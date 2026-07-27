@@ -56,17 +56,18 @@ Editar `/etc/pve/lxc/110.conf` (ou o ID que você usou) e adicionar ao final:
 # GPU passthrough — RTX 3060
 lxc.cgroup2.devices.allow: c 195:* rwm
 lxc.cgroup2.devices.allow: c 509:* rwm
+lxc.cgroup2.devices.allow: c 238:* rwm
 lxc.mount.entry: /dev/nvidia0          dev/nvidia0          none bind,optional,create=file
 lxc.mount.entry: /dev/nvidiactl        dev/nvidiactl        none bind,optional,create=file
 lxc.mount.entry: /dev/nvidia-uvm       dev/nvidia-uvm       none bind,optional,create=file
 lxc.mount.entry: /dev/nvidia-uvm-tools dev/nvidia-uvm-tools none bind,optional,create=file
-lxc.mount.entry: /dev/nvidia-modeset   dev/nvidia-modeset   none bind,optional,create=file
+lxc.mount.entry: /dev/nvidia-caps      dev/nvidia-caps      none bind,optional,create=dir
 
 # Bind mount para modelos
 mp0: /mnt/models,mp=/models
 ```
 
-> **Nota:** os device numbers `195` e `509` são os major numbers padrão do driver NVIDIA. Confirme com `ls -la /dev/nvidia*` no host antes de editar.
+> **Nota:** os device numbers são `195` (nvidia), `509` (nvidia-uvm), `238` (nvidia-caps). O major `238` é necessário para `cuInit()` no driver 470+. Confirme com `ls -la /dev/nvidia*` no host antes de editar.
 
 ### 4. Iniciar o container
 
