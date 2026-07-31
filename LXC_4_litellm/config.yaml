@@ -61,6 +61,12 @@ model_list:
       api_base: http://192.168.0.217:8080/v1
       api_key: "none"
 
+  - model_name: embed
+    litellm_params:
+      model: openai/bge-m3
+      api_base: http://192.168.0.217:8081/v1
+      api_key: "none"
+
 router_settings:
 
   routing_strategy: least-busy

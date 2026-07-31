@@ -133,16 +133,21 @@ O script é **idempotente** — pode ser reexecutado sem problemas. Ele:
 
 ---
 
-## Gerenciar o serviço
+## Gerenciar os serviços
 
 ```bash
-systemctl status llama-server      # estado atual
-systemctl restart llama-server     # reiniciar (ex: após trocar modelo)
-systemctl stop llama-server        # parar
-journalctl -u llama-server -f      # logs em tempo real
+# Inference (Qwen3.6 — porta 8080)
+systemctl status llama-server
+systemctl restart llama-server
+journalctl -u llama-server -f
+
+# Embeddings (bge-m3 — porta 8081)
+systemctl status bge-embedding
+systemctl restart bge-embedding
+journalctl -u bge-embedding -f
 ```
 
-Para trocar o modelo ou ajustar parâmetros, edite `/etc/llama-server.env` e reinicie.
+Para trocar parâmetros, edite `/etc/llama-server.env` ou `/etc/bge-embedding.env` e reinicie o serviço correspondente.
 
 ---
 
@@ -168,19 +173,35 @@ curl http://localhost:8080/v1/chat/completions \
 curl http://192.168.0.211:4000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model":"local-coder","messages":[{"role":"user","content":"Hello"}],"max_tokens":32}'
+
+# Embedding direto (bge-m3 — porta 8081)
+curl http://localhost:8081/v1/embeddings \
+  -H "Content-Type: application/json" \
+  -d '{"model":"bge-m3","input":"Apollo homelab embedding test"}'
 ```
 
 ---
 
 ## Performance esperada
 
+**llama-server — Qwen3.6 (porta 8080)**
+
 | Métrica | Valor estimado |
 |---------|---------------|
-| VRAM usada | ~10–12 GB (Q4_K_M, offload parcial) |
+| VRAM usada | ~10–11 GB (Q4_K_M, NGL=45) |
 | RAM usada | ~13–15 GB (camadas offloaded + KV cache) |
 | Tokens/s geração | 50–80 tok/s com MTP |
-| Contexto | 16K tokens (padrão), 32K possível reduzindo `LLAMA_NGL` para ~60 |
+| Contexto | 32K tokens |
 | TTFT | ~1–3 segundos |
+
+**bge-embedding — bge-m3 (porta 8081)**
+
+| Métrica | Valor estimado |
+|---------|---------------|
+| VRAM usada | ~570 MB (Q4_K_M, NGL=99) |
+| Throughput | ~500–1000 embeddings/s |
+| Dimensão do vetor | 1024 |
+| Contexto máx | 8192 tokens |
 
 ---
 
@@ -195,3 +216,5 @@ curl http://192.168.0.211:4000/v1/chat/completions \
 | Tok/s baixo apesar do MTP | `draft-p-min` rejeitando tudo | Baixar para `0.70` em `/etc/llama-server.env` e restart |
 | OOM ao carregar modelo | VRAM insuficiente | Reduzir `LLAMA_NGL` para 50–60 para offloar mais para RAM |
 | Contexto 32K não funciona | KV cache estoura VRAM | Reduzir `LLAMA_NGL` para ~60 para liberar ~2GB de VRAM |
+| bge-embedding OOM ao iniciar | VRAM apertada com Qwen3.6 | Reduzir `LLAMA_NGL` para 38–40 para liberar ~1GB |
+| `/v1/embeddings` retorna 404 | Serviço não iniciado ou sem flag `--embedding` | `systemctl start bge-embedding` e verificar logs |

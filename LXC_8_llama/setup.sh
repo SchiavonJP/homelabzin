@@ -11,6 +11,8 @@ DRIVER_VERSION="610.43.02"
 LLAMA_REPO="https://github.com/ggml-org/llama.cpp"
 MODEL_REPO="localweights/Qwen3.6-35B-A3B-MTP-Q4_K_M-GGUF"
 MODEL_FILE="Qwen3.6-35B-A3B-MTP-Q4_K_M.gguf"
+BGE_REPO="gpustack/bge-m3-GGUF"
+BGE_FILE="bge-m3-Q4_K_M.gguf"
 MODEL_DIR="/models"
 LLAMA_DIR="/opt/llama.cpp"
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
@@ -21,6 +23,10 @@ LLAMA_PORT="${LLAMA_PORT:-8080}"
 LLAMA_CTX_SIZE="${LLAMA_CTX_SIZE:-16384}"
 LLAMA_NGL="${LLAMA_NGL:-99}"
 LLAMA_MODEL_PATH="${LLAMA_MODEL_PATH:-${MODEL_DIR}/${MODEL_FILE}}"
+BGE_PORT="${BGE_PORT:-8081}"
+BGE_CTX_SIZE="${BGE_CTX_SIZE:-8192}"
+BGE_NGL="${BGE_NGL:-99}"
+BGE_MODEL_PATH="${BGE_MODEL_PATH:-${MODEL_DIR}/${BGE_FILE}}"
 
 # ──────────────────────────────────────────────────────────────
 # Helpers
@@ -205,11 +211,26 @@ else
 fi
 
 # ──────────────────────────────────────────────────────────────
-# 7. Install systemd service
+# 6b. Download bge-m3 embedding model
 # ──────────────────────────────────────────────────────────────
-step "Installing systemd service..."
+step "Downloading bge-m3 embedding model (${BGE_FILE})..."
 
-# Write the env file (always regenerated so overrides take effect)
+if [ -f "${BGE_MODEL_PATH}" ]; then
+  ok "bge-m3 already present at ${BGE_MODEL_PATH}"
+else
+  pip3 install -q --break-system-packages huggingface-hub
+  hf download "$BGE_REPO" \
+    --local-dir "$MODEL_DIR" \
+    --include "${BGE_FILE}"
+  ok "bge-m3 downloaded to ${BGE_MODEL_PATH}"
+fi
+
+# ──────────────────────────────────────────────────────────────
+# 7. Install systemd services
+# ──────────────────────────────────────────────────────────────
+step "Installing systemd services..."
+
+# Env files (always regenerated so overrides take effect)
 cat > /etc/llama-server.env << EOF
 LLAMA_PORT=${LLAMA_PORT}
 LLAMA_MODEL_PATH=${LLAMA_MODEL_PATH}
@@ -217,10 +238,19 @@ LLAMA_CTX_SIZE=${LLAMA_CTX_SIZE}
 LLAMA_NGL=${LLAMA_NGL}
 EOF
 
+cat > /etc/bge-embedding.env << EOF
+BGE_PORT=${BGE_PORT}
+BGE_MODEL_PATH=${BGE_MODEL_PATH}
+BGE_CTX_SIZE=${BGE_CTX_SIZE}
+BGE_NGL=${BGE_NGL}
+EOF
+
 cp "${SCRIPT_DIR}/llama-server.service" /etc/systemd/system/llama-server.service
+cp "${SCRIPT_DIR}/bge-embedding.service" /etc/systemd/system/bge-embedding.service
 systemctl daemon-reload
 systemctl enable --now llama-server
-ok "Service installed and started"
+systemctl enable --now bge-embedding
+ok "Services installed and started"
 
 # ──────────────────────────────────────────────────────────────
 # 8. Verification
@@ -235,15 +265,20 @@ systemctl status llama-server --no-pager -l | head -25
 echo ""
 
 HEALTH=$(curl -sf "http://localhost:${LLAMA_PORT}/health" 2>/dev/null || echo '{"status":"not ready yet"}')
-echo "Health: ${HEALTH}"
+echo "Health (llama-server):   ${HEALTH}"
+
+BGE_HEALTH=$(curl -sf "http://localhost:${BGE_PORT}/health" 2>/dev/null || echo '{"status":"not ready yet"}')
+echo "Health (bge-embedding):  ${BGE_HEALTH}"
 
 echo ""
 echo "════════════════════════════════════════════════"
 echo "  Apollo setup complete!"
-echo "  Local API:  http://$(hostname -I | awk '{print $1}'):${LLAMA_PORT}/v1"
+echo "  Inference:  http://$(hostname -I | awk '{print $1}'):${LLAMA_PORT}/v1"
+echo "  Embeddings: http://$(hostname -I | awk '{print $1}'):${BGE_PORT}/v1/embeddings"
 echo "  Public URL: https://apollo.joaopaulo.me"
 echo ""
-echo "  Manage service:"
-echo "    systemctl status llama-server"
+echo "  Manage services:"
+echo "    systemctl status llama-server bge-embedding"
 echo "    journalctl -u llama-server -f"
+echo "    journalctl -u bge-embedding -f"
 echo "════════════════════════════════════════════════"

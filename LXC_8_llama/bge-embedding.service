@@ -1,0 +1,28 @@
+[Unit]
+Description=llama.cpp Embedding Server — Apollo (bge-m3)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/llama.cpp
+EnvironmentFile=/etc/bge-embedding.env
+Environment=CUDA_VISIBLE_DEVICES=0
+Environment=LD_LIBRARY_PATH=/usr/local/cuda/lib64
+
+ExecStart=/opt/llama.cpp/build/bin/llama-server \
+  --model ${BGE_MODEL_PATH} \
+  --host 0.0.0.0 \
+  --port ${BGE_PORT} \
+  --ngl ${BGE_NGL} \
+  --embedding \
+  --pooling mean \
+  --ctx-size ${BGE_CTX_SIZE} \
+  --batch-size 2048 \
+  --threads 4
+
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
