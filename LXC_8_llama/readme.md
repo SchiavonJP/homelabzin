@@ -214,7 +214,7 @@ curl http://localhost:8081/v1/embeddings \
 | `CUDA not found` no build | PATH incorreto | `export PATH=/usr/local/cuda/bin:$PATH` e rerodar cmake |
 | `spec-type mtp` ignorado | GGUF sem cabeças MTP | Usar especificamente o GGUF com sufixo `-MTP` |
 | Tok/s baixo apesar do MTP | `draft-p-min` rejeitando tudo | Baixar para `0.70` em `/etc/llama-server.env` e restart |
-| OOM ao carregar modelo | VRAM insuficiente | Reduzir `LLAMA_NGL` para 50–60 para offloar mais para RAM |
-| Contexto 32K não funciona | KV cache estoura VRAM | Reduzir `LLAMA_NGL` para ~60 para liberar ~2GB de VRAM |
+| OOM ao carregar modelo (`CUDA0 buffer`) | NGL muito alto — MoE tem ~28 blocos; NGL > 28 = modelo inteiro (~20GB) na GPU | Reduzir `LLAMA_NGL` para ≤18 (com bge-m3 rodando) ou ≤22 (sem bge-m3) |
+| Contexto 32K causa OOM mesmo com NGL baixo | KV cache pre-alocado é proporcional ao ctx | Usar `LLAMA_CTX_SIZE=8192`; aumentar ctx só após confirmar NGL estável |
 | bge-embedding OOM ao iniciar | VRAM apertada com Qwen3.6 | Reduzir `LLAMA_NGL` para 38–40 para liberar ~1GB |
 | `/v1/embeddings` retorna 404 | Serviço não iniciado ou sem flag `--embedding` | `systemctl start bge-embedding` e verificar logs |
