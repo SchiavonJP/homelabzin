@@ -14,7 +14,7 @@ ExecStart=/opt/llama.cpp/build/bin/llama-server \
   --model ${BGE_MODEL_PATH} \
   --host 0.0.0.0 \
   --port ${BGE_PORT} \
-  --ngl ${BGE_NGL} \
+  --n-gpu-layers ${BGE_NGL} \
   --embedding \
   --pooling mean \
   --ctx-size ${BGE_CTX_SIZE} \
