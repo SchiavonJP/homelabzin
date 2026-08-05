@@ -79,7 +79,7 @@ docker compose up -d
 
 ### 1. Prowlarr → indexadores
 
-`http://192.168.0.219:9696` — adicionar indexadores (1337x, RARBG mirror, Jackett etc.)
+`http://192.168.0.219:9696` — adicionar indexadores disponíveis (ex: 1337x, YTS, EZTV, TorrentGalaxy, Nyaa)
 
 ### 2. Prowlarr → conectar aos *arr
 
