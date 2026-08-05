@@ -1,0 +1,38 @@
+services:
+
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: sb_jellyfin
+    restart: unless-stopped
+    ports:
+      - "8096:8096"
+      - "8920:8920"
+    volumes:
+      - jellyfin_config:/config
+      - jellyfin_cache:/cache
+      - /mnt/media/movies:/media/movies:ro
+      - /mnt/media/tv:/media/tv:ro
+    environment:
+      TZ: America/Sao_Paulo
+      JELLYFIN_PublishedServerUrl: https://jellyfin.joaopaulo.me
+    networks:
+      - media
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8096/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 4g
+
+volumes:
+  jellyfin_config:
+  jellyfin_cache:
+
+networks:
+  media:
+    name: sb_media
+    driver: bridge

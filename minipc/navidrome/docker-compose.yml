@@ -1,0 +1,26 @@
+services:
+
+  navidrome:
+    image: deluan/navidrome:latest
+    container_name: minipc_navidrome
+    restart: unless-stopped
+    ports:
+      - "4533:4533"
+    volumes:
+      - navidrome_data:/data
+      - /storage/music:/music:ro
+    environment:
+      TZ: America/Sao_Paulo
+      ND_MUSICFOLDER: /music
+      ND_DATAFOLDER: /data
+      ND_SCANSCHEDULE: "@every 1h"
+      ND_LOGLEVEL: info
+      ND_SESSIONTIMEOUT: 24h
+      ND_BASEURL: ""
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+
+volumes:
+  navidrome_data:
