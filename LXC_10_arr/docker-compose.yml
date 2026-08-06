@@ -158,6 +158,7 @@ services:
       SLSKD_SHARED_DIR: /music
       SLSKD_USERNAME: ${SLSKD_USERNAME:-slskd}
       SLSKD_PASSWORD: ${SLSKD_PASSWORD:-slskd}
+      SLSKD_API_KEY: ${SLSKD_API_KEY}
     networks:
       - arr
     deploy:
