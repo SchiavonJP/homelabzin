@@ -158,8 +158,6 @@ services:
       SLSKD_SHARED_DIR: /music
       SLSKD_USERNAME: ${SLSKD_USERNAME:-slskd}
       SLSKD_PASSWORD: ${SLSKD_PASSWORD:-slskd}
-      SLSKD_SOULSEEK_USERNAME: ${SLSKD_SOULSEEK_USERNAME}
-      SLSKD_SOULSEEK_PASSWORD: ${SLSKD_SOULSEEK_PASSWORD}
     networks:
       - arr
     deploy:
