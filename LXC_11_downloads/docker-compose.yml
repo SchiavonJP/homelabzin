@@ -33,6 +33,7 @@ services:
     image: ghcr.io/alexta69/metube:latest
     container_name: sb_metube
     restart: unless-stopped
+    user: "0:0"
     ports:
       - "8081:8081"
     volumes:
