@@ -44,6 +44,7 @@ services:
       DOWNLOAD_DIR: /downloads
       AUDIO_DOWNLOAD_DIR: /music
       STATE_DIR: /state
+      YTDL_OPTIONS: '{"force_ipv4":true}'
     networks:
       - downloads
     deploy:
