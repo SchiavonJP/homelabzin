@@ -29,31 +29,8 @@ services:
         limits:
           memory: 1g
 
-  metube:
-    image: ghcr.io/alexta69/metube:latest
-    container_name: sb_metube
-    restart: unless-stopped
-    network_mode: host
-    volumes:
-      - metube_state:/state
-      - metube_temp:/temp
-      - /mnt/media/downloads:/downloads
-      - /mnt/media/music:/music
-    environment:
-      TZ: America/Sao_Paulo
-      DOWNLOAD_DIR: /downloads
-      AUDIO_DOWNLOAD_DIR: /music
-      STATE_DIR: /state
-      TEMP_DIR: /temp
-    deploy:
-      resources:
-        limits:
-          memory: 512m
-
 volumes:
   qbittorrent_config:
-  metube_state:
-  metube_temp:
 
 networks:
   downloads:
