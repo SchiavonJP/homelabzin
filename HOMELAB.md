@@ -44,6 +44,9 @@ Exportado via NFS Docker (`erichough/nfs-server`) para toda a rede `192.168.0.0/
 | `code-server` | 8082 | VS Code no browser |
 | `minipc_navidrome` | 4533 | Streaming de música 24/7 |
 | `minipc_nfs` (erichough/nfs-server) | 2049, 111 | Exporta `/storage` para os LXCs do Proxmox |
+| `immich` | 2283 | Backup de fotos/vídeos — Google Photos (sem ML) |
+| `adguard` | 3001, 53 | DNS ad-blocker — rede local + Tailscale |
+| `vaultwarden` | — | Gerenciador de senhas (`vault.joaopaulo.me`) |
 
 Configs: [minipc/nfs/](minipc/nfs/) · [minipc/navidrome/](minipc/navidrome/)
 
