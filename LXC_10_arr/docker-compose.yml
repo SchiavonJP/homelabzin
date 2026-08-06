@@ -139,12 +139,82 @@ services:
         limits:
           memory: 512m
 
+  slskd:
+    image: slskd/slskd:latest
+    container_name: sb_slskd
+    restart: unless-stopped
+    ports:
+      - "5030:5030"
+      - "50300:50300"
+    volumes:
+      - slskd_config:/app
+      - /mnt/media/downloads:/downloads
+      - /mnt/media/music:/music:ro
+    environment:
+      TZ: America/Sao_Paulo
+      SLSKD_REMOTE_CONFIGURATION: "true"
+      SLSKD_DOWNLOADS_DIR: /downloads/slskd
+      SLSKD_INCOMPLETE_DIR: /downloads/slskd/incomplete
+      SLSKD_SHARED_DIR: /music
+    networks:
+      - arr
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+
+  soularr:
+    image: mrusse08/soularr:latest
+    container_name: sb_soularr
+    restart: unless-stopped
+    volumes:
+      - soularr_config:/data
+      - /mnt/media/downloads:/downloads
+    environment:
+      TZ: America/Sao_Paulo
+      LIDARR_URL: http://sb_lidarr:8686
+      LIDARR_API_KEY: ${LIDARR_API_KEY}
+      SLSKD_URL: http://sb_slskd:5030
+      SLSKD_API_KEY: ${SLSKD_API_KEY}
+      DOWNLOAD_FOLDER: /downloads/slskd
+    networks:
+      - arr
+    depends_on:
+      - lidarr
+      - slskd
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+
+  beets:
+    image: lscr.io/linuxserver/beets:latest
+    container_name: sb_beets
+    restart: unless-stopped
+    volumes:
+      - beets_config:/config
+      - /mnt/media/music:/music
+      - /mnt/media/downloads:/downloads
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: America/Sao_Paulo
+    networks:
+      - arr
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+
 volumes:
   prowlarr_config:
   radarr_config:
   sonarr_config:
   lidarr_config:
   bazarr_config:
+  slskd_config:
+  soularr_config:
+  beets_config:
 
 networks:
   arr:

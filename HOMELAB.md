@@ -74,9 +74,8 @@ All containers run Debian 12 with Docker, deployed via sparse checkout from the 
 | LXC | Hostname | IP | Role |
 |-----|----------|----|------|
 | 9 | sb-media | 192.168.0.218 | Jellyfin (streaming, CPU transcoding) |
-| 10 | sb-arr | 192.168.0.219 | Arr stack (Radarr · Sonarr · Lidarr · Prowlarr · Bazarr) |
+| 10 | sb-arr | 192.168.0.219 | Arr stack + Music Auto (Radarr · Sonarr · Lidarr · Prowlarr · Bazarr · slskd · Soularr · Beets) |
 | 11 | sb-downloads | 192.168.0.220 | qBittorrent |
-| 12 | sb-music-auto | 192.168.0.221 | Soularr · slskd · Beets |
 
 ---
 
@@ -195,14 +194,14 @@ Config: [LXC_9_jellyfin/](LXC_9_jellyfin/)
 
 ---
 
-### LXC 10 — Arr Stack (Media Automation)
+### LXC 10 — Arr Stack + Music Automation
 
-- **Services:** Prowlarr · Radarr · Sonarr · Lidarr · Bazarr
+- **Services:** Prowlarr · Radarr · Sonarr · Lidarr · Bazarr · slskd · Soularr · Beets
 - **Access:** `192.168.0.219` (LAN apenas)
-- **Ports:** 9696 · 7878 · 8989 · 8686 · 6767
+- **Ports:** 9696 · 7878 · 8989 · 8686 · 6767 · 5030 (slskd) · 50300 (Soulseek P2P)
 - **Resources:** 2 cores · 2 GB RAM · 20 GB disk
 
-Stack de automação de mídia. Prowlarr agrega indexadores; *arr monitoram e solicitam downloads; Bazarr baixa legendas. Download client: qBittorrent em LXC 11 (`192.168.0.220:8080`). Biblioteca no Mini PC via NFS.
+Stack de automação de mídia e música. *arr + Prowlarr para filmes/séries/música via torrents. slskd + Soularr para músicas via Soulseek (Lidarr → Soularr → slskd). Beets para organização de tags. Soularr fala com Lidarr via `http://sb_lidarr:8686` (mesmo LXC). Biblioteca no Mini PC via NFS.
 
 Config: [LXC_10_arr/](LXC_10_arr/)
 
@@ -218,19 +217,6 @@ Config: [LXC_10_arr/](LXC_10_arr/)
 Download client para o stack *arr. Arquivos baixados em `/mnt/media/downloads` (NFS → Mini PC). VPN via Gluetun sidecar é opcional — documentado no readme, não ativo por padrão.
 
 Config: [LXC_11_downloads/](LXC_11_downloads/)
-
----
-
-### LXC 12 — Music Automation
-
-- **Services:** slskd (Soulseek) · Soularr · Beets
-- **Access:** `192.168.0.221` (LAN apenas)
-- **Ports:** 5030 (slskd WebUI) · 50300 (Soulseek P2P)
-- **Resources:** 2 cores · 2 GB RAM · 10 GB disk
-
-Pipeline de aquisição de música via Soulseek. Soularr faz bridge entre Lidarr (LXC 10) e slskd. Beets organiza tags e renomeia arquivos após download. Biblioteca no Mini PC via NFS.
-
-Config: [LXC_12_music_auto/](LXC_12_music_auto/)
 
 ---
 
@@ -280,7 +266,7 @@ LXC 1 — Traefik (reverse proxy + TLS)
               ├── LXC 9  — Jellyfin
               ├── LXC 10 — Arr (Radarr · Sonarr · Lidarr · Prowlarr · Bazarr)
               ├── LXC 11 — qBittorrent
-              └── LXC 12 — Music Auto (Soularr · slskd · Beets)
+              └── LXC 10 também: slskd · Soularr · Beets (music automation)
                       │
                       └── NFS ◄──────────────────── Mini PC 192.168.0.12
                                                      /storage/{music,movies,tv,downloads}
