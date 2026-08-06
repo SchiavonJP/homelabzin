@@ -11,7 +11,7 @@ Download client para o stack *arr. Os arquivos baixados vão para `/mnt/media/do
 ## Criar o LXC no Proxmox
 
 ```bash
-pct create 111 local:vztmpl/debian-12-standard_12.12-1_amd64.tar.zst \
+pct create 113 local:vztmpl/debian-12-standard_12.12-1_amd64.tar.zst \
   --hostname sb-downloads \
   --memory 4096 \
   --swap 1024 \
@@ -20,7 +20,7 @@ pct create 111 local:vztmpl/debian-12-standard_12.12-1_amd64.tar.zst \
   --net0 name=eth0,bridge=vmbr0,ip=192.168.0.220/24,gw=192.168.0.1 \
   --unprivileged 1 \
   --features keyctl=1,nesting=1
-pct start 111
+pct start 113
 ```
 
 ---

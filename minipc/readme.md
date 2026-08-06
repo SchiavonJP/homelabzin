@@ -21,6 +21,7 @@ O Mini PC fica sempre ligado. Ele é o **dono da biblioteca de mídia** e serve 
 | `redis-nextcloud` | redis:6.2.20 | — | Cache do Nextcloud |
 | `code-server` | code-server:4.106.3 | 8082 | VS Code no browser |
 | `minipc_navidrome` | navidrome:latest | 4533 | Streaming de música |
+| `tailscale` | tailscale:v1.90.8 | 5252 (web UI) | VPN — acesso remoto à rede 192.168.0.0/24 |
 
 ---
 
