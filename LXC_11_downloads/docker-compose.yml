@@ -36,6 +36,7 @@ services:
     network_mode: host
     volumes:
       - metube_state:/state
+      - metube_temp:/temp
       - /mnt/media/downloads:/downloads
       - /mnt/media/music:/music
     environment:
@@ -43,7 +44,7 @@ services:
       DOWNLOAD_DIR: /downloads
       AUDIO_DOWNLOAD_DIR: /music
       STATE_DIR: /state
-      YTDL_OPTIONS: '{"source_address":"0.0.0.0"}'
+      TEMP_DIR: /temp
     deploy:
       resources:
         limits:
@@ -52,6 +53,7 @@ services:
 volumes:
   qbittorrent_config:
   metube_state:
+  metube_temp:
 
 networks:
   downloads:
