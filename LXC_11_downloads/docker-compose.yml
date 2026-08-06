@@ -29,11 +29,21 @@ services:
         limits:
           memory: 1g
 
+  bgutil:
+    image: ghcr.io/nickel828/bgutil-ytdlp-pot-provider:latest
+    container_name: sb_bgutil
+    restart: unless-stopped
+    networks:
+      - downloads
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+
   metube:
     image: ghcr.io/alexta69/metube:latest
     container_name: sb_metube
     restart: unless-stopped
-    user: "0:0"
     ports:
       - "8081:8081"
     volumes:
@@ -45,8 +55,11 @@ services:
       DOWNLOAD_DIR: /downloads
       AUDIO_DOWNLOAD_DIR: /music
       STATE_DIR: /state
+      YTDL_OPTIONS: '{"extractor_args":{"youtube":{"pot_bgutil_baseurl":["http://sb_bgutil:4416"]}}}'
     networks:
       - downloads
+    depends_on:
+      - bgutil
     deploy:
       resources:
         limits:
