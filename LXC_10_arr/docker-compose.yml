@@ -171,15 +171,10 @@ services:
     container_name: sb_soularr
     restart: unless-stopped
     volumes:
-      - soularr_config:/data
+      - ./soularr:/data
       - /mnt/media/downloads:/downloads
     environment:
       TZ: America/Sao_Paulo
-      LIDARR_URL: http://sb_lidarr:8686
-      LIDARR_API_KEY: ${LIDARR_API_KEY}
-      SLSKD_URL: http://sb_slskd:5030
-      SLSKD_API_KEY: ${SLSKD_API_KEY}
-      DOWNLOAD_FOLDER: /downloads/slskd
     networks:
       - arr
     depends_on:
@@ -216,7 +211,6 @@ volumes:
   lidarr_config:
   bazarr_config:
   slskd_config:
-  soularr_config:
   beets_config:
 
 networks:
