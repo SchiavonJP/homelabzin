@@ -1,10 +1,8 @@
-# LXC 10 — Arr Stack
+# LXC 10 — Arr Stack + Music Automation
 
 > **Hostname:** sb-arr  
 > **IP:** 192.168.0.219  
 > **Acesso:** LAN apenas (sem exposição pública)
-
-Stack de automação de mídia. Todos os serviços usam a biblioteca no Mini PC via NFS.
 
 | Serviço | Porta | Função |
 |---------|-------|--------|
@@ -13,6 +11,10 @@ Stack de automação de mídia. Todos os serviços usam a biblioteca no Mini PC 
 | Sonarr | 8989 | Automação de séries |
 | Lidarr | 8686 | Automação de música |
 | Bazarr | 6767 | Download de legendas |
+| FlareSolverr | 8191 | Bypass Cloudflare (indexadores protegidos) |
+| slskd | 5030 | Daemon Soulseek (P2P music) |
+| Soularr | — | Bridge Lidarr ↔ slskd |
+| Beets | — | Tagger e organizador de música (CLI) |
 
 ---
 
@@ -53,6 +55,14 @@ pct restart NNN
 ls /mnt/media/  # deve mostrar: music, movies, tv, downloads
 ```
 
+**Permissões no Mini PC** (necessário para escrita pelos containers):
+
+```bash
+# No Mini PC (192.168.0.12)
+sudo mkdir -p /storage/movies /storage/tv /storage/music /storage/downloads /storage/downloads/slskd /storage/downloads/slskd/incomplete
+sudo chmod 777 /storage/movies /storage/tv /storage/music /storage/downloads /storage/downloads/slskd /storage/downloads/slskd/incomplete
+```
+
 ---
 
 ## Deploy
@@ -70,47 +80,90 @@ git sparse-checkout set LXC_10_arr
 git checkout main
 cd LXC_10_arr
 
+cp .env.example .env
+# Preencher LIDARR_API_KEY e SLSKD_API_KEY após primeiro boot
 docker compose up -d
 ```
 
 ---
 
-## Configuração via UI (pós-deploy)
+## Configuração via UI
 
-### 1. Prowlarr → indexadores
+### 1. Prowlarr → FlareSolverr
 
-`http://192.168.0.219:9696` — adicionar indexadores disponíveis (ex: 1337x, YTS, EZTV, TorrentGalaxy, Nyaa)
+`http://192.168.0.219:9696` → Settings → Indexers → Add:
+- FlareSolverr URL: `http://sb_flaresolverr:8191`
 
-### 2. Prowlarr → conectar aos *arr
+### 2. Prowlarr → indexadores
 
-Settings → Apps → adicionar:
-- Radarr: `http://192.168.0.219:7878` + API key do Radarr
-- Sonarr: `http://192.168.0.219:8989` + API key
-- Lidarr: `http://192.168.0.219:8686` + API key
+Adicionar indexadores: 1337x (com FlareSolverr tag), YTS, EZTV, TorrentGalaxy, Nyaa
 
-### 3. Radarr / Sonarr / Lidarr → download client
+### 3. Prowlarr → conectar aos *arr
+
+Settings → Apps → adicionar cada *arr:
+- Radarr: `http://sb_radarr:7878` + API key
+- Sonarr: `http://sb_sonarr:8989` + API key
+- Lidarr: `http://sb_lidarr:8686` + API key
+
+### 4. Radarr / Sonarr / Lidarr → download client
 
 Settings → Download Clients → qBittorrent:
-- Host: `192.168.0.220`
-- Port: `8080`
-- Username/Password: conforme configurado no LXC 11
+- Host: `192.168.0.220`, Port: `8080`
 
-### 4. Radarr → library path
+### 5. Radarr → root folder
 
-`http://192.168.0.219:7878` → Settings → Media Management:
-- Root Folder: `/movies`
+Settings → Media Management → Root Folders → `/movies`
 
-### 5. Sonarr → library path
+### 6. Sonarr → root folder
 
 Root Folder: `/tv`
 
-### 6. Lidarr → library path
+### 7. Lidarr → root folder
 
 Root Folder: `/music`
 
-### 7. Bazarr
+### 8. Bazarr
 
-`http://192.168.0.219:6767` → Settings → Sonarr + Radarr com IPs/API keys locais. Adicionar provedor de legendas (OpenSubtitles, Subdl etc.)
+`http://192.168.0.219:6767` → Settings → Sonarr + Radarr:
+- Sonarr URL: `http://sb_sonarr:8989` + API key
+- Radarr URL: `http://sb_radarr:7878` + API key
+- Adicionar provedor de legendas: OpenSubtitles ou Subdl
+
+### 9. Jellyfin → bibliotecas
+
+Jellyfin está em LXC 9 (`http://192.168.0.218:8096`).
+Settings → Dashboard → Libraries → Add Media Library:
+- Movies → `/media/movies`
+- TV Shows → `/media/tv`
+
+Jellyfin detecta automaticamente quando Radarr/Sonarr importam novos arquivos.
+
+---
+
+## Configuração de música (slskd + Soularr)
+
+### slskd (primeira vez)
+
+`http://192.168.0.219:5030`
+1. Criar conta admin no primeiro acesso
+2. Settings → API → gerar API key → colocar no `.env` como `SLSKD_API_KEY`
+3. Settings → Soulseek → username/password da conta Soulseek
+4. Reiniciar: `docker compose restart slskd soularr`
+
+### Soularr
+
+Configurado via variáveis de ambiente. Após preencher o `.env`:
+```bash
+docker compose restart soularr
+docker logs sb_soularr -f
+```
+
+### Beets
+
+CLI para organizar tags. Executar após novos downloads:
+```bash
+docker exec -it sb_beets beet import /mnt/media/downloads/slskd/
+```
 
 ---
 
@@ -121,4 +174,5 @@ curl http://192.168.0.219:9696/ping  # Prowlarr
 curl http://192.168.0.219:7878/ping  # Radarr
 curl http://192.168.0.219:8989/ping  # Sonarr
 curl http://192.168.0.219:8686/ping  # Lidarr
+curl http://192.168.0.219:5030       # slskd
 ```

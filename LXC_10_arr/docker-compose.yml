@@ -156,6 +156,8 @@ services:
       SLSKD_DOWNLOADS_DIR: /downloads/slskd
       SLSKD_INCOMPLETE_DIR: /downloads/slskd/incomplete
       SLSKD_SHARED_DIR: /music
+      SLSKD_WEB__AUTHENTICATION__USERNAME: ${SLSKD_USERNAME:-slskd}
+      SLSKD_WEB__AUTHENTICATION__PASSWORD: ${SLSKD_PASSWORD:-slskd}
     networks:
       - arr
     deploy:
