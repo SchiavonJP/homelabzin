@@ -33,8 +33,7 @@ services:
     image: ghcr.io/alexta69/metube:latest
     container_name: sb_metube
     restart: unless-stopped
-    ports:
-      - "8081:8081"
+    network_mode: host
     volumes:
       - metube_state:/state
       - /mnt/media/downloads:/downloads
@@ -45,8 +44,6 @@ services:
       AUDIO_DOWNLOAD_DIR: /music
       STATE_DIR: /state
       YTDL_OPTIONS: '{"force_ipv4":true}'
-    networks:
-      - downloads
     deploy:
       resources:
         limits:
