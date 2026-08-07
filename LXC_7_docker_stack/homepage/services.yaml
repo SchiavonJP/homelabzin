@@ -56,6 +56,7 @@
           type: qbittorrent
           url: http://192.168.0.220:8080
           username: schiva
+          password: "{{QBITTORRENT_PASSWORD}}"
 
     - Prowlarr:
         href: http://192.168.0.219:9696
