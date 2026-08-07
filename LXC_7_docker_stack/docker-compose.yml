@@ -40,6 +40,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       TZ: America/Sao_Paulo
+      HOMEPAGE_ALLOWED_HOSTS: 192.168.0.216:3002,home.joaopaulo.me
       PROXMOX_TOKEN_ID: ${PROXMOX_TOKEN_ID}
       PROXMOX_TOKEN_SECRET: ${PROXMOX_TOKEN_SECRET}
     deploy:
