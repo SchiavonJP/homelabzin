@@ -1,0 +1,24 @@
+title: Homelab
+description: joaopaulo.me
+
+theme: dark
+color: slate
+
+useEqualHeights: true
+
+layout:
+  AI / Second Brain:
+    style: row
+    columns: 4
+  Media:
+    style: row
+    columns: 3
+  Downloads:
+    style: row
+    columns: 3
+  Mini PC:
+    style: row
+    columns: 4
+  Infrastructure:
+    style: row
+    columns: 4

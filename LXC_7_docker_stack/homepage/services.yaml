@@ -1,0 +1,168 @@
+- AI / Second Brain:
+    - Hermes:
+        href: https://hermes.joaopaulo.me
+        description: AI agent engine + MCP server
+        icon: sh-hermes
+        ping: http://192.168.0.213:9119
+
+    - Odysseus:
+        href: https://odysseus.joaopaulo.me
+        description: AI workspace (chat + research)
+        icon: sh-open-webui
+        ping: http://192.168.0.214:7000
+
+    - LiteLLM:
+        href: https://litellm.joaopaulo.me
+        description: LLM router (OpenRouter + local)
+        icon: sh-litellm
+        ping: http://192.168.0.211:4000
+
+    - Apollo:
+        href: http://192.168.0.217:8080
+        description: llama.cpp inference — RTX 3060
+        icon: sh-ollama
+        ping: http://192.168.0.217:8080/health
+
+- Media:
+    - Jellyfin:
+        href: https://jellyfin.joaopaulo.me
+        description: Streaming de filmes e séries
+        icon: sh-jellyfin
+        ping: http://192.168.0.218:8096/health
+        widget:
+          type: jellyfin
+          url: http://192.168.0.218:8096
+          key: {{JELLYFIN_API_KEY}}
+
+    - Navidrome:
+        href: http://192.168.0.12:4533
+        description: Streaming de música
+        icon: sh-navidrome
+        ping: http://192.168.0.12:4533/ping
+
+    - Metube:
+        href: http://192.168.0.12:8081
+        description: Downloader YouTube / áudio
+        icon: sh-metube
+        ping: http://192.168.0.12:8081
+
+- Downloads:
+    - qBittorrent:
+        href: http://192.168.0.220:8080
+        description: Torrent download client
+        icon: sh-qbittorrent
+        ping: http://192.168.0.220:8080
+        widget:
+          type: qbittorrent
+          url: http://192.168.0.220:8080
+          username: schiva
+
+    - Prowlarr:
+        href: http://192.168.0.219:9696
+        description: Indexador central
+        icon: sh-prowlarr
+        ping: http://192.168.0.219:9696/ping
+
+    - Radarr:
+        href: http://192.168.0.219:7878
+        description: Automação de filmes
+        icon: sh-radarr
+        ping: http://192.168.0.219:7878/ping
+        widget:
+          type: radarr
+          url: http://192.168.0.219:7878
+          key: {{RADARR_API_KEY}}
+
+    - Sonarr:
+        href: http://192.168.0.219:8989
+        description: Automação de séries
+        icon: sh-sonarr
+        ping: http://192.168.0.219:8989/ping
+        widget:
+          type: sonarr
+          url: http://192.168.0.219:8989
+          key: {{SONARR_API_KEY}}
+
+    - Lidarr:
+        href: http://192.168.0.219:8686
+        description: Automação de música
+        icon: sh-lidarr
+        ping: http://192.168.0.219:8686/ping
+        widget:
+          type: lidarr
+          url: http://192.168.0.219:8686
+          key: {{LIDARR_API_KEY}}
+
+    - Bazarr:
+        href: http://192.168.0.219:6767
+        description: Download de legendas
+        icon: sh-bazarr
+        ping: http://192.168.0.219:6767
+
+    - slskd:
+        href: http://192.168.0.219:5030
+        description: Soulseek — música via P2P
+        icon: mdi-music-note
+        ping: http://192.168.0.219:5030
+
+- Mini PC:
+    - CasaOS:
+        href: http://192.168.0.12:8888
+        description: Gerenciador do Mini PC
+        icon: sh-casaos
+        ping: http://192.168.0.12:8888
+
+    - Nextcloud:
+        href: http://192.168.0.12:7580
+        description: File storage — Google Drive
+        icon: sh-nextcloud
+        ping: http://192.168.0.12:7580
+
+    - Immich:
+        href: http://192.168.0.12:2283
+        description: Backup de fotos — Google Photos
+        icon: sh-immich
+        ping: http://192.168.0.12:2283
+
+    - Vaultwarden:
+        href: https://vault.joaopaulo.me
+        description: Gerenciador de senhas
+        icon: sh-vaultwarden
+        ping: https://vault.joaopaulo.me/alive
+
+    - AdGuard Home:
+        href: http://192.168.0.12:3001
+        description: DNS ad-blocker
+        icon: sh-adguard-home
+        ping: http://192.168.0.12:3001
+
+    - Code Server:
+        href: http://192.168.0.12:8082
+        description: VS Code no browser
+        icon: sh-code-server
+        ping: http://192.168.0.12:8082
+
+- Infrastructure:
+    - Traefik:
+        href: http://192.168.0.12:8088
+        description: Reverse proxy — Mini PC
+        icon: sh-traefik
+        ping: http://192.168.0.12:8088
+
+    - Uptime Kuma:
+        href: https://monitor.joaopaulo.me
+        description: Monitoramento HTTP/TCP
+        icon: sh-uptime-kuma
+        ping: http://192.168.0.216:3001
+
+    - Dockhand:
+        href: https://dockhand.joaopaulo.me
+        description: Gerenciamento de containers
+        icon: sh-dockhand
+        ping: http://192.168.0.216:3000
+
+    - Proxmox:
+        href: https://192.168.0.200:8006
+        description: Hypervisor — host principal
+        icon: sh-proxmox
+        ping: http://192.168.0.200:8006

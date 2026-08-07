@@ -1,0 +1,4 @@
+# Auto-discovery desabilitado — config manual em services.yaml
+# Descomentar para habilitar detecção automática via Docker labels
+# my-docker:
+#   socket: /var/run/docker.sock
