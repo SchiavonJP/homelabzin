@@ -154,14 +154,14 @@ Clean Debian 12, no Docker. Intended for Node.js, Python, and CLI tooling — ac
 
 ---
 
-### LXC 7 — Monitor (Observability)
+### LXC 7 — Monitor (Observability + Dashboard)
 
-- **Services:** Uptime Kuma · Dockhand
-- **Access:** `192.168.0.216` · `monitor.joaopaulo.me` · `dockhand.joaopaulo.me`
-- **Ports:** 3001 (Kuma) · 3000 (Dockhand)
+- **Services:** Uptime Kuma · Dockhand · Homepage
+- **Access:** `192.168.0.216` · `monitor.joaopaulo.me` · `dockhand.joaopaulo.me` · `home.joaopaulo.me`
+- **Ports:** 3001 (Kuma) · 3000 (Dockhand) · 3002 (Homepage)
 - **Resources:** 1 core · 1 GB RAM · 10 GB disk
 
-Uptime Kuma monitors all services via HTTP/TCP/SSL. Dockhand provides a Docker container management UI across LXCs. Both share the `dockhand` Postgres database on LXC 5.
+Uptime Kuma monitors all services via HTTP/TCP/SSL. Dockhand provides a Docker container management UI. Homepage (`ghcr.io/gethomepage/homepage`) is the central dashboard with all homelab services organized in groups, service pings, and *arr widgets. Config in `LXC_7_docker_stack/homepage/`.
 
 ---
 
@@ -234,6 +234,7 @@ All routed via Traefik (LXC 1) + Cloudflare Tunnel. No open inbound ports requir
 | `dockhand.joaopaulo.me` | Dockhand container UI | LXC 7 |
 | `apollo.joaopaulo.me` | Apollo inference API | LXC 8 |
 | `jellyfin.joaopaulo.me` | Jellyfin streaming | LXC 9 |
+| `home.joaopaulo.me` | Homepage dashboard | LXC 7 |
 
 ---
 
@@ -286,7 +287,7 @@ LXC 1 — Traefik (reverse proxy + TLS)
 | Vault taxonomy | Obsidian vault structure to be defined |
 | Hermes Gateway | Telegram/Discord for mobile second-brain access |
 | Gitea | Local GitHub mirror for offline agent access |
-| Homepage | Start page with Kuma status badges (optional, LXC 7 port 3002) |
+| ~~Homepage~~ | ✅ Deployado — `home.joaopaulo.me` (LXC 7 porta 3002) |
 | Jellyfin GPU passthrough | Add RTX 3060 to LXC 9 when CPU transcoding is bottleneck |
 | Navidrome public subdomain | `music.joaopaulo.me` via Cloudflare Tunnel (LAN-only for now) |
 | qBittorrent VPN | Gluetun sidecar — documented in LXC 11 readme, not active |

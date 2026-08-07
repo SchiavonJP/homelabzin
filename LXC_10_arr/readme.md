@@ -114,13 +114,35 @@ Settings → Download Clients → qBittorrent:
 
 Settings → Media Management → Root Folders → `/movies`
 
+> **Se o Save travar infinitamente** (bug com NFS): inserir direto no banco:
+> ```bash
+> apt-get install -y sqlite3
+> DB="/var/lib/docker/volumes/lxc_10_arr_radarr_config/_data/radarr.db"
+> sqlite3 $DB "INSERT INTO RootFolders (Path) VALUES ('/movies/');"
+> docker restart sb_radarr
+> ```
+
 ### 6. Sonarr → root folder
 
 Root Folder: `/tv`
 
+> **Se o Save travar infinitamente**:
+> ```bash
+> DB="/var/lib/docker/volumes/lxc_10_arr_sonarr_config/_data/sonarr.db"
+> sqlite3 $DB "INSERT INTO RootFolders (Path) VALUES ('/tv/');"
+> docker restart sb_sonarr
+> ```
+
 ### 7. Lidarr → root folder
 
 Root Folder: `/music`
+
+> **Se o Save travar infinitamente**:
+> ```bash
+> DB="/var/lib/docker/volumes/lxc_10_arr_lidarr_config/_data/lidarr.db"
+> sqlite3 $DB "INSERT INTO RootFolders (Path, Name, DefaultMetadataProfileId, DefaultQualityProfileId, DefaultMonitorOption, DefaultNewItemMonitorOption) VALUES ('/music/', 'root', 1, 1, 0, 0);"
+> docker restart sb_lidarr
+> ```
 
 ### 8. Bazarr
 
