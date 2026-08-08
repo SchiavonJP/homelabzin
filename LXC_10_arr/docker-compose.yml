@@ -160,6 +160,7 @@ services:
       SLSKD_USERNAME: ${SLSKD_USERNAME:-slskd}
       SLSKD_PASSWORD: ${SLSKD_PASSWORD:-slskd}
       SLSKD_API_KEY: ${SLSKD_API_KEY}
+      SLSKD_SOULSEEK_LISTEN_PORT: 50300
     networks:
       - arr
     deploy:
