@@ -32,7 +32,7 @@
         widget:
           type: jellyfin
           url: http://192.168.0.218:8096
-          key: "{{JELLYFIN_API_KEY}}"
+          key: "{{HOMEPAGE_VAR_JELLYFIN_API_KEY}}"
 
     - Navidrome:
         href: http://192.168.0.12:4533
@@ -56,7 +56,7 @@
           type: qbittorrent
           url: http://192.168.0.220:8080
           username: schiva
-          password: "{{QBITTORRENT_PASSWORD}}"
+          password: "{{HOMEPAGE_VAR_QBITTORRENT_PASSWORD}}"
 
     - Prowlarr:
         href: http://192.168.0.219:9696
@@ -72,7 +72,7 @@
         widget:
           type: radarr
           url: http://192.168.0.219:7878
-          key: ${RADARR_API_KEY}
+          key: "{{HOMEPAGE_VAR_RADARR_API_KEY}}"
 
     - Sonarr:
         href: http://192.168.0.219:8989
@@ -82,7 +82,7 @@
         widget:
           type: sonarr
           url: http://192.168.0.219:8989
-          key: ${SONARR_API_KEY}
+          key: "{{HOMEPAGE_VAR_SONARR_API_KEY}}"
 
     - Lidarr:
         href: http://192.168.0.219:8686
@@ -92,7 +92,7 @@
         widget:
           type: lidarr
           url: http://192.168.0.219:8686
-          key: ${LIDARR_API_KEY}
+          key: "{{HOMEPAGE_VAR_LIDARR_API_KEY}}"
 
     - Bazarr:
         href: http://192.168.0.219:6767
