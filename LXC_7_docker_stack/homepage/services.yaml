@@ -32,7 +32,7 @@
         widget:
           type: jellyfin
           url: http://192.168.0.218:8096
-          key: {{JELLYFIN_API_KEY}}
+          key: "{{JELLYFIN_API_KEY}}"
 
     - Navidrome:
         href: http://192.168.0.12:4533
@@ -72,7 +72,7 @@
         widget:
           type: radarr
           url: http://192.168.0.219:7878
-          key: {{RADARR_API_KEY}}
+          key: "{{RADARR_API_KEY}}"
 
     - Sonarr:
         href: http://192.168.0.219:8989
@@ -82,7 +82,7 @@
         widget:
           type: sonarr
           url: http://192.168.0.219:8989
-          key: {{SONARR_API_KEY}}
+          key: "{{SONARR_API_KEY}}"
 
     - Lidarr:
         href: http://192.168.0.219:8686
@@ -92,7 +92,7 @@
         widget:
           type: lidarr
           url: http://192.168.0.219:8686
-          key: {{LIDARR_API_KEY}}
+          key: "{{LIDARR_API_KEY}}"
 
     - Bazarr:
         href: http://192.168.0.219:6767
