@@ -143,6 +143,7 @@ services:
     image: slskd/slskd:latest
     container_name: sb_slskd
     restart: unless-stopped
+    user: "1000:1000"
     ports:
       - "5030:5030"
       - "50300:50300"
