@@ -80,6 +80,29 @@ http:
       middlewares:
         - secure-headers
 
+    # Mini PC — Super Productivity
+    super-productivity:
+      rule: "Host(`sp.joaopaulo.me`)"
+      entrypoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+      service: super-productivity
+      middlewares:
+        - secure-headers
+
+    # Mini PC — Nextcloud (WebDAV para sync do SP + acesso externo)
+    nextcloud:
+      rule: "Host(`nextcloud.joaopaulo.me`)"
+      entrypoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+      service: nextcloud
+      middlewares:
+        - secure-headers
+        - nextcloud-cors
+
     # LXC 8 — Apollo (llama.cpp inference)
     apollo:
       rule: "Host(`apollo.joaopaulo.me`)"
@@ -129,6 +152,18 @@ http:
       loadBalancer:
         servers:
           - url: "http://192.168.0.216:3000"
+
+    # Mini PC — Super Productivity (mesma rede Docker 'traefik')
+    super-productivity:
+      loadBalancer:
+        servers:
+          - url: "http://minipc_superproductivity:80"
+
+    # Mini PC — Nextcloud (mesma rede Docker 'traefik')
+    nextcloud:
+      loadBalancer:
+        servers:
+          - url: "http://nextcloud:80"
 
     # LXC 8 — port 8080 (llama-server)
     apollo:

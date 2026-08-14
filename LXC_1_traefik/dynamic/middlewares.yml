@@ -31,3 +31,28 @@ http:
         average: 20
         burst: 10
         period: 1m
+
+    # CORS para WebDAV do Nextcloud — permite requests do Super Productivity
+    nextcloud-cors:
+      headers:
+        accessControlAllowOriginList:
+          - "https://sp.joaopaulo.me"
+        accessControlAllowMethods:
+          - "GET"
+          - "POST"
+          - "PUT"
+          - "DELETE"
+          - "PROPFIND"
+          - "MKCOL"
+          - "COPY"
+          - "MOVE"
+          - "OPTIONS"
+        accessControlAllowHeaders:
+          - "Authorization"
+          - "Content-Type"
+          - "Depth"
+          - "Destination"
+          - "Overwrite"
+          - "If-Match"
+        accessControlAllowCredentials: true
+        accessControlMaxAge: 100

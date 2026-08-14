@@ -143,6 +143,20 @@
         icon: sh-code-server
         ping: http://192.168.0.12:8082
 
+- Productivity:
+    - Super Productivity:
+        href: http://192.168.0.12:8083
+        description: Gestão de tarefas — sync via Nextcloud
+        icon: sh-super-productivity
+        ping: http://192.168.0.12:8083
+
+    - Syncthing:
+        href: http://192.168.0.12:8384
+        description: Sync de arquivos P2P — relay 24/7
+        icon: sh-syncthing
+        ping: http://192.168.0.12:8384
+
+
 - Infrastructure:
     - Traefik:
         href: http://192.168.0.12:8088

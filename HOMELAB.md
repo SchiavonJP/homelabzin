@@ -47,8 +47,10 @@ Exportado via NFS Docker (`erichough/nfs-server`) para toda a rede `192.168.0.0/
 | `immich` | 2283 | Backup de fotos/vídeos — Google Photos (sem ML) |
 | `adguard` | 3001, 53 | DNS ad-blocker — rede local + Tailscale |
 | `vaultwarden` | — | Gerenciador de senhas (`vault.joaopaulo.me`) |
+| `minipc_superproductivity` | 8083 | Gestão de tarefas (`sp.joaopaulo.me`) — sync via Nextcloud WebDAV |
+| `syncthing` (CasaOS) | 8384 | Sync de arquivos P2P — relay para Logseq e outros |
 
-Configs: [minipc/nfs/](minipc/nfs/) · [minipc/navidrome/](minipc/navidrome/)
+Configs: [minipc/nfs/](minipc/nfs/) · [minipc/navidrome/](minipc/navidrome/) · [minipc/super-productivity/](minipc/super-productivity/) · [minipc/logseq/](minipc/logseq/)
 
 ---
 
@@ -235,6 +237,8 @@ All routed via Traefik (LXC 1) + Cloudflare Tunnel. No open inbound ports requir
 | `apollo.joaopaulo.me` | Apollo inference API | LXC 8 |
 | `jellyfin.joaopaulo.me` | Jellyfin streaming | LXC 9 |
 | `home.joaopaulo.me` | Homepage dashboard | LXC 7 |
+| `sp.joaopaulo.me` | Super Productivity | Mini PC |
+| `nextcloud.joaopaulo.me` | Nextcloud (WebDAV + cloud) | Mini PC |
 
 ---
 
