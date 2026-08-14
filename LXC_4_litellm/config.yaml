@@ -67,6 +67,10 @@ model_list:
       api_base: http://192.168.0.217:8081/v1
       api_key: "none"
 
+litellm_settings:
+  success_callback: ["langfuse"]
+  failure_callback: ["langfuse"]
+
 router_settings:
 
   routing_strategy: least-busy

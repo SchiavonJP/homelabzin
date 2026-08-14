@@ -157,6 +157,13 @@
         ping: http://192.168.0.12:8384
 
 
+- Observability:
+    - Langfuse:
+        href: https://langfuse.joaopaulo.me
+        description: Observabilidade LLM — traces, custos e latência
+        icon: sh-langfuse
+        ping: http://192.168.0.211:3001
+
 - Infrastructure:
     - Traefik:
         href: http://192.168.0.12:8088

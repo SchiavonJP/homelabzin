@@ -114,12 +114,12 @@ Web-based AI workspace for chat, deep research, and vault access from any machin
 
 ---
 
-### LXC 4 — LiteLLM (AI Router)
+### LXC 4 — LiteLLM + Langfuse (AI Router + Observabilidade)
 
-- **Service:** LiteLLM (`main-stable`)
-- **Access:** `192.168.0.211` · `litellm.joaopaulo.me`
-- **Port:** 4000
-- **Resources:** 2 cores · 2 GB RAM · 10 GB disk
+- **Services:** LiteLLM (`main-stable`) · Langfuse 3 (traces + custos) · ClickHouse (storage de eventos)
+- **Access:** `192.168.0.211` · `litellm.joaopaulo.me` · `langfuse.joaopaulo.me`
+- **Ports:** 4000 (LiteLLM) · 3001 (Langfuse)
+- **Resources:** 2 cores · 4 GB RAM · 10 GB disk
 
 Central OpenAI-compatible LLM router. Single endpoint; no service knows which backend it's hitting. Routes to:
 
@@ -235,6 +235,7 @@ All routed via Traefik (LXC 1) + Cloudflare Tunnel. No open inbound ports requir
 | `monitor.joaopaulo.me` | Uptime Kuma | LXC 7 |
 | `dockhand.joaopaulo.me` | Dockhand container UI | LXC 7 |
 | `apollo.joaopaulo.me` | Apollo inference API | LXC 8 |
+| `langfuse.joaopaulo.me` | Langfuse observabilidade LLM | LXC 4 |
 | `jellyfin.joaopaulo.me` | Jellyfin streaming | LXC 9 |
 | `home.joaopaulo.me` | Homepage dashboard | LXC 7 |
 | `sp.joaopaulo.me` | Super Productivity | Mini PC |

@@ -103,6 +103,17 @@ http:
         - secure-headers
         - nextcloud-cors
 
+    # LXC 4 — Langfuse (observabilidade LLM)
+    langfuse:
+      rule: "Host(`langfuse.joaopaulo.me`)"
+      entrypoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+      service: langfuse
+      middlewares:
+        - secure-headers
+
     # LXC 8 — Apollo (llama.cpp inference)
     apollo:
       rule: "Host(`apollo.joaopaulo.me`)"
@@ -164,6 +175,12 @@ http:
       loadBalancer:
         servers:
           - url: "http://nextcloud:80"
+
+    # LXC 4 — port 3001 (Langfuse)
+    langfuse:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.0.211:3001"
 
     # LXC 8 — port 8080 (llama-server)
     apollo:

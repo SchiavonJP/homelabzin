@@ -13,9 +13,13 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       REDIS_URL: ${REDIS_URL}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY}
+      LANGFUSE_HOST: http://sb_langfuse:3000
     entrypoint: ["litellm", "--config", "/app/config.yaml", "--detailed_debug"]
     networks:
       - router
+      - observability
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4000/health/liveliness')"]
       interval: 30s
@@ -31,3 +35,6 @@ networks:
   router:
     name: sb_router
     driver: bridge
+  observability:
+    name: sb_observability
+    external: true
