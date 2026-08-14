@@ -1,4 +1,6 @@
 <clickhouse>
     <max_server_memory_usage>800000000</max_server_memory_usage>
     <max_server_memory_usage_to_ram_ratio>0.4</max_server_memory_usage_to_ram_ratio>
+    <!-- LXC sem IPv6 — forçar escuta apenas em IPv4 -->
+    <listen_host>0.0.0.0</listen_host>
 </clickhouse>

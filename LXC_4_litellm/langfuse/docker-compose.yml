@@ -77,8 +77,10 @@ services:
       nofile:
         soft: 262144
         hard: 262144
+    security_opt:
+      - seccomp:unconfined
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8123/ping | grep -q Ok."]
       interval: 10s
       timeout: 5s
       retries: 5
