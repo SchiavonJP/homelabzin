@@ -75,7 +75,7 @@ router_settings:
 
   routing_strategy: least-busy
   num_retries: 5
-  timeout: 120
+  timeout: 600
 
   # All free OpenRouter models as fallbacks for maximum availability
   fallback_models:
