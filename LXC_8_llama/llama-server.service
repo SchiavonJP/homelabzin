@@ -1,30 +1,15 @@
 [Unit]
-Description=llama.cpp Server — Apollo (Qwen3.6 MTP)
+Description=llama.cpp Server — Apollo
 After=network.target
 
 [Service]
 Type=simple
 User=root
 WorkingDirectory=/opt/llama.cpp
-EnvironmentFile=/etc/llama-server.env
 Environment=CUDA_VISIBLE_DEVICES=0
 Environment=LD_LIBRARY_PATH=/usr/local/cuda/lib64
 
-ExecStart=/opt/llama.cpp/build/bin/llama-server \
-  --model ${LLAMA_MODEL_PATH} \
-  --host 0.0.0.0 \
-  --port ${LLAMA_PORT} \
-  --n-gpu-layers ${LLAMA_NGL} \
-  --spec-type draft-mtp \
-  --spec-draft-n-max 3 \
-  --draft-p-min 0.80 \
-  --flash-attn on \
-  --ctx-size ${LLAMA_CTX_SIZE} \
-  --cache-type-k q8_0 \
-  --cache-type-v q8_0 \
-  --threads 6 \
-  --parallel 1 \
-  --cont-batching
+ExecStart=/opt/llama.cpp/run-llama-server.sh
 
 Restart=on-failure
 RestartSec=10

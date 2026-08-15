@@ -9,8 +9,6 @@ set -euo pipefail
 DRIVER_VERSION="610.43.02"
 # Auto-detected in step 4 — picks the latest cuda-toolkit-X-Y available in the repo
 LLAMA_REPO="https://github.com/ggml-org/llama.cpp"
-MODEL_REPO="localweights/Qwen3.6-35B-A3B-MTP-Q4_K_M-GGUF"
-MODEL_FILE="Qwen3.6-35B-A3B-MTP-Q4_K_M.gguf"
 BGE_REPO="gpustack/bge-m3-GGUF"
 BGE_FILE="bge-m3-Q4_K_M.gguf"
 MODEL_DIR="/models"
@@ -19,9 +17,31 @@ SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 
 # Load user overrides
 [ -f "${SCRIPT_DIR}/.env" ] && source "${SCRIPT_DIR}/.env"
+
+# ── Model preset ──────────────────────────────────────────────
+# Select via MODEL_PRESET env var or .env file.
+# .env values take precedence over preset defaults.
+MODEL_PRESET="${MODEL_PRESET:-qwen3}"
+
+case "$MODEL_PRESET" in
+  qwen3)
+    MODEL_REPO="${MODEL_REPO:-localweights/Qwen3.6-35B-A3B-MTP-Q4_K_M-GGUF}"
+    MODEL_FILE="${MODEL_FILE:-Qwen3.6-35B-A3B-MTP-Q4_K_M.gguf}"
+    LLAMA_NGL="${LLAMA_NGL:-22}"
+    LLAMA_CTX_SIZE="${LLAMA_CTX_SIZE:-8192}"
+    LLAMA_EXTRA_ARGS="${LLAMA_EXTRA_ARGS:---spec-type draft-mtp --spec-draft-n-max 3 --draft-p-min 0.40}"
+    ;;
+  gemma3-12b)
+    MODEL_REPO="${MODEL_REPO:-bartowski/gemma-3-12b-it-GGUF}"
+    MODEL_FILE="${MODEL_FILE:-gemma-3-12b-it-Q4_K_M.gguf}"
+    LLAMA_NGL="${LLAMA_NGL:-99}"
+    LLAMA_CTX_SIZE="${LLAMA_CTX_SIZE:-8192}"
+    LLAMA_EXTRA_ARGS="${LLAMA_EXTRA_ARGS:-}"
+    ;;
+  *) echo -e "\033[1;31m  ✗\033[0m Unknown MODEL_PRESET: '$MODEL_PRESET'. Use: qwen3, gemma3-12b." >&2; exit 1 ;;
+esac
+
 LLAMA_PORT="${LLAMA_PORT:-8080}"
-LLAMA_CTX_SIZE="${LLAMA_CTX_SIZE:-8192}"
-LLAMA_NGL="${LLAMA_NGL:-21}"
 LLAMA_MODEL_PATH="${LLAMA_MODEL_PATH:-${MODEL_DIR}/${MODEL_FILE}}"
 BGE_PORT="${BGE_PORT:-8081}"
 BGE_CTX_SIZE="${BGE_CTX_SIZE:-8192}"
@@ -236,7 +256,31 @@ LLAMA_PORT=${LLAMA_PORT}
 LLAMA_MODEL_PATH=${LLAMA_MODEL_PATH}
 LLAMA_CTX_SIZE=${LLAMA_CTX_SIZE}
 LLAMA_NGL=${LLAMA_NGL}
+LLAMA_THREADS=6
+LLAMA_EXTRA_ARGS=${LLAMA_EXTRA_ARGS}
 EOF
+
+# Wrapper script — handles word-splitting of LLAMA_EXTRA_ARGS
+# (systemd does not word-split env var references in ExecStart)
+cat > "${LLAMA_DIR}/run-llama-server.sh" << 'WRAPPER'
+#!/usr/bin/env bash
+set -a; source /etc/llama-server.env; set +a
+exec /opt/llama.cpp/build/bin/llama-server \
+  --model        "$LLAMA_MODEL_PATH" \
+  --host         0.0.0.0 \
+  --port         "$LLAMA_PORT" \
+  --n-gpu-layers "$LLAMA_NGL" \
+  --flash-attn   on \
+  --ctx-size     "$LLAMA_CTX_SIZE" \
+  --cache-type-k q8_0 \
+  --cache-type-v q8_0 \
+  --threads      "${LLAMA_THREADS:-6}" \
+  --parallel     1 \
+  --cont-batching \
+  $LLAMA_EXTRA_ARGS
+WRAPPER
+chmod +x "${LLAMA_DIR}/run-llama-server.sh"
+ok "Wrapper script written to ${LLAMA_DIR}/run-llama-server.sh"
 
 cat > /etc/bge-embedding.env << EOF
 BGE_PORT=${BGE_PORT}

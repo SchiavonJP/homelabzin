@@ -133,6 +133,27 @@ O script é **idempotente** — pode ser reexecutado sem problemas. Ele:
 
 ---
 
+## Alternando modelos
+
+| Preset | Modelo | VRAM | Tokens/s esperado |
+|--------|--------|------|------------------|
+| `qwen3` (default) | Qwen3.6-35B-A3B-MTP Q4_K_M | ~11.4 GiB (NGL=22) | ~25–35 t/s |
+| `gemma3-12b` | Gemma 3 12B IT Q4_K_M | ~9 GiB (NGL=99) | ~60–100 t/s |
+
+```bash
+# Trocar para Gemma 3 12B (baixa modelo se necessário, não recompila llama.cpp)
+MODEL_PRESET=gemma3-12b bash setup.sh
+systemctl restart llama-server
+
+# Voltar para Qwen3.6
+MODEL_PRESET=qwen3 bash setup.sh
+systemctl restart llama-server
+```
+
+Setup.sh é idempotente — ao trocar preset, apenas atualiza o env file, regenera o wrapper script e reinicia o serviço. O download só acontece se o GGUF ainda não existe em `/models`.
+
+---
+
 ## Gerenciar os serviços
 
 ```bash
@@ -213,8 +234,9 @@ curl http://localhost:8081/v1/embeddings \
 | `nvidia-smi: not found` | Bug do pacote vazio | O setup.sh extrai do `.run` automaticamente |
 | `CUDA not found` no build | PATH incorreto | `export PATH=/usr/local/cuda/bin:$PATH` e rerodar cmake |
 | `spec-type mtp` ignorado | GGUF sem cabeças MTP | Usar especificamente o GGUF com sufixo `-MTP` |
-| Tok/s baixo apesar do MTP | `draft-p-min` rejeitando tudo | Baixar para `0.70` em `/etc/llama-server.env` e restart |
-| OOM ao carregar modelo (`CUDA0 buffer`) | NGL muito alto — MoE tem ~28 blocos; NGL > 28 = modelo inteiro (~20GB) na GPU | Reduzir `LLAMA_NGL` para ≤18 (com bge-m3 rodando) ou ≤22 (sem bge-m3) |
+| Tok/s baixo apesar do MTP | `draft-p-min` rejeitando tudo | Preset qwen3 usa 0.40 por default; conferir `/etc/llama-server.env` |
+| OOM ao carregar modelo (`CUDA0 buffer`) | NGL muito alto — MoE tem ~28 blocos; NGL > 28 = modelo inteiro (~20GB) na GPU | Reduzir `LLAMA_NGL` para ≤22 (bge-m3 na CPU) |
+| Gemma 3 falha ao iniciar com `spec-type mtp` | Preset antigo ainda no env | `MODEL_PRESET=gemma3-12b bash setup.sh` regenera o wrapper sem MTP flags |
 | Contexto 32K causa OOM mesmo com NGL baixo | KV cache pre-alocado é proporcional ao ctx | Usar `LLAMA_CTX_SIZE=8192`; aumentar ctx só após confirmar NGL estável |
 | bge-embedding OOM ao iniciar | VRAM apertada com Qwen3.6 | Reduzir `LLAMA_NGL` para 38–40 para liberar ~1GB |
 | `/v1/embeddings` retorna 404 | Serviço não iniciado ou sem flag `--embedding` | `systemctl start bge-embedding` e verificar logs |
