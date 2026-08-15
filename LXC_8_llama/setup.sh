@@ -226,9 +226,14 @@ if [ -f "${LLAMA_MODEL_PATH}" ]; then
   ok "Model already present at ${LLAMA_MODEL_PATH}"
 else
   pip3 install -q --break-system-packages huggingface-hub
+  # Pass HF_TOKEN if set (required for gated models like Gemma 3)
+  HF_TOKEN_ARGS=()
+  [ -n "${HF_TOKEN:-}" ] && HF_TOKEN_ARGS=(--token "$HF_TOKEN")
   hf download "$MODEL_REPO" \
     --local-dir "$MODEL_DIR" \
-    --include "*.gguf"
+    --include "${MODEL_FILE}" \
+    "${HF_TOKEN_ARGS[@]}"
+  [ -f "${LLAMA_MODEL_PATH}" ] || die "Download failed — file not found: ${LLAMA_MODEL_PATH}"
   ok "Model downloaded to ${LLAMA_MODEL_PATH}"
 fi
 
@@ -294,8 +299,8 @@ EOF
 cp "${SCRIPT_DIR}/llama-server.service" /etc/systemd/system/llama-server.service
 cp "${SCRIPT_DIR}/bge-embedding.service" /etc/systemd/system/bge-embedding.service
 systemctl daemon-reload
-systemctl enable --now llama-server
-systemctl enable --now bge-embedding
+systemctl enable llama-server bge-embedding
+systemctl restart llama-server bge-embedding
 ok "Services installed and started"
 
 # ──────────────────────────────────────────────────────────────
