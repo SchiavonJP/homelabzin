@@ -32,8 +32,19 @@ case "$MODEL_PRESET" in
     LLAMA_EXTRA_ARGS="${LLAMA_EXTRA_ARGS:---spec-type draft-mtp --spec-draft-n-max 3 --draft-p-min 0.40}"
     ;;
   gemma3-12b)
+    # Gemma 3 12B is gated — requires HF_TOKEN + accepted Google terms.
+    # Repo: bartowski/gemma-3-12b-it-GGUF  (verify exact name at huggingface.co/bartowski)
+    # Set HF_TOKEN=hf_xxx before running if using gated repo.
     MODEL_REPO="${MODEL_REPO:-bartowski/gemma-3-12b-it-GGUF}"
     MODEL_FILE="${MODEL_FILE:-gemma-3-12b-it-Q4_K_M.gguf}"
+    LLAMA_NGL="${LLAMA_NGL:-99}"
+    LLAMA_CTX_SIZE="${LLAMA_CTX_SIZE:-8192}"
+    LLAMA_EXTRA_ARGS="${LLAMA_EXTRA_ARGS:-}"
+    ;;
+  qwen25-14b)
+    # Public alternative: Qwen2.5 14B dense — no auth needed, ~8.5 GiB Q4_K_M
+    MODEL_REPO="${MODEL_REPO:-Qwen/Qwen2.5-14B-Instruct-GGUF}"
+    MODEL_FILE="${MODEL_FILE:-qwen2.5-14b-instruct-q4_k_m.gguf}"
     LLAMA_NGL="${LLAMA_NGL:-99}"
     LLAMA_CTX_SIZE="${LLAMA_CTX_SIZE:-8192}"
     LLAMA_EXTRA_ARGS="${LLAMA_EXTRA_ARGS:-}"
@@ -233,7 +244,9 @@ else
     --local-dir "$MODEL_DIR" \
     --include "${MODEL_FILE}" \
     "${HF_TOKEN_ARGS[@]}"
-  [ -f "${LLAMA_MODEL_PATH}" ] || die "Download failed — file not found: ${LLAMA_MODEL_PATH}"
+  [ -f "${LLAMA_MODEL_PATH}" ] || die "Download failed — file not found: ${LLAMA_MODEL_PATH}. Check MODEL_REPO name or set HF_TOKEN for gated models."
+  _size=$(stat -c%s "${LLAMA_MODEL_PATH}" 2>/dev/null || echo 0)
+  [ "$_size" -gt 104857600 ] || die "Download incomplete — file too small (${_size} bytes): ${LLAMA_MODEL_PATH}. Re-run after deleting the stub: rm ${LLAMA_MODEL_PATH}"
   ok "Model downloaded to ${LLAMA_MODEL_PATH}"
 fi
 
