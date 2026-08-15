@@ -1,3 +1,6 @@
+general_settings:
+  request_timeout: 600
+
 model_list:
   # ===== Defaults =====
   - model_name: default-agent
