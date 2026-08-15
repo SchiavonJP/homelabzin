@@ -42,7 +42,9 @@ case "$MODEL_PRESET" in
 esac
 
 LLAMA_PORT="${LLAMA_PORT:-8080}"
-LLAMA_MODEL_PATH="${LLAMA_MODEL_PATH:-${MODEL_DIR}/${MODEL_FILE}}"
+# Always derived from MODEL_FILE set by the preset; .env overrides of LLAMA_MODEL_PATH are ignored.
+# To use a custom model path, set MODEL_FILE in .env instead.
+LLAMA_MODEL_PATH="${MODEL_DIR}/${MODEL_FILE}"
 BGE_PORT="${BGE_PORT:-8081}"
 BGE_CTX_SIZE="${BGE_CTX_SIZE:-8192}"
 BGE_NGL="${BGE_NGL:-99}"
