@@ -36,7 +36,7 @@ case "$MODEL_PRESET" in
     # Repo: bartowski/gemma-4-12b-it-GGUF  (verify exact name at huggingface.co/bartowski)
     # Set HF_TOKEN=hf_xxx before running if using gated repo.
     MODEL_REPO="${MODEL_REPO:-bartowski/gemma-4-12b-it-GGUF}"
-    MODEL_FILE="${MODEL_FILE:-gemma-4-12b-it-Q4_K_M.gguf}"
+    MODEL_FILE="${MODEL_FILE:-gemma-4-12B-it-Q4_K_M.gguf}"
     LLAMA_NGL="${LLAMA_NGL:-99}"
     LLAMA_CTX_SIZE="${LLAMA_CTX_SIZE:-8192}"
     LLAMA_EXTRA_ARGS="${LLAMA_EXTRA_ARGS:-}"
