@@ -1,5 +1,42 @@
 services:
 
+  minio:
+    image: minio/minio:latest
+    container_name: sb_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9090"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9000/minio/health/live || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - observability
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: sb_minio_init
+    restart: on-failure
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    entrypoint: ["/bin/sh", "-c", "mc alias set local http://sb_minio:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD && mc mb --ignore-existing local/langfuse-events && mc mb --ignore-existing local/langfuse-media && echo 'buckets ready'"]
+    networks:
+      - observability
+
   langfuse-web:
     image: langfuse/langfuse:3
     container_name: sb_langfuse
@@ -8,6 +45,8 @@ services:
       langfuse-worker:
         condition: service_started
       clickhouse:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     ports:
       - "3001:3000"
@@ -28,8 +67,18 @@ services:
       LANGFUSE_INIT_PROJECT_NAME: LiteLLM
       LANGFUSE_INIT_USER_EMAIL: ${LANGFUSE_ADMIN_EMAIL}
       LANGFUSE_INIT_USER_PASSWORD: ${LANGFUSE_ADMIN_PASSWORD}
-      LANGFUSE_S3_UPLOAD_ENABLED: "false"
-      LANGFUSE_S3_MEDIA_UPLOAD_ENABLED: "false"
+      LANGFUSE_S3_EVENT_UPLOAD_BUCKET: langfuse-events
+      LANGFUSE_S3_EVENT_UPLOAD_REGION: us-east-1
+      LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT: http://sb_minio:9000
+      LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE: "true"
+      LANGFUSE_S3_MEDIA_UPLOAD_BUCKET: langfuse-media
+      LANGFUSE_S3_MEDIA_UPLOAD_REGION: us-east-1
+      LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT: http://sb_minio:9000
+      LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE: "true"
     networks:
       - observability
     deploy:
@@ -44,6 +93,8 @@ services:
     depends_on:
       clickhouse:
         condition: service_healthy
+      minio:
+        condition: service_healthy
     environment:
       DATABASE_URL: ${LANGFUSE_DATABASE_URL}
       CLICKHOUSE_MIGRATION_URL: ${CLICKHOUSE_MIGRATION_URL}
@@ -53,8 +104,18 @@ services:
       REDIS_CONNECTION_STRING: ${REDIS_CONNECTION_STRING}
       SALT: ${SALT}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
-      LANGFUSE_S3_UPLOAD_ENABLED: "false"
-      LANGFUSE_S3_MEDIA_UPLOAD_ENABLED: "false"
+      LANGFUSE_S3_EVENT_UPLOAD_BUCKET: langfuse-events
+      LANGFUSE_S3_EVENT_UPLOAD_REGION: us-east-1
+      LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT: http://sb_minio:9000
+      LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE: "true"
+      LANGFUSE_S3_MEDIA_UPLOAD_BUCKET: langfuse-media
+      LANGFUSE_S3_MEDIA_UPLOAD_REGION: us-east-1
+      LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT: http://sb_minio:9000
+      LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE: "true"
     networks:
       - observability
     deploy:
@@ -94,6 +155,7 @@ services:
 
 volumes:
   clickhouse_data:
+  minio_data:
 
 networks:
   observability:
