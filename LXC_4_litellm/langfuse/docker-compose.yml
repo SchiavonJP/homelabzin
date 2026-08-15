@@ -81,12 +81,13 @@ services:
       LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
       LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
       LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE: "true"
+      NODE_OPTIONS: "--max-old-space-size=900"
     networks:
       - observability
     deploy:
       resources:
         limits:
-          memory: 512m
+          memory: 1g
 
   langfuse-worker:
     image: langfuse/langfuse-worker:3
