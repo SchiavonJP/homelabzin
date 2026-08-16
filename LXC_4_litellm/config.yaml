@@ -54,15 +54,17 @@ model_list:
 
   - model_name: local-coder
     litellm_params:
-      model: openai/qwen3.6-35b-mtp
+      model: openai/gemma-4-12b-it
       api_base: http://192.168.0.217:8080/v1
       api_key: "none"
+      timeout: 600
 
   - model_name: local-fast
     litellm_params:
-      model: openai/qwen3.6-35b-mtp
+      model: openai/gemma-4-12b-it
       api_base: http://192.168.0.217:8080/v1
       api_key: "none"
+      timeout: 600
 
   - model_name: embed
     litellm_params:
