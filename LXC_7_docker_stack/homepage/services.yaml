@@ -164,6 +164,43 @@
         icon: sh-langfuse
         ping: http://192.168.0.211:3001
 
+- PNCP:
+    - PNCP API:
+        href: https://api.joaopaulo.me
+        description: FastAPI backend — licitações PNCP
+        icon: sh-fastapi
+        ping: http://192.168.0.230:8000/api/v1/health/live
+
+    - PNCP App:
+        href: https://app.joaopaulo.me
+        description: Frontend Next.js — portal de licitações
+        icon: sh-nextjs
+        ping: https://app.joaopaulo.me
+
+    - MinIO:
+        href: http://192.168.0.231:9001
+        description: Object storage — documentos PNCP
+        icon: sh-minio
+        ping: http://192.168.0.231:9001
+
+    - Windmill:
+        href: https://windmill.joaopaulo.me
+        description: Orquestrador de pipelines — coleta diária PNCP
+        icon: sh-windmill
+        ping: http://192.168.0.232:8000/api/v1/ping
+
+    - Dify:
+        href: http://192.168.0.233:80
+        description: Workflow de IA — explicação de licitações
+        icon: sh-dify
+        ping: http://192.168.0.233:80
+
+    - Dokploy:
+        href: http://192.168.0.234:3000
+        description: Plataforma de deploy — frontend e serviços
+        icon: sh-dokploy
+        ping: http://192.168.0.234:3000
+
 - Infrastructure:
     - Traefik:
         href: http://192.168.0.12:8088

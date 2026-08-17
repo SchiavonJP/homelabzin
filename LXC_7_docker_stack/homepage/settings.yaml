@@ -19,6 +19,9 @@ layout:
   Mini PC:
     style: row
     columns: 4
+  PNCP:
+    style: row
+    columns: 3
   Infrastructure:
     style: row
     columns: 4
