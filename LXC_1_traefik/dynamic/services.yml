@@ -148,6 +148,39 @@ http:
       middlewares:
         - secure-headers
 
+    # LXC 12 — Personal Hub — AFFiNE (atrás de Cloudflare Access)
+    affine:
+      rule: "Host(`affine.joaopaulo.me`)"
+      entrypoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+      service: affine
+      middlewares:
+        - secure-headers
+
+    # LXC 12 — Personal Hub — Ryot
+    ryot:
+      rule: "Host(`ryot.joaopaulo.me`)"
+      entrypoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+      service: ryot
+      middlewares:
+        - secure-headers
+
+    # Mini PC — Karakeep
+    keep:
+      rule: "Host(`keep.joaopaulo.me`)"
+      entrypoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+      service: keep
+      middlewares:
+        - secure-headers
+
   services:
 
     # LXC 4 — port 4000
@@ -221,3 +254,21 @@ http:
       loadBalancer:
         servers:
           - url: "http://192.168.0.233:80"
+
+    # LXC 12 — Personal Hub — AFFiNE, porta 3010
+    affine:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.0.221:3010"
+
+    # LXC 12 — Personal Hub — Ryot, porta 8000
+    ryot:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.0.221:8000"
+
+    # Mini PC — Karakeep, porta 3000
+    keep:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.0.12:3000"

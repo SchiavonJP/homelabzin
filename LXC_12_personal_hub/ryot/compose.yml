@@ -1,0 +1,63 @@
+name: ryot
+
+services:
+
+  postgres:
+    image: postgres:18-alpine
+    container_name: ryot_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ryot
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ryot
+    volumes:
+      - postgres_storage:/var/lib/postgresql
+    networks:
+      - ryot_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ryot -d ryot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+
+  ryot:
+    image: ghcr.io/ignisda/ryot:v10.5.0
+    container_name: ryot_app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgres://ryot:${POSTGRES_PASSWORD}@postgres:5432/ryot
+      SERVER_ADMIN_ACCESS_TOKEN: ${SERVER_ADMIN_ACCESS_TOKEN}
+      FRONTEND_URL: https://ryot.joaopaulo.me
+      TZ: America/Sao_Paulo
+    volumes:
+      - ryot_data:/data
+    networks:
+      - ryot_net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+
+volumes:
+  postgres_storage:
+  ryot_data:
+
+networks:
+  ryot_net:
+    name: ryot_net
+    driver: bridge

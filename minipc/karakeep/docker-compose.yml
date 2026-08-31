@@ -1,0 +1,44 @@
+name: karakeep
+
+services:
+  web:
+    image: ghcr.io/karakeep-app/karakeep:${KARAKEEP_VERSION:-0.33.2}
+    container_name: minipc_karakeep
+    restart: unless-stopped
+    volumes:
+      - data:/data
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      MEILI_ADDR: http://meilisearch:7700
+      BROWSER_WEB_URL: http://chrome:9222
+      DATA_DIR: /data # NÃO ALTERAR — ver volume acima
+
+  chrome:
+    image: ghcr.io/karakeep-app/karakeep-chrome:release
+    container_name: minipc_karakeep_chrome
+    restart: unless-stopped
+    init: true
+    command:
+      - --disable-gpu
+      - --disable-dev-shm-usage
+      - --hide-scrollbars
+      - --disable-blink-features=AutomationControlled
+      - --window-size=1440,900
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.41.0
+    container_name: minipc_karakeep_meilisearch
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      MEILI_NO_ANALYTICS: "true"
+    volumes:
+      - meilisearch:/meili_data
+
+volumes:
+  meilisearch:
+  data:
