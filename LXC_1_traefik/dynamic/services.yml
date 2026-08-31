@@ -126,6 +126,28 @@ http:
         - secure-headers
         - rate-limit-api
 
+    # PNCP — Windmill (pncp-windmill, LXC 232) — atrás de Cloudflare Access
+    windmill:
+      rule: "Host(`windmill.joaopaulo.me`)"
+      entrypoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+      service: windmill
+      middlewares:
+        - secure-headers
+
+    # PNCP — Dify (pncp-dify, LXC 233)
+    dify:
+      rule: "Host(`dify.joaopaulo.me`)"
+      entrypoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+      service: dify
+      middlewares:
+        - secure-headers
+
   services:
 
     # LXC 4 — port 4000
@@ -187,3 +209,15 @@ http:
       loadBalancer:
         servers:
           - url: "http://192.168.0.217:8080"
+
+    # PNCP — pncp-windmill (LXC 232), porta 8000 — confirmado via docker ps
+    windmill:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.0.232:8000"
+
+    # PNCP — pncp-dify (LXC 233), nginx porta 80 — confirmado via docker ps
+    dify:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.0.233:80"
