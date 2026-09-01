@@ -58,6 +58,57 @@ Configs: [minipc/nfs/](minipc/nfs/) · [minipc/navidrome/](minipc/navidrome/) ·
 
 All containers run Debian 12 with Docker, deployed via sparse checkout from the [`second-brain-automation`](https://github.com/SchiavonJP/second-brain-automation) repo.
 
+### Bootstrap padrão de um novo LXC
+
+Sequência completa pra preparar um LXC recém-criado (`pct create` já feito)
+antes do deploy da stack em si. Rodar do host Proxmox (`ssh root@192.168.0.200`).
+Substituir `<VMIDs>` e `<IPs>` pelos containers reais — pode ser um só ou
+vários de uma vez, já que são loops.
+
+```bash
+# 1. Senha de root (acesso via console VNC/noVNC do Proxmox — SSH por
+#    chave não precisa disso, é só fallback pra quando a chave não rolar)
+for ID in <VMIDs>; do
+    pct exec $ID -- passwd root
+done
+
+# 2. Habilitar Docker (nesting + keyctl) e reiniciar
+#    Redundante se o LXC já foi criado com --features keyctl=1,nesting=1
+#    no próprio `pct create` (padrão usado nos LXCs mais recentes)
+for ID in <VMIDs>; do
+    echo "features: keyctl=1,nesting=1" >> /etc/pve/lxc/${ID}.conf
+    pct reboot $ID
+done
+
+# 3. Injetar chave SSH (acesso sem senha + permite git clone via SSH)
+for ID in <VMIDs>; do
+    pct exec $ID -- mkdir -p /root/.ssh
+    cat ~/.ssh/id_ed25519.pub | pct exec $ID -- tee /root/.ssh/authorized_keys
+    cat ~/.ssh/id_ed25519     | pct exec $ID -- tee /root/.ssh/id_ed25519
+    pct exec $ID -- chmod 700 /root/.ssh
+    pct exec $ID -- chmod 600 /root/.ssh/authorized_keys /root/.ssh/id_ed25519
+done
+
+# 4. Instalar Docker (via IP, depois que a chave já está injetada)
+for IP in <IPs>; do
+    ssh root@$IP "apt-get update -qq && apt-get install -y curl"
+done
+for IP in <IPs>; do
+    ssh root@$IP "curl -fsSL https://get.docker.com | sh"
+done
+```
+
+> A chave privada copiada no passo 3 precisa estar cadastrada no GitHub
+> (Settings → SSH keys) pra o LXC conseguir `git clone` do repo via SSH.
+> Depois desse bootstrap, seguir o deploy específico da stack (sparse
+> checkout + `docker compose up -d`) documentado no readme de cada LXC.
+
+Pra mudar a senha de root depois (sem repetir o bootstrap todo):
+```bash
+pct exec <VMID> -- passwd root                                  # interativa
+pct exec <VMID> -- bash -c "echo 'root:NOVASENHA' | chpasswd"   # direta
+```
+
 ### AI / Second Brain (LXCs 1-8)
 
 | LXC | Hostname | Codename | IP | Role |
