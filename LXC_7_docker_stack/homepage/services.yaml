@@ -157,6 +157,31 @@
         ping: http://192.168.0.12:8384
 
 
+- Personal Hub:
+    - AFFiNE:
+        href: https://affine.joaopaulo.me
+        description: Base de conhecimento — docs, whiteboard, databases
+        icon: sh-affine
+        ping: http://192.168.0.221:3010
+
+    - Ryot:
+        href: https://ryot.joaopaulo.me
+        description: Tracker pessoal — livros, filmes, jogos, fitness
+        icon: sh-ryot
+        ping: http://192.168.0.221:8000/health
+
+    - Karakeep:
+        href: https://keep.joaopaulo.me
+        description: Guardar links — sem download de vídeo
+        icon: sh-karakeep
+        ping: http://192.168.0.12:3000
+
+    - Actual Budget:
+        href: https://budget.joaopaulo.me
+        description: Orçamento pessoal
+        icon: sh-actual-budget
+        ping: http://192.168.0.12:15006
+
 - Observability:
     - Langfuse:
         href: https://langfuse.joaopaulo.me
@@ -190,7 +215,7 @@
         ping: http://192.168.0.232:8000/api/v1/ping
 
     - Dify:
-        href: http://192.168.0.233:80
+        href: https://dify.joaopaulo.me
         description: Workflow de IA — explicação de licitações
         icon: sh-dify
         ping: http://192.168.0.233:80

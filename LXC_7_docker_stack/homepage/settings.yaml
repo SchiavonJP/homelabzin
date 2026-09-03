@@ -22,6 +22,9 @@ layout:
   PNCP:
     style: row
     columns: 3
+  Personal Hub:
+    style: row
+    columns: 4
   Infrastructure:
     style: row
     columns: 4
