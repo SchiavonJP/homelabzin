@@ -26,14 +26,12 @@ seção Cloudflare.
 
 ## Deploy
 
+Clone completo em `/root` (sem sparse-checkout — mesmo padrão usado no PNCP):
+
 ```bash
-mkdir -p /opt/stacks && cd /opt/stacks
-git clone --no-checkout --filter=blob:none https://github.com/SchiavonJP/second-brain-automation.git
-cd second-brain-automation
-git sparse-checkout init --cone
-git sparse-checkout set LXC_12_personal_hub
-git checkout main
-cd LXC_12_personal_hub/affine
+cd /root
+git clone https://github.com/SchiavonJP/second-brain-automation.git
+cd second-brain-automation/LXC_12_personal_hub/affine
 
 cp .env.example .env
 nano .env   # preencher POSTGRES_PASSWORD
@@ -72,7 +70,7 @@ Destino recomendado: NFS do Mini PC (`/storage/backups/affine`).
 ## Atualização
 
 ```bash
-cd /opt/stacks/second-brain-automation && git pull
+cd /root/second-brain-automation && git pull
 cd LXC_12_personal_hub/affine && docker compose pull && docker compose up -d
 ```
 
