@@ -181,6 +181,17 @@ http:
       middlewares:
         - secure-headers
 
+    # Mini PC — Actual Budget
+    budget:
+      rule: "Host(`budget.joaopaulo.me`)"
+      entrypoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+      service: budget
+      middlewares:
+        - secure-headers
+
   services:
 
     # LXC 4 — port 4000
@@ -272,3 +283,9 @@ http:
       loadBalancer:
         servers:
           - url: "http://192.168.0.12:3000"
+
+    # Mini PC — Actual Budget, porta 15006
+    budget:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.0.12:15006"
