@@ -1,6 +1,6 @@
 # Homelab — Overview
 
-> Last updated: 2026-08-01
+> Last updated: 2026-09-19
 
 ---
 
@@ -130,6 +130,12 @@ pct exec <VMID> -- bash -c "echo 'root:NOVASENHA' | chpasswd"   # direta
 | 10 | sb-arr | 192.168.0.219 | Arr stack + Music Auto (Radarr · Sonarr · Lidarr · Prowlarr · Bazarr · slskd · Soularr · Beets) |
 | 11 | sb-downloads | 192.168.0.220 | qBittorrent |
 
+### Camera (LXC 13)
+
+| LXC | Hostname | IP | Role |
+|-----|----------|----|------|
+| 13 | sb-camera | 192.168.0.222 | motionEye — webcam USB, monitoramento do cachorro |
+
 ---
 
 ### LXC 1 — Traefik (Reverse Proxy)
@@ -140,6 +146,11 @@ pct exec <VMID> -- bash -c "echo 'root:NOVASENHA' | chpasswd"   # direta
 - **Resources:** 1 core · 512 MB RAM · 5 GB disk
 
 TLS via Cloudflare DNS Challenge. Routes all public subdomains. Cloudflare Tunnel (cloudflared) exposes services without open inbound ports. Reusable middlewares: `secure-headers`, `rate-limit-api`, `rate-limit-admin`. File provider with hot-reload (`watch=true`).
+
+> **Status (2026-09-19):** este LXC não está rodando no host no momento —
+> não aparece em `pct list`/`qm list` e `192.168.0.212` não responde. Todos
+> os subdomínios públicos abaixo ficam inacessíveis até ser restaurado;
+> serviços continuam acessíveis via IP local nesse meio tempo.
 
 ---
 
@@ -220,28 +231,44 @@ Uptime Kuma monitors all services via HTTP/TCP/SSL. Dockhand provides a Docker c
 
 ### LXC 8 — Apollo (GPU Inference)
 
-- **Services:** llama-server (Qwen3.6) · bge-embedding (bge-m3)
+- **Services:** llama-server (Ornith-1.5-35B-A3B) · bge-embedding (bge-m3)
 - **Access:** `192.168.0.217` · `apollo.joaopaulo.me`
 - **Ports:** 8080 (inference) · 8081 (embeddings)
 - **Resources:** 8 cores · 48 GB RAM · 8 GB swap · 50 GB disk · **RTX 3060 12 GB (passthrough)**
 
-Local GPU inference node. Runs `llama-server` (llama.cpp compiled with CUDA) and a separate `bge-embedding` service. Both are systemd services sourcing their config from `/etc/llama-server.env` and `/etc/bge-embedding.env`. Exposes an OpenAI-compatible API consumed by LiteLLM.
+Local GPU inference node. Runs `llama-server` (llama.cpp compiled with CUDA) and a separate `bge-embedding` service. Both are systemd services sourcing their config from `/etc/llama-server.env` and `/etc/bge-embedding.env`. Exposes an OpenAI-compatible API consumed by LiteLLM (`local-coder`/`hermes-local`).
 
 | Service | Model | Port | VRAM | Performance |
 |---------|-------|------|------|-------------|
-| llama-server | Qwen3.6-35B-A3B-MTP Q4_K_M | 8080 | ~11 GB (NGL=21) | 50–80 tok/s |
+| llama-server | Ornith-1.5-35B-A3B Q4_K_M | 8080 | ~10.7 GB (`--n-cpu-moe 28`, ctx 172032) | ~41 tok/s |
 | bge-embedding | bge-m3 Q4_K_M | 8081 | ~570 MB (NGL=99) | 500–1000 emb/s · dim=1024 |
+
+**Offload strategy — `--n-cpu-moe` em vez de `--n-gpu-layers` parcial:** para modelos MoE, offload por layer inteira (`-ngl` parcial) desperdiça VRAM em pesos de experts que raramente são ativados. `--n-cpu-moe N` mantém `-ngl 99` (atenção/norms/embeddings sempre na GPU — pequenos, sempre computados) e manda só os pesos dos experts MoE das primeiras N layers pra CPU RAM (grandes em disco, esparsos por token). No Ornith (40 layers totais), `--n-cpu-moe 28` rendeu **~41 tok/s com 172032 de contexto**, contra ~21 tok/s com 8192 de contexto usando NGL parcial (20/40 layers). Ajustar N incrementalmente: mais alto = mais RAM/menos VRAM/mais contexto cabe; mais baixo = mais VRAM/mais rápido, até faltar memória (erro `cudaMalloc failed: out of memory`, serviço reinicia em loop — se acontecer, baixar N ou o `LLAMA_CTX_SIZE`).
+
+Config completa em `/etc/llama-server.env`:
+```
+LLAMA_MODEL_PATH=/models/Ornith-1.5-35B-A3B-Q4_K_M.gguf
+LLAMA_CTX_SIZE=172032
+LLAMA_NGL=99
+LLAMA_THREADS=6
+LLAMA_EXTRA_ARGS="--n-cpu-moe 28 --no-mmproj"
+```
+(`--cache-type-k q8_0 --cache-type-v q8_0 --flash-attn on` fixos em `run-llama-server.sh`)
+
+**Rollback:** config anterior (gemma-4-12B-it-Q4_K_M, NGL=99, ctx 8192) salva em `/etc/llama-server.env.bak-gemma` no próprio LXC — `cp /etc/llama-server.env.bak-gemma /etc/llama-server.env && systemctl restart llama-server` reverte em segundos (arquivo do modelo continua em `/models/`).
+
+**Bug de GPU corrigido (2026-09-19):** depois de um reboot do LXC, o driver NVIDIA reatribuiu o major number do device `/dev/nvidia-uvm` (de 509 pra 508), mas o cgroup em `/etc/pve/lxc/110.conf` só liberava 509 — CUDA falhava silenciosamente e o llama-server caía pra CPU (sem crash, só ~10x mais lento) sem nenhum log de erro óbvio. Sintoma: `nvidia-smi` mostra 0% de uso e 1 MiB durante geração ativa. Fix: conferir o major real com `ls -la /dev/nvidia-uvm*` e ajustar a linha `lxc.cgroup2.devices.allow: c XXX:* rwm` correspondente no `.conf`, depois `pct reboot`. Pode se repetir em reboots futuros do host.
 
 ---
 
 ### LXC 9 — Jellyfin (Media Streaming)
 
-- **Service:** Jellyfin
-- **Access:** `192.168.0.218` · `jellyfin.joaopaulo.me`
-- **Port:** 8096
+- **Services:** Jellyfin (12.1) · Seerr
+- **Access:** `192.168.0.218` · `jellyfin.joaopaulo.me` · `seerr.joaopaulo.me`
+- **Ports:** 8096 (Jellyfin) · 5055 (Seerr)
 - **Resources:** 4 cores · 8 GB RAM · 50 GB disk
 
-Streaming de filmes e séries. Biblioteca montada via NFS do Mini PC (`192.168.0.12:/storage`). Transcoding via CPU por ora — GPU pode ser adicionada depois replicando o passthrough do LXC 8.
+Streaming de filmes e séries. Biblioteca montada via NFS do Mini PC (`192.168.0.12:/storage`). Transcoding via CPU por ora — GPU pode ser adicionada depois replicando o passthrough do LXC 8. Seerr (sucessor unificado do Jellyseerr + Overseerr) roda ao lado, na mesma rede Docker — pedidos de mídia conectados ao Jellyfin e ao Radarr/Sonarr (LXC 10); atrás de Cloudflare Access.
 
 Config: [LXC_9_jellyfin/](LXC_9_jellyfin/)
 
@@ -273,6 +300,24 @@ Config: [LXC_11_downloads/](LXC_11_downloads/)
 
 ---
 
+### LXC 13 — Camera (motionEye)
+
+- **Service:** motionEye (`motioneyeproject/motioneye`)
+- **Access:** `192.168.0.222` · `camera.joaopaulo.me` (pendente — Traefik fora do ar, ver seção LXC 1; recomendado atrás de Cloudflare Access quando restaurado)
+- **Port:** 8765
+- **Resources:** 2 cores · 1 GB RAM · 512 MB swap · 20 GB disk · webcam USB (passthrough V4L2)
+
+Webcam USB conectada diretamente ao host Proxmox, passada para o LXC via
+V4L2 (`/dev/video0`, unprivileged + udev rule para device estável) e daí
+para o container Docker via `devices:`. Monitoramento do cachorro via live
+view + gravação por movimento na UI do motionEye — sem notificação push por
+ora (upgrade fácil pra depois via hooks `on_motion_detected`/`on_movie_end` →
+ntfy, já rodando no LXC 3).
+
+Config: [LXC_13_camera/](LXC_13_camera/)
+
+---
+
 ## Public Subdomains
 
 All routed via Traefik (LXC 1) + Cloudflare Tunnel. No open inbound ports required.
@@ -288,6 +333,8 @@ All routed via Traefik (LXC 1) + Cloudflare Tunnel. No open inbound ports requir
 | `apollo.joaopaulo.me` | Apollo inference API | LXC 8 |
 | `langfuse.joaopaulo.me` | Langfuse observabilidade LLM | LXC 4 |
 | `jellyfin.joaopaulo.me` | Jellyfin streaming | LXC 9 |
+| `seerr.joaopaulo.me` | Seerr (pedidos de mídia) | LXC 9 |
+| `camera.joaopaulo.me` | motionEye (dog cam) | LXC 13 |
 | `home.joaopaulo.me` | Homepage dashboard | LXC 7 |
 | `sp.joaopaulo.me` | Super Productivity | Mini PC |
 | `nextcloud.joaopaulo.me` | Nextcloud (WebDAV + cloud) | Mini PC |
@@ -329,6 +376,8 @@ LXC 1 — Traefik (reverse proxy + TLS)
                                                      /storage/{music,movies,tv,downloads}
                                                      Navidrome (4533) — sempre ligado
                                                      Obsidian LiveSync — já em produção
+
+LXC 13 — Camera (motionEye) ── webcam USB (Proxmox host, V4L2 passthrough)
 ```
 
 ---

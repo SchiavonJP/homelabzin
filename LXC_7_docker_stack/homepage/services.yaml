@@ -34,6 +34,16 @@
           url: http://192.168.0.218:8096
           key: "{{HOMEPAGE_VAR_JELLYFIN_API_KEY}}"
 
+    - Seerr:
+        href: https://seerr.joaopaulo.me
+        description: Pedidos de filmes e séries
+        icon: sh-seerr
+        ping: http://192.168.0.218:5055/api/v1/status
+        widget:
+          type: seerr
+          url: http://192.168.0.218:5055
+          key: "{{HOMEPAGE_VAR_SEERR_API_KEY}}"
+
     - Navidrome:
         href: http://192.168.0.12:4533
         description: Streaming de música

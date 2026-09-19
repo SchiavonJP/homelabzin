@@ -154,3 +154,71 @@ No Jellyfin: Settings → Dashboard → Playback → Hardware Acceleration → N
    - Filmes → `/media/movies`
    - Séries → `/media/tv`
 4. Settings → Dashboard → Playback → Software (CPU) por ora
+
+---
+
+## Upgrade para Jellyfin 12
+
+Jellyfin 12.0 (lançado 08/09/2026) é a renumeração do que seria "10.12" —
+banco mais rápido para playlists/coleções, suporte nativo a livros/quadrinhos,
+"Still watching?", scrub frame-a-frame, FFmpeg 8.1 e Modern UI como padrão.
+`docker-compose.yml` já está fixado em `jellyfin/jellyfin:12.1`. **Upgrade
+exige passos manuais — não é só trocar a tag e reiniciar:**
+
+1. **Backup obrigatório** do volume de config antes de qualquer coisa:
+   ```bash
+   docker run --rm -v jellyfin_config:/from -v /mnt/backups:/to alpine \
+     tar czf /to/jellyfin-config-$(date +%F).tar.gz -C /from .
+   ```
+2. **Checar a versão atual** (`Dashboard → About` ou `docker logs sb_jellyfin | grep -i version`):
+   precisa estar em `10.10.7` ou `10.11.x` antes de pular pra 12. Se estiver
+   mais antigo, atualizar primeiro para `10.10.7`.
+3. **Remover plugins de terceiros** antes do upgrade — plugins compilados
+   para 10.11 não carregam em 12.0/12.1 (precisam retarget pra .NET 10).
+4. Checar se não há usernames duplicados diferindo só por maiúscula/minúscula
+   (agora case-insensitive) — evita falha na migração do banco.
+5. Subir a nova versão:
+   ```bash
+   git pull && docker compose pull && docker compose up -d
+   ```
+6. **Rescan completo da biblioteca é obrigatório** após o upgrade — a
+   primeira varredura demora bem mais que o normal. Não parar o container
+   durante a migração do banco.
+7. Dar hard-refresh no client web (`Ctrl+Shift+R`) depois que a migração
+   terminar.
+
+---
+
+## Seerr — pedidos de mídia
+
+Sucessor unificado do Jellyseerr + Overseerr (`github.com/seerr-team/seerr`).
+Deixa qualquer usuário pedir filme/série pela UI; ele fala com o Jellyfin
+(biblioteca) e com Radarr/Sonarr (automação de download, LXC 10). Roda no
+mesmo `docker-compose.yml` deste LXC, na mesma rede `media`.
+
+- **Acesso:** `http://192.168.0.218:5055` / `https://seerr.joaopaulo.me`
+- **Versão pinada:** `ghcr.io/seerr-team/seerr:v3.4.1` — nunca usar `:latest`,
+  atualizar o pin manualmente no `docker-compose.yml` ao subir de versão.
+
+### Setup inicial (UI)
+
+1. Acessar `http://192.168.0.218:5055` e completar o wizard.
+2. Conectar ao Jellyfin usando o nome do container na rede interna:
+   `http://sb_jellyfin:8096`.
+3. Conectar Radarr e Sonarr (LXC 10, `sb-arr`) via IP + API key de cada um:
+   - Radarr: `http://192.168.0.219:7878`
+   - Sonarr: `http://192.168.0.219:8989`
+4. Gerar a API key do Seerr em `Settings → General` — usada no widget do
+   Homepage (`HOMEPAGE_VAR_SEERR_API_KEY`).
+
+### Cloudflare Access (passo manual, fora deste repo)
+
+Seerr fica atrás de Cloudflare Access, mesmo padrão do Affine/Ryot — quem
+não estiver autorizado nem chega na tela de login do Seerr. Isso é
+configurado direto no painel do Cloudflare Zero Trust, não em arquivo
+versionado neste repo:
+
+1. Cloudflare Zero Trust → **Access → Applications** → Add an application
+   → Self-hosted.
+2. Domain: `seerr.joaopaulo.me`.
+3. Policy: restringir por e-mail (ou grupo) aos usuários autorizados.

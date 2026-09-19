@@ -192,6 +192,28 @@ http:
       middlewares:
         - secure-headers
 
+    # LXC 9 — Seerr (pedidos de mídia, atrás de Cloudflare Access)
+    seerr:
+      rule: "Host(`seerr.joaopaulo.me`)"
+      entrypoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+      service: seerr
+      middlewares:
+        - secure-headers
+
+    # LXC 13 — Camera (motionEye) — recomendado atrás de Cloudflare Access
+    camera:
+      rule: "Host(`camera.joaopaulo.me`)"
+      entrypoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+      service: camera
+      middlewares:
+        - secure-headers
+
   services:
 
     # LXC 4 — port 4000
@@ -289,3 +311,15 @@ http:
       loadBalancer:
         servers:
           - url: "http://192.168.0.12:15006"
+
+    # LXC 9 — Seerr, porta 5055
+    seerr:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.0.218:5055"
+
+    # LXC 13 — Camera (motionEye), porta 8765
+    camera:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.0.222:8765"
