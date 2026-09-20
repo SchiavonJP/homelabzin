@@ -203,6 +203,17 @@ http:
       middlewares:
         - secure-headers
 
+    # Mini PC — Immich (antes servido direto por cloudflared local, sem secure-headers)
+    immich:
+      rule: "Host(`photos.joaopaulo.me`)"
+      entrypoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+      service: immich
+      middlewares:
+        - secure-headers
+
     # LXC 13 — Camera (motionEye) — recomendado atrás de Cloudflare Access
     camera:
       rule: "Host(`camera.joaopaulo.me`)"
@@ -317,6 +328,12 @@ http:
       loadBalancer:
         servers:
           - url: "http://192.168.0.218:5055"
+
+    # Mini PC — Immich, porta 2283
+    immich:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.0.12:2283"
 
     # LXC 13 — Camera (motionEye), porta 8765
     camera:

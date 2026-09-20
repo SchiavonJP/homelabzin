@@ -36,17 +36,16 @@ mkdir -p /storage/photos
 
 ## Acesso público (necessário para app mobile fora de casa)
 
-```bash
-# Criar DNS record
-cloudflared tunnel route dns <tunnel-name> photos.joaopaulo.me
-```
+`photos.joaopaulo.me` é roteado pelo Traefik do LXC 1 (`LXC_1_traefik/dynamic/services.yml`,
+backend `http://192.168.0.12:2283`) — assim herda o middleware `secure-headers` que o resto
+do stack já usa. Antes ia direto por um `cloudflared` local no Mini PC, sem passar pelo Traefik.
 
-Adicionar ao `/etc/cloudflared/config.yml`:
+Se esse Mini PC ainda tiver a entrada antiga do tempo em que o acesso era direto, remover do
+`/etc/cloudflared/config.yml` (a entrada abaixo não é mais necessária):
 ```yaml
 - hostname: photos.joaopaulo.me
   service: http://127.0.0.1:2283
 ```
-
 ```bash
 systemctl restart cloudflared
 ```

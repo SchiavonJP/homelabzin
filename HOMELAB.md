@@ -231,7 +231,7 @@ Uptime Kuma monitors all services via HTTP/TCP/SSL. Dockhand provides a Docker c
 
 ### LXC 8 — Apollo (GPU Inference)
 
-- **Services:** llama-server (Ornith-1.5-35B-A3B) · bge-embedding (bge-m3)
+- **Services:** llama-server (Qwen3.6-35B-A3B-MTP) · bge-embedding (bge-m3)
 - **Access:** `192.168.0.217` · `apollo.joaopaulo.me`
 - **Ports:** 8080 (inference) · 8081 (embeddings)
 - **Resources:** 8 cores · 48 GB RAM · 8 GB swap · 50 GB disk · **RTX 3060 12 GB (passthrough)**
@@ -240,14 +240,14 @@ Local GPU inference node. Runs `llama-server` (llama.cpp compiled with CUDA) and
 
 | Service | Model | Port | VRAM | Performance |
 |---------|-------|------|------|-------------|
-| llama-server | Ornith-1.5-35B-A3B Q4_K_M | 8080 | ~10.7 GB (`--n-cpu-moe 28`, ctx 172032) | ~41 tok/s |
+| llama-server | Qwen3.6-35B-A3B-MTP UD-Q4_K_M | 8080 | ~11.1 GB (`--n-cpu-moe 28`, ctx 172032) | ~39 tok/s |
 | bge-embedding | bge-m3 Q4_K_M | 8081 | ~570 MB (NGL=99) | 500–1000 emb/s · dim=1024 |
 
-**Offload strategy — `--n-cpu-moe` em vez de `--n-gpu-layers` parcial:** para modelos MoE, offload por layer inteira (`-ngl` parcial) desperdiça VRAM em pesos de experts que raramente são ativados. `--n-cpu-moe N` mantém `-ngl 99` (atenção/norms/embeddings sempre na GPU — pequenos, sempre computados) e manda só os pesos dos experts MoE das primeiras N layers pra CPU RAM (grandes em disco, esparsos por token). No Ornith (40 layers totais), `--n-cpu-moe 28` rendeu **~41 tok/s com 172032 de contexto**, contra ~21 tok/s com 8192 de contexto usando NGL parcial (20/40 layers). Ajustar N incrementalmente: mais alto = mais RAM/menos VRAM/mais contexto cabe; mais baixo = mais VRAM/mais rápido, até faltar memória (erro `cudaMalloc failed: out of memory`, serviço reinicia em loop — se acontecer, baixar N ou o `LLAMA_CTX_SIZE`).
+**Offload strategy — `--n-cpu-moe` em vez de `--n-gpu-layers` parcial:** para modelos MoE, offload por layer inteira (`-ngl` parcial) desperdiça VRAM em pesos de experts que raramente são ativados. `--n-cpu-moe N` mantém `-ngl 99` (atenção/norms/embeddings sempre na GPU — pequenos, sempre computados) e manda só os pesos dos experts MoE das primeiras N layers pra CPU RAM (grandes em disco, esparsos por token). Ajustar N incrementalmente: mais alto = mais RAM/menos VRAM/mais contexto cabe; mais baixo = mais VRAM/mais rápido, até faltar memória (erro `cudaMalloc failed: out of memory`, serviço reinicia em loop — se acontecer, baixar N ou o `LLAMA_CTX_SIZE`). MTP nativo (`--spec-type draft-mtp`) foi testado nos dois modelos abaixo e **piorou** a velocidade em ambos — o offload parcial pra CPU já é o gargalo, e o overhead de rascunhar+verificar não compensa nesse hardware.
 
-Config completa em `/etc/llama-server.env`:
+**Config atual (padrão) — Qwen3.6-35B-A3B-MTP:**
 ```
-LLAMA_MODEL_PATH=/models/Ornith-1.5-35B-A3B-Q4_K_M.gguf
+LLAMA_MODEL_PATH=/models/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
 LLAMA_CTX_SIZE=172032
 LLAMA_NGL=99
 LLAMA_THREADS=6
@@ -255,7 +255,21 @@ LLAMA_EXTRA_ARGS="--n-cpu-moe 28 --no-mmproj"
 ```
 (`--cache-type-k q8_0 --cache-type-v q8_0 --flash-attn on` fixos em `run-llama-server.sh`)
 
-**Rollback:** config anterior (gemma-4-12B-it-Q4_K_M, NGL=99, ctx 8192) salva em `/etc/llama-server.env.bak-gemma` no próprio LXC — `cp /etc/llama-server.env.bak-gemma /etc/llama-server.env && systemctl restart llama-server` reverte em segundos (arquivo do modelo continua em `/models/`).
+**Modelos alternativos já baixados em `/models/`** — trocar é só editar `/etc/llama-server.env` e `systemctl restart llama-server`, nenhum download necessário:
+
+| Modelo | `LLAMA_MODEL_PATH` | `LLAMA_EXTRA_ARGS` | Contexto testado | Velocidade |
+|---|---|---|---|---|
+| **Qwen3.6-35B-A3B-MTP** (padrão) | `/models/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf` | `"--n-cpu-moe 28 --no-mmproj"` | 172032 | ~39 tok/s · 73.4% SWE-bench |
+| **Ornith-1.5-35B-A3B** | `/models/Ornith-1.5-35B-A3B-Q4_K_M.gguf` | `"--n-cpu-moe 28 --no-mmproj"` | 172032 | ~41 tok/s · sem benchmark divulgado |
+| gemma-4-12B-it (rollback) | `/models/gemma-4-12B-it-Q4_K_M.gguf` | (nenhum) | 8192 | ~38 tok/s · denso, 100% GPU (`LLAMA_NGL=99`) |
+
+Ornith e Qwen3.6 são arquiteturalmente quase gêmeos (mesma família híbrida GatedDeltaNet+atenção, MoE 256/8+shared, mesmo tamanho) — por isso o mesmo `--n-cpu-moe 28` funciona igual nos dois, com a mesma folga de VRAM (~800MB livres a 172K de contexto). Pra trocar pro Ornith:
+```bash
+pct exec 110 -- bash -c 'sed -i "s|Qwen3.6-35B-A3B-UD-Q4_K_M.gguf|Ornith-1.5-35B-A3B-Q4_K_M.gguf|" /etc/llama-server.env && systemctl restart llama-server'
+```
+(reverter: trocar `Ornith-1.5-35B-A3B-Q4_K_M.gguf` de volta por `Qwen3.6-35B-A3B-UD-Q4_K_M.gguf` no comando acima)
+
+**Rollback pro gemma:** config salva em `/etc/llama-server.env.bak-gemma` no próprio LXC — `cp /etc/llama-server.env.bak-gemma /etc/llama-server.env && systemctl restart llama-server` reverte em segundos.
 
 **Bug de GPU corrigido (2026-09-19):** depois de um reboot do LXC, o driver NVIDIA reatribuiu o major number do device `/dev/nvidia-uvm` (de 509 pra 508), mas o cgroup em `/etc/pve/lxc/110.conf` só liberava 509 — CUDA falhava silenciosamente e o llama-server caía pra CPU (sem crash, só ~10x mais lento) sem nenhum log de erro óbvio. Sintoma: `nvidia-smi` mostra 0% de uso e 1 MiB durante geração ativa. Fix: conferir o major real com `ls -la /dev/nvidia-uvm*` e ajustar a linha `lxc.cgroup2.devices.allow: c XXX:* rwm` correspondente no `.conf`, depois `pct reboot`. Pode se repetir em reboots futuros do host.
 
@@ -338,6 +352,7 @@ All routed via Traefik (LXC 1) + Cloudflare Tunnel. No open inbound ports requir
 | `home.joaopaulo.me` | Homepage dashboard | LXC 7 |
 | `sp.joaopaulo.me` | Super Productivity | Mini PC |
 | `nextcloud.joaopaulo.me` | Nextcloud (WebDAV + cloud) | Mini PC |
+| `photos.joaopaulo.me` | Immich (fotos/vídeos) | Mini PC |
 
 ---
 

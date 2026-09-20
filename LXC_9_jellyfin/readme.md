@@ -203,12 +203,21 @@ mesmo `docker-compose.yml` deste LXC, na mesma rede `media`.
 ### Setup inicial (UI)
 
 1. Acessar `http://192.168.0.218:5055` e completar o wizard.
-2. Conectar ao Jellyfin usando o nome do container na rede interna:
-   `http://sb_jellyfin:8096`.
-3. Conectar Radarr e Sonarr (LXC 10, `sb-arr`) via IP + API key de cada um:
+2. Tela de conexão com o Jellyfin (isso é o **Internal URL** — comunicação
+   Seerr ↔ Jellyfin nos bastidores):
+   - Jellyfin URL: `sb_jellyfin` · Port: `8096` · Use SSL: desligado ·
+     URL Base: vazio.
+   - Username/Password: o usuário admin criado no primeiro setup do Jellyfin.
+3. **Depois do wizard**, ir em `Settings → Mediaserver Settings` e preencher
+   o **External URL** com `https://jellyfin.joaopaulo.me`. Esse campo não
+   aparece no wizard, mas é ele que monta os links de "Play on Jellyfin",
+   avatares etc. mostrados pro usuário final — se ficar vazio ou igual ao
+   Internal URL, esses botões tentam abrir `sb_jellyfin:8096`, que só
+   resolve dentro da rede Docker e não no navegador de ninguém.
+4. Conectar Radarr e Sonarr (LXC 10, `sb-arr`) via IP + API key de cada um:
    - Radarr: `http://192.168.0.219:7878`
    - Sonarr: `http://192.168.0.219:8989`
-4. Gerar a API key do Seerr em `Settings → General` — usada no widget do
+5. Gerar a API key do Seerr em `Settings → General` — usada no widget do
    Homepage (`HOMEPAGE_VAR_SEERR_API_KEY`).
 
 ### Cloudflare Access (passo manual, fora deste repo)
