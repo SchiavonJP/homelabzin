@@ -33,6 +33,8 @@ services:
         condition: service_healthy
     ports:
       - "8000:8000"
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=1 # evita "Network is unreachable" quando a API externa resolve AAAA sem rota IPv6 no bridge
     environment:
       DATABASE_URL: postgres://ryot:${POSTGRES_PASSWORD}@postgres:5432/ryot
       SERVER_ADMIN_ACCESS_TOKEN: ${SERVER_ADMIN_ACCESS_TOKEN}
