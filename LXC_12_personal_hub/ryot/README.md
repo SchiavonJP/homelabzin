@@ -21,10 +21,21 @@ git clone https://github.com/SchiavonJP/second-brain-automation.git
 cd second-brain-automation/LXC_12_personal_hub/ryot
 
 cp .env.example .env
-nano .env   # preencher POSTGRES_PASSWORD e SERVER_ADMIN_ACCESS_TOKEN
+nano .env   # preencher POSTGRES_PASSWORD, SERVER_ADMIN_ACCESS_TOKEN e TMDB_ACCESS_TOKEN
 
 docker compose -f compose.yml up -d
 ```
+
+### Busca de filmes/séries não funciona (TMDB/TVDB)
+
+O Ryot **não** vem com chave própria de fábrica — sem `TMDB_ACCESS_TOKEN` configurado,
+toda busca falha com um erro genérico ("Failed to search metadata" na UI; nos logs,
+`missing field 'page'`/`missing field 'data'`, que é o Ryot tentando decodificar uma
+resposta de erro 401 do provedor como se fosse sucesso). Gerar o token em
+[themoviedb.org](https://themoviedb.org) → `Settings → API → Request an API Key
+(Developer)` → copiar o **"API Read Access Token"** (não a "API Key (v3 auth)" curta)
+e colocar em `TMDB_ACCESS_TOKEN` no `.env`. TVDB é opcional (`MOVIES_AND_SHOWS_TVDB_API_KEY`,
+cadastro mais burocrático na API v4 deles) — TMDB já cobre bem filme/série sozinho.
 
 ## Verificação
 
