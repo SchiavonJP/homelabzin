@@ -38,6 +38,7 @@ services:
       SERVER_ADMIN_ACCESS_TOKEN: ${SERVER_ADMIN_ACCESS_TOKEN}
       FRONTEND_URL: https://ryot.joaopaulo.me
       TZ: America/Sao_Paulo
+      RUST_LOG: "ryot=debug" # temporário — diagnosticar falha de busca TMDB, remover depois
     volumes:
       - ryot_data:/data
     networks:
