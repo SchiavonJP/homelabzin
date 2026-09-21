@@ -22,6 +22,7 @@ cd second-brain-automation/LXC_12_personal_hub/ryot
 
 cp .env.example .env
 nano .env   # preencher POSTGRES_PASSWORD, SERVER_ADMIN_ACCESS_TOKEN e TMDB_ACCESS_TOKEN
+            # (GOOGLE_BOOKS_API_KEY e HARDCOVER_API_KEY são opcionais — só livros)
 
 docker compose -f compose.yml up -d
 ```

@@ -39,6 +39,8 @@ services:
       DATABASE_URL: postgres://ryot:${POSTGRES_PASSWORD}@postgres:5432/ryot
       SERVER_ADMIN_ACCESS_TOKEN: ${SERVER_ADMIN_ACCESS_TOKEN}
       MOVIES_AND_SHOWS_TMDB_ACCESS_TOKEN: ${TMDB_ACCESS_TOKEN}
+      BOOKS_GOOGLE_BOOKS_API_KEY: ${GOOGLE_BOOKS_API_KEY}
+      BOOKS_HARDCOVER_API_KEY: ${HARDCOVER_API_KEY}
       FRONTEND_URL: https://ryot.joaopaulo.me
       TZ: America/Sao_Paulo
     volumes:
