@@ -21,13 +21,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # strongSwan NÃO usa o bundle de CA do sistema (o do ca-certificates, usado
 # por curl/wget) — ele só confia no que estiver em /etc/ipsec.d/cacerts.
-# O servidor da UFSC usa certificado Let's Encrypt normal, então basta
-# copiar a raiz ISRG Root X1 (que já vem no ca-certificates) pra lá.
-# `test -s` no final falha o build alto e claro se o cert não for achado,
-# em vez de deixar a pasta vazia silenciosamente (mesmo erro de novo).
+# `test -s` em cada passo falha o build alto e claro se o cert não for
+# achado/baixado, em vez de deixar a pasta vazia silenciosamente.
 RUN mkdir -p /etc/ipsec.d/cacerts && \
     find /usr/share/ca-certificates -iname "*ISRG_Root_X1*" -exec cp {} /etc/ipsec.d/cacerts/isrg-root-x1.pem \; && \
     test -s /etc/ipsec.d/cacerts/isrg-root-x1.pem
+# A UFSC usa cadeia da "Generation Y" da Let's Encrypt (intermediária YR1 →
+# raiz ISRG Root YR) — raiz nova, ainda não incluída no bundle padrão de
+# nenhuma distro (por isso não veio junto com o ca-certificates acima).
+# strongSwan só carrega 1 certificado por arquivo — tem que ser arquivo
+# separado do isrg-root-x1.pem, não dá pra concatenar num PEM só.
+RUN curl -fsSL https://letsencrypt.org/certs/gen-y/root-yr.pem \
+      -o /etc/ipsec.d/cacerts/isrg-root-yr.pem && \
+    test -s /etc/ipsec.d/cacerts/isrg-root-yr.pem
 
 COPY ipsec.conf.template /etc/ipsec.conf.template
 COPY ipsec.secrets.template /etc/ipsec.secrets.template
