@@ -13,6 +13,12 @@ services:
       - NET_ADMIN
     devices:
       - /dev/net/tun
+    volumes:
+      # Montados por fora da imagem — ajustar rightsubnet/proposta etc. só
+      # precisa de `docker compose up -d` (recreate), não rebuild completo
+      # (que agora envolve compilar o strongSwan do zero, ~30min).
+      - ./vpn/ipsec.conf.template:/etc/ipsec.conf.template:ro
+      - ./vpn/ipsec.secrets.template:/etc/ipsec.secrets.template:ro
     environment:
       UFSC_USERNAME: ${UFSC_VPN_USERNAME}
       UFSC_PASSWORD: ${UFSC_VPN_PASSWORD}

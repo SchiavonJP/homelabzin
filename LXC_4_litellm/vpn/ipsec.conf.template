@@ -9,7 +9,11 @@ conn ufsc
     # colocar em /etc/ipsec.d/cacerts/ dentro do container (via volume) —
     # não desative rightauth pra "resolver", isso quebra a validação do servidor.
     rightauth=pubkey
-    rightsubnet=0.0.0.0/0
+    # Restringe o túnel só à rede da UFSC — confirmado rodando que
+    # 0.0.0.0/0 virava full-tunnel de fato (Postgres em 192.168.0.210 deu
+    # timeout com o seletor amplo). vpn.ufsc.br é 150.162.0.67 e o IP
+    # virtual atribuído a nós foi 150.162.166.10 — mesmo bloco /16.
+    rightsubnet=150.162.0.0/16
     # Cliente se autentica via usuário/senha (EAP) — a UFSC exige o wrapper
     # EAP-PEAP (não EAP-MSCHAPv2 puro, confirmado rodando: o servidor
     # respondia EAP/REQ/PEAP e falhava no NAK pedindo MSCHAPv2 direto).
