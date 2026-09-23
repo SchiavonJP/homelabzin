@@ -1,0 +1,21 @@
+config setup
+    charondebug="ike 1, knl 1, cfg 1"
+
+conn ufsc
+    keyexchange=ikev2
+    right=vpn.ufsc.br
+    # Servidor se autentica com certificado próprio (padrão IKEv2 roadwarrior).
+    # Se a validação falhar, buscar o certificado da CA da UFSC/ICPEdu e
+    # colocar em /etc/ipsec.d/cacerts/ dentro do container (via volume) —
+    # não desative rightauth pra "resolver", isso quebra a validação do servidor.
+    rightauth=pubkey
+    rightsubnet=0.0.0.0/0
+    # Cliente se autentica via usuário/senha (EAP) — método oficial da UFSC.
+    leftauth=eap-mschapv2
+    leftid=${UFSC_USERNAME}
+    eap_identity=${UFSC_USERNAME}
+    leftsourceip=%config
+    dpdaction=restart
+    dpddelay=30s
+    closeaction=restart
+    auto=start

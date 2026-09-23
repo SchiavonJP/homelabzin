@@ -159,3 +159,50 @@ Se o Mac M1 estiver offline ou lento, o LiteLLM cai automaticamente para OpenRou
 - llama3.1-8b → gpt-4o
 - qwen2.5-coder → deepseek-r1
 - hermes-local → claude-sonnet
+
+## VPN UFSC → Ollama remoto
+
+O container `litellm` compartilha a rede de um sidecar (`ufsc-vpn`, em
+[`vpn/`](vpn/)) que mantém um túnel IKEv2 sempre ativo até `vpn.ufsc.br` —
+assim o modelo `ufsc-ollama` no `config.yaml` consegue alcançar
+`ollama.vlab.ufsc.br`.
+
+### Credenciais
+
+- `UFSC_VPN_USERNAME` no `.env`: **idUFSC completo**, formato
+  `nome.sobrenome@ufsc.br` — nunca a variante `@grad` ou `@posgrad` (a UFSC
+  rejeita). `UFSC_VPN_PASSWORD`: a senha normal da tua conta UFSC.
+- `UFSC_OLLAMA_API_BASE`: URL completa com Basic Auth embutido
+  (`https://user:senha@ollama.vlab.ufsc.br/v1`) — é o que o Ollama remoto
+  exige na frente (proxy da UFSC).
+
+### Coisas que só se confirma rodando de verdade
+
+1. **Split-tunnel**: depois de subir, `docker exec sb_ufsc_vpn ip route` —
+   espera-se só rotas específicas da rede da UFSC, não um `0.0.0.0/0`
+   substituindo a rota padrão. Se a UFSC empurrar full-tunnel, o LiteLLM
+   perde acesso a Postgres/Redis (`192.168.0.210`), Apollo (`192.168.0.217`)
+   e OpenRouter — nesse caso a arquitetura de sidecar único não serve, tem
+   que revisar (ex.: um proxy dedicado só pra essa chamada específica).
+2. **Basic Auth do Ollama**: primeiro tenta só com `UFSC_OLLAMA_API_BASE`
+   (usuário:senha na URL). Se o client HTTP do LiteLLM não respeitar isso,
+   descomentar o `extra_headers` no `config.yaml` e preencher
+   `UFSC_OLLAMA_AUTH_HEADER` no `.env` (`Basic <base64 de user:senha>`,
+   gerar com `echo -n 'usuario:senha' | base64`).
+3. **Validação de certificado do servidor** (`rightauth=pubkey` no
+   `ipsec.conf`): se o `ipsec statusall` mostrar erro de validação de
+   certificado, buscar o certificado da CA da UFSC/ICPEdu e montar em
+   `/etc/ipsec.d/cacerts/` dentro do container — **não** desabilitar a
+   validação pra "resolver".
+
+### Deploy / debug
+
+```bash
+docker compose up -d ufsc-vpn
+docker logs sb_ufsc_vpn                    # confirmar "generating CHILD_SA" / ESTABLISHED
+docker exec sb_ufsc_vpn ipsec statusall    # status detalhado do túnel
+docker exec sb_ufsc_vpn ip route           # confirmar split-tunnel
+
+docker compose up -d litellm               # recria com o network_mode novo
+curl http://192.168.0.211:4000/health      # confirmar que nada quebrou
+```

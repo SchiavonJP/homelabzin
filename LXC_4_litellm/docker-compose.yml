@@ -1,10 +1,48 @@
 services:
+  # Sidecar VPN — túnel IKEv2 até a UFSC, pra alcançar o Ollama remoto
+  # (ollama.vlab.ufsc.br). Mesmo padrão de sidecar já usado no LXC 11
+  # (gluetun + network_mode: service:), só que com strongSwan (Gluetun não
+  # suporta IKEv2/PPTP, só WireGuard/OpenVPN).
+  ufsc-vpn:
+    build: ./vpn
+    container_name: sb_ufsc_vpn
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    environment:
+      UFSC_USERNAME: ${UFSC_VPN_USERNAME}
+      UFSC_PASSWORD: ${UFSC_VPN_PASSWORD}
+    networks:
+      - router
+      - observability
+    healthcheck:
+      test: ["CMD-SHELL", "ipsec statusall | grep -q ESTABLISHED || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+
   litellm:
     image: docker.litellm.ai/berriai/litellm:main-stable
     container_name: sb_litellm
     restart: unless-stopped
-    ports:
-      - "4000:4000"
+    depends_on:
+      ufsc-vpn:
+        condition: service_healthy
+    # Compartilha a rede do sidecar VPN — assim o tráfego pra rede da UFSC
+    # sai pelo túnel, e o resto (Postgres/Redis/Apollo/OpenRouter) continua
+    # pela rota normal, contanto que a UFSC faça split-tunnel (ver readme).
+    # Não dá pra combinar `network_mode` com `networks`/`ports` no compose —
+    # por isso a porta 4000 e a rede `router` migraram pro ufsc-vpn acima.
+    network_mode: "service:ufsc-vpn"
     volumes:
       - ./config.yaml:/app/config.yaml
     environment:
@@ -16,10 +54,9 @@ services:
       LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY}
       LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY}
       LANGFUSE_HOST: http://sb_langfuse:3000
+      UFSC_OLLAMA_API_BASE: ${UFSC_OLLAMA_API_BASE}
+      UFSC_OLLAMA_AUTH_HEADER: ${UFSC_OLLAMA_AUTH_HEADER}
     entrypoint: ["litellm", "--config", "/app/config.yaml", "--detailed_debug"]
-    networks:
-      - router
-      - observability
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4000/health/liveliness')"]
       interval: 30s
