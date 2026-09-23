@@ -81,11 +81,10 @@ model_list:
       model: openai/<nome-do-modelo>
       api_base: os.environ/UFSC_OLLAMA_API_BASE
       api_key: "none"
-      # Fallback se o Basic Auth embutido na URL do api_base não for
-      # respeitado pelo client HTTP do LiteLLM — descomentar e usar
-      # UFSC_OLLAMA_AUTH_HEADER (ver .env.example) nesse caso:
-      # extra_headers:
-      #   Authorization: os.environ/UFSC_OLLAMA_AUTH_HEADER
+      # Basic Auth via header, não embutido na URL — a senha da UFSC tem
+      # caractere especial, que quebraria o parsing de user:senha@host.
+      extra_headers:
+        Authorization: os.environ/UFSC_OLLAMA_AUTH_HEADER
       timeout: 600
 
 litellm_settings:

@@ -172,9 +172,15 @@ assim o modelo `ufsc-ollama` no `config.yaml` consegue alcançar
 - `UFSC_VPN_USERNAME` no `.env`: **idUFSC completo**, formato
   `nome.sobrenome@ufsc.br` — nunca a variante `@grad` ou `@posgrad` (a UFSC
   rejeita). `UFSC_VPN_PASSWORD`: a senha normal da tua conta UFSC.
-- `UFSC_OLLAMA_API_BASE`: URL completa com Basic Auth embutido
-  (`https://user:senha@ollama.vlab.ufsc.br/v1`) — é o que o Ollama remoto
-  exige na frente (proxy da UFSC).
+  ⚠️ Se essa senha tiver caractere `"` (aspas duplas), o `ipsec.secrets`
+  quebra (`${UFSC_PASSWORD}` é substituído dentro de `"..."` no template) —
+  nesse caso específico só dá pra contornar trocando a senha da conta UFSC.
+- `UFSC_OLLAMA_API_BASE`: **sem** usuário/senha na URL — só
+  `https://ollama.vlab.ufsc.br/v1`. O Basic Auth vai no
+  `UFSC_OLLAMA_AUTH_HEADER` (`Basic <base64 de user:senha>`), não embutido
+  na URL — se a senha tiver caractere especial (`:` `@` `/` `?` `#` `%`),
+  embutir na URL quebra o parsing de `user:senha@host`; base64 não tem esse
+  problema.
 
 ### Coisas que só se confirma rodando de verdade
 
@@ -184,11 +190,12 @@ assim o modelo `ufsc-ollama` no `config.yaml` consegue alcançar
    perde acesso a Postgres/Redis (`192.168.0.210`), Apollo (`192.168.0.217`)
    e OpenRouter — nesse caso a arquitetura de sidecar único não serve, tem
    que revisar (ex.: um proxy dedicado só pra essa chamada específica).
-2. **Basic Auth do Ollama**: primeiro tenta só com `UFSC_OLLAMA_API_BASE`
-   (usuário:senha na URL). Se o client HTTP do LiteLLM não respeitar isso,
-   descomentar o `extra_headers` no `config.yaml` e preencher
-   `UFSC_OLLAMA_AUTH_HEADER` no `.env` (`Basic <base64 de user:senha>`,
-   gerar com `echo -n 'usuario:senha' | base64`).
+2. **Basic Auth do Ollama**: já configurado via `extra_headers` (header
+   `Authorization`), não na URL — a senha da UFSC tem caractere especial
+   que quebraria o `user:senha@host`. Gerar o valor de
+   `UFSC_OLLAMA_AUTH_HEADER` com `echo -n 'usuario:senha' | base64` e
+   prefixar com `Basic ` no `.env`. Se ainda assim der 401, confirmar que o
+   `echo -n` não deixou passar quebra de linha (`-n` é obrigatório).
 3. **Validação de certificado do servidor** (`rightauth=pubkey` no
    `ipsec.conf`): se o `ipsec statusall` mostrar erro de validação de
    certificado, buscar o certificado da CA da UFSC/ICPEdu e montar em
