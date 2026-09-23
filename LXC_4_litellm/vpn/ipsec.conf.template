@@ -10,8 +10,12 @@ conn ufsc
     # não desative rightauth pra "resolver", isso quebra a validação do servidor.
     rightauth=pubkey
     rightsubnet=0.0.0.0/0
-    # Cliente se autentica via usuário/senha (EAP) — método oficial da UFSC.
-    leftauth=eap-mschapv2
+    # Cliente se autentica via usuário/senha (EAP) — a UFSC exige o wrapper
+    # EAP-PEAP (não EAP-MSCHAPv2 puro, confirmado rodando: o servidor
+    # respondia EAP/REQ/PEAP e falhava no NAK pedindo MSCHAPv2 direto).
+    # phase2_method do plugin eap-peap já é mschapv2 por padrão, então o
+    # usuário/senha por baixo continuam os mesmos.
+    leftauth=eap-peap
     leftid=${UFSC_USERNAME}
     eap_identity=${UFSC_USERNAME}
     leftsourceip=%config

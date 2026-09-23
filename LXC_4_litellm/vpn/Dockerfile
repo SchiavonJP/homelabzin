@@ -1,23 +1,80 @@
+# O Debian/Ubuntu remove o plugin eap-peap dos pacotes binários desde a
+# 5.8.0-2 (decisão dos mantenedores, ver bug #843180 do Debian) — a UFSC
+# exige EAP-PEAP, então não tem como usar o pacote pronto. Build multi-stage
+# compilando o strongSwan do zero com --enable-eap-peap.
+
+FROM debian:12-slim AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libgmp-dev \
+    libssl-dev \
+    libcap-dev \
+    pkg-config \
+    flex \
+    bison \
+    gperf \
+    wget \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+ARG STRONGSWAN_VERSION=5.9.8
+WORKDIR /build
+RUN wget -q https://download.strongswan.org/strongswan-${STRONGSWAN_VERSION}.tar.gz && \
+    tar xzf strongswan-${STRONGSWAN_VERSION}.tar.gz
+
+WORKDIR /build/strongswan-5.9.8
+# Lista de plugins ampla o suficiente pra cobrir tudo que já confirmamos
+# necessário (rodando de verdade contra a UFSC) + eap-peap, que é o motivo
+# de compilar do zero. Sem --disable-defaults — mantém o conjunto padrão
+# do upstream e só garante explicitamente o que precisamos.
+RUN ./configure \
+      --prefix=/usr \
+      --sysconfdir=/etc \
+      --enable-eap-identity \
+      --enable-eap-md5 \
+      --enable-eap-gtc \
+      --enable-eap-mschapv2 \
+      --enable-eap-peap \
+      --enable-eap-ttls \
+      --enable-eap-tls \
+      --enable-eap-radius \
+      --enable-openssl \
+      --enable-gmp \
+      --enable-pem \
+      --enable-pkcs1 \
+      --enable-pkcs7 \
+      --enable-pkcs8 \
+      --enable-pkcs12 \
+      --enable-x509 \
+      --enable-pubkey \
+      --enable-revocation \
+      --enable-constraints \
+      --enable-kernel-netlink \
+      --enable-socket-default \
+      --enable-stroke \
+      --enable-updown \
+      --enable-resolve \
+      --enable-vici \
+      --enable-swanctl \
+    && make -j"$(nproc)" \
+    && make install DESTDIR=/install
+
+# ── Imagem final ─────────────────────────────────────────────────────────
 FROM debian:12-slim
 
-# Pacotes recomendados oficialmente pela UFSC para o cliente IKEv2
-# (servicos.setic.ufsc.br, FAQ 5459) — omitido só o strongswan-nm (plugin
-# de GUI do NetworkManager, sem uso num container headless).
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    strongswan \
-    strongswan-libcharon \
-    strongswan-starter \
-    strongswan-charon \
-    strongswan-swanctl \
-    strongswan-pki \
-    libcharon-extra-plugins \
-    libcharon-extauth-plugins \
+    libgmp10 \
+    libssl3 \
+    libcap2 \
     gettext-base \
     iproute2 \
     iputils-ping \
     curl \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /install/ /
 
 # strongSwan NÃO usa o bundle de CA do sistema (o do ca-certificates, usado
 # por curl/wget) — ele só confia no que estiver em /etc/ipsec.d/cacerts.
