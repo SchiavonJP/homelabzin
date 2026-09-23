@@ -164,8 +164,16 @@ Se o Mac M1 estiver offline ou lento, o LiteLLM cai automaticamente para OpenRou
 
 O container `litellm` compartilha a rede de um sidecar (`ufsc-vpn`, em
 [`vpn/`](vpn/)) que mantém um túnel IKEv2 sempre ativo até `vpn.ufsc.br` —
-assim o modelo `ufsc-ollama` no `config.yaml` consegue alcançar
-`ollama.vlab.ufsc.br`.
+assim os modelos `ufsc-*` no `config.yaml` conseguem alcançar
+`ollama.vlab.ufsc.br`. Só entraram modelos sem equivalente em Apollo (12-35B)
+ou no free tier do OpenRouter — critério documentado inline no `config.yaml`:
+
+| Alias | Modelo | Por quê é remoto |
+|---|---|---|
+| `ufsc-frontier` | `qwen3.5:122b` | 125B, não cabe nos 12GB do Apollo |
+| `ufsc-llama70b` | `llama3.3:70b` | Família Llama, nenhuma configurada hoje |
+| `ufsc-vision` | `qwen3.8:27b` | Primeiro modelo com visão no stack |
+| `ufsc-ocr` | `glm-ocr:latest` | OCR especializado, categoria própria |
 
 ### Credenciais
 

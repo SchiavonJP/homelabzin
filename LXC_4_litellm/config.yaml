@@ -73,16 +73,51 @@ model_list:
       api_key: "none"
 
   # ===== Remoto (UFSC — via túnel IKEv2, ver LXC_4_litellm/vpn/) =====
+  # Só modelos que não têm equivalente já coberto por Apollo (12-35B) ou
+  # pelo free tier do OpenRouter — sem sentido duplicar isso com latência
+  # extra de VPN. Critério de cada um documentado inline.
 
-  - model_name: ufsc-ollama
+  # 125B (MoE) — não cabe nos 12GB da RTX 3060 do Apollo, único lugar do
+  # stack que roda algo desse porte.
+  - model_name: ufsc-frontier
     litellm_params:
-      # Trocar <nome-do-modelo> pelo nome real listado em `ollama list`
-      # na máquina remota da UFSC.
-      model: openai/<nome-do-modelo>
+      model: openai/qwen3.5:122b
       api_base: os.environ/UFSC_OLLAMA_API_BASE
       api_key: "none"
-      # Basic Auth via header, não embutido na URL — a senha da UFSC tem
-      # caractere especial, que quebraria o parsing de user:senha@host.
+      extra_headers:
+        Authorization: os.environ/UFSC_OLLAMA_AUTH_HEADER
+      timeout: 600
+
+  # Preenche família que falta — nenhum Llama configurado hoje (Apollo e
+  # OpenRouter free atual não têm nenhum).
+  - model_name: ufsc-llama70b
+    litellm_params:
+      model: openai/llama3.3:70b
+      api_base: os.environ/UFSC_OLLAMA_API_BASE
+      api_key: "none"
+      extra_headers:
+        Authorization: os.environ/UFSC_OLLAMA_AUTH_HEADER
+      timeout: 600
+
+  # Primeiro modelo com visão em todo o stack — nem Apollo nem OpenRouter
+  # free atual têm capability de imagem configurada.
+  - model_name: ufsc-vision
+    litellm_params:
+      model: openai/qwen3.8:27b
+      api_base: os.environ/UFSC_OLLAMA_API_BASE
+      api_key: "none"
+      extra_headers:
+        Authorization: os.environ/UFSC_OLLAMA_AUTH_HEADER
+      timeout: 600
+
+  # Modelo especializado em OCR — categoria própria, nada parecido no
+  # resto do stack (não é um vision-chat genérico, é dedicado a extração
+  # de texto de imagem/documento).
+  - model_name: ufsc-ocr
+    litellm_params:
+      model: openai/glm-ocr:latest
+      api_base: os.environ/UFSC_OLLAMA_API_BASE
+      api_key: "none"
       extra_headers:
         Authorization: os.environ/UFSC_OLLAMA_AUTH_HEADER
       timeout: 600
