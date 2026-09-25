@@ -170,10 +170,21 @@ ou no free tier do OpenRouter — critério documentado inline no `config.yaml`:
 
 | Alias | Modelo | Por quê é remoto |
 |---|---|---|
-| `ufsc-frontier` | `qwen3.5:122b` | 125B, não cabe nos 12GB do Apollo |
+| `ufsc-frontier` | `qwen2.5:72b` (ceos) / `qwen3.5:122b` (vlab) | Porte grande, não cabe nos 12GB do Apollo |
 | `ufsc-llama70b` | `llama3.3:70b` | Família Llama, nenhuma configurada hoje |
 | `ufsc-vision` | `qwen3.8:27b` | Primeiro modelo com visão no stack |
 | `ufsc-ocr` | `glm-ocr:latest` | OCR especializado, categoria própria |
+
+**Dois clusters, um pool por alias**: existe também `ollama.ceos.ufsc.br` —
+um cluster mais simples que o DGX do `vlab`, mas que **funciona de verdade**
+pra geração (o `vlab` trava em `POST`, só `GET` responde — ver "Status
+conhecido" abaixo). Cada alias acima tem **duas entradas** no
+`config.yaml` com o mesmo `model_name` (ceos primeiro, vlab depois) — o
+Router do LiteLLM (`routing_strategy: least-busy` + `num_retries`, em
+`router_settings`) trata isso como um pool só, com retry/cooldown
+automático se uma falhar. Não precisou de lógica de fallback separada.
+`ceos` não exigiu Basic Auth no teste manual — se isso mudar, adicionar o
+mesmo `extra_headers`/`UFSC_OLLAMA_AUTH_HEADER` usado nas entradas do vlab.
 
 ### Credenciais
 
@@ -209,6 +220,19 @@ ou no free tier do OpenRouter — critério documentado inline no `config.yaml`:
    certificado, buscar o certificado da CA da UFSC/ICPEdu e montar em
    `/etc/ipsec.d/cacerts/` dentro do container — **não** desabilitar a
    validação pra "resolver".
+
+### Status conhecido (2026-09-23): geração trava, mesmo tudo certo daqui
+
+`GET /api/tags` e `GET /api/ps` respondem normal. `POST /api/generate` e
+`/v1/chat/completions` travam indefinidamente sem nenhum byte de resposta,
+mesmo com modelo pequeno (`llama3.2:3b`). **Reproduzido de duas origens
+independentes** — cliente VPN nativo do macOS direto, e o sidecar
+strongSwan/Docker deste repo — mesmo resultado nos dois, descartando causa
+do nosso lado (túnel, EAP-PEAP, certificado, roteamento, LiteLLM — tudo
+isso está confirmado funcionando, é o `GET` que prova). Suspeita: proxy de
+auth (LDAP) na frente do Ollama não repassa POST corretamente, ou o worker
+de inferência do vlab não está alocado. **Isso é um chamado a abrir com
+quem administra `vlab.ufsc.br`, não uma config a ajustar aqui.**
 
 ### Deploy / debug
 
