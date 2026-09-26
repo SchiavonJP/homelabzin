@@ -1,0 +1,23 @@
+name: hawser
+
+services:
+
+  hawser:
+    image: ghcr.io/finsys/hawser:latest
+    container_name: hawser_agent
+    restart: unless-stopped
+    environment:
+      TOKEN: ${HAWSER_TOKEN}
+      STACKS_DIR: /opt/hawser-stacks
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - hawser_stacks:/opt/hawser-stacks
+    ports:
+      - "2376:2376"
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+
+volumes:
+  hawser_stacks:

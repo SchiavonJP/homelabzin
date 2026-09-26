@@ -245,3 +245,9 @@ docker exec sb_ufsc_vpn ip route           # confirmar split-tunnel
 docker compose up -d litellm               # recria com o network_mode novo
 curl http://192.168.0.211:4000/health      # confirmar que nada quebrou
 ```
+
+## Monitoramento (Dockhand/Hawser)
+
+Agente Hawser (`sb_hawser`, porta 2376) registrado no Dockhand (LXC 7) —
+detecta atualização de imagem disponível (badge, não aplica sozinho). Ver
+`HAWSER_TOKEN` no `.env.example`.

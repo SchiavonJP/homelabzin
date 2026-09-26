@@ -198,3 +198,9 @@ curl http://192.168.0.219:8989/ping  # Sonarr
 curl http://192.168.0.219:8686/ping  # Lidarr
 curl http://192.168.0.219:5030       # slskd
 ```
+
+## Monitoramento (Dockhand/Hawser)
+
+Agente Hawser (`sb_hawser`, porta 2376) registrado no Dockhand (LXC 7) —
+detecta atualização de imagem disponível (badge, não aplica sozinho). Ver
+`HAWSER_TOKEN` no `.env.example`.

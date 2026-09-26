@@ -29,8 +29,29 @@ services:
         limits:
           memory: 1g
 
+  # Agente do Dockhand (LXC 7) — expõe este host pro pool de checagem de
+  # atualização de imagem. Modo Standard (token obrigatório, Dockhand
+  # gerado em Settings → Environments → Add new).
+  hawser:
+    image: ghcr.io/finsys/hawser:latest
+    container_name: sb_hawser
+    restart: unless-stopped
+    environment:
+      TOKEN: ${HAWSER_TOKEN}
+      STACKS_DIR: /opt/hawser-stacks
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - hawser_stacks:/opt/hawser-stacks
+    ports:
+      - "2376:2376"
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+
 volumes:
   qbittorrent_config:
+  hawser_stacks:
 
 networks:
   downloads:

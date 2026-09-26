@@ -119,5 +119,11 @@ redis://:<senha>@<IP_LXC5>:6380
 - Para acesso externo ao FalkorDB browser, usar SSH tunnel: `ssh -L 3000:localhost:3000 root@<IP_LXC5>`
 - FalkorDB só é necessário quando o Graphify começar a ser usado — pode ficar comentado inicialmente
 
+## Monitoramento (Dockhand/Hawser)
+
+Agente Hawser (`sb_hawser`, porta 2376) registrado no Dockhand (LXC 7) —
+detecta atualização de imagem disponível (badge, não aplica sozinho). Ver
+`HAWSER_TOKEN` no `.env.example`.
+
 
 

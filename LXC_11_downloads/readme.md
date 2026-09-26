@@ -138,3 +138,9 @@ E no serviço `qbittorrent`:
 curl http://192.168.0.220:8080  # WebUI respondendo
 ls /mnt/media/downloads          # diretório acessível
 ```
+
+## Monitoramento (Dockhand/Hawser)
+
+Agente Hawser (`sb_hawser`, porta 2376) registrado no Dockhand (LXC 7) —
+detecta atualização de imagem disponível (badge, não aplica sozinho). Ver
+`HAWSER_TOKEN` no `.env.example`.

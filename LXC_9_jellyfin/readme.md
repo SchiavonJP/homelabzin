@@ -231,3 +231,9 @@ versionado neste repo:
    → Self-hosted.
 2. Domain: `seerr.joaopaulo.me`.
 3. Policy: restringir por e-mail (ou grupo) aos usuários autorizados.
+
+## Monitoramento (Dockhand/Hawser)
+
+Agente Hawser (`sb_hawser`, porta 2376) registrado no Dockhand (LXC 7) —
+detecta atualização de imagem disponível (badge, não aplica sozinho, já que
+Jellyfin e Seerr seguem versão pinada). Ver `HAWSER_TOKEN` no `.env.example`.

@@ -143,3 +143,9 @@ docker exec -it sb_hermes hermes gateway setup
 
 Depois do setup, consegues interagir com o Hermes directamente no Telegram,
 mesmo fora de casa, sem expor o dashboard publicamente.
+
+## Monitoramento (Dockhand/Hawser)
+
+Agente Hawser (`sb_hawser`, porta 2376) registrado no Dockhand (LXC 7) —
+detecta atualização de imagem disponível (badge, não aplica sozinho). Ver
+`HAWSER_TOKEN` no `.env.example`.
