@@ -288,11 +288,25 @@ Update `docker-compose.yml` to use MCP server v2 (Python/FastAPI):
 - Command: `pip install -e . && uvicorn server:app --host 0.0.0.0 --port 3100`
 - Volume: `./mcp-v2:/app` instead of `./mcp:/app`
 
-Configure SSHFS for the vault:
+Configure SSHFS for the vault — **not** the Mini PC (it only runs the LiveSync
+CouchDB server, no plain-file vault folder exists there). The real target is the
+personal Linux notebook, reached via Tailscale (LXC 2 joined the tailnet as a plain
+client — see `notebook/readme.md`), mounted with a resilient systemd automount
+instead of a one-shot command (the notebook goes on/offline unpredictably):
+
 ```bash
 apt install -y sshfs
 mkdir -p /mnt/obsidian-vault
-sshfs root@<IP_MINIPC>:/path/to/vault /mnt/obsidian-vault -o allow_other,reconnect
+```
+
+`/etc/fstab`:
+```
+notebook_user@<IP_TAILSCALE_NOTEBOOK>:/caminho/do/vault /mnt/obsidian-vault fuse.sshfs _netdev,reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,IdentityFile=/root/.ssh/hermes_vault_key,allow_other,x-systemd.automount,x-systemd.idle-timeout=60,noauto 0 0
+```
+
+```bash
+systemctl daemon-reload
+systemctl start mnt-obsidian\x2dvault.automount
 ```
 
 ### 2. Test MCP server v2 and change nomeclature to v1, no need to use v2

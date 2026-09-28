@@ -54,9 +54,9 @@ services:
     ports:
       - "3100:3100"
     volumes:
-      - obsidian_vault:/vault          
+      - /mnt/obsidian-vault:/vault
       - ./skills:/skills
-      - hermes_data:/opt/data:ro       
+      - hermes_data:/opt/data:ro
     environment:
       PORT: 3100
       VAULT_PATH: /vault
@@ -91,7 +91,6 @@ services:
 
 volumes:
   hermes_data:
-  obsidian_vault:
   hawser_stacks:
 
 networks:
