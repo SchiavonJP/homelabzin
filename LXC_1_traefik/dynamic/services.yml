@@ -225,6 +225,17 @@ http:
       middlewares:
         - secure-headers
 
+    # Mini PC — SilverBullet (leitura avulsa do vault via Nextcloud)
+    silverbullet:
+      rule: "Host(`silverbullet.joaopaulo.me`)"
+      entrypoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+      service: silverbullet
+      middlewares:
+        - secure-headers
+
   services:
 
     # LXC 4 — port 4000
@@ -340,3 +351,9 @@ http:
       loadBalancer:
         servers:
           - url: "http://192.168.0.222:8765"
+
+    # Mini PC — SilverBullet, porta 3011
+    silverbullet:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.0.12:3011"

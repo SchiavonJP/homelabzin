@@ -84,8 +84,27 @@ cd LXC_2_hermes_mcp && docker compose up -d
 
 ## Vault Obsidian
 
-O vault é sincronizado via CouchDB (Obsidian LiveSync) em `https://obsidian.joaopaulo.me`.
-Integração directa com o MCP server está pendente — os endpoints de vault retornam vazio por agora.
+O vault é sincronizado via CouchDB (Obsidian LiveSync) em `https://obsidian.joaopaulo.me`
+— esse CouchDB fica no Mini PC e não deve ser tocado diretamente (guarda as notas como
+blobs fragmentados, não como arquivos).
+
+A integração do MCP server é feita por outro caminho: o LXC 2 entrou na tailnet
+(Tailscale, cliente comum) e monta via SSHFS a pasta real do vault no notebook
+pessoal (`/home/schiva/Documentos/Obsidian Vault`, ver `notebook/readme.md`), bind-
+montada em `/vault` no container `mcp-server`. Isso é o que o LiveSync já observa —
+qualquer nota escrita pelo Hermes chega ao vault real e propaga para os outros
+dispositivos normalmente.
+
+Mount no host do LXC 2 (fora do Docker): `/mnt/obsidian-vault`, via `/etc/fstab`
+(`fuse.sshfs`, `nofail` — automount do systemd não é suportado dentro do container,
+então o mount acontece no boot sem travar caso o notebook esteja offline).
+
+**Limitação:** só funciona enquanto o notebook estiver ligado (e com o Obsidian
+aberto pra notar mudanças externas e empurrar pro LiveSync) — não é uma ponte 24/7.
+
+Verificado end-to-end em 2026-09-28: `curl http://192.168.0.213:3100/vault/notes`
+lista as notas reais; escrita via `POST /vault/notes` chega ao arquivo real no
+notebook (confirmado via sessão SFTP separada).
 
 ## Skills centralizadas
 
