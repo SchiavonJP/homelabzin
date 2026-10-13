@@ -236,6 +236,15 @@ http:
       middlewares:
         - secure-headers
 
+    # Mini PC — Upsnap (HTTP/LAN only)
+    upsnap:
+      rule: "Host(`upsnap.local`) || Host(`192.168.0.12`)"
+      entrypoints:
+        - web
+      service: upsnap
+      middlewares:
+        - secure-headers
+
   services:
 
     # LXC 4 — port 4000
@@ -357,3 +366,9 @@ http:
       loadBalancer:
         servers:
           - url: "http://192.168.0.12:3011"
+
+    # Mini PC — Upsnap, porta 8090
+    upsnap:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.0.12:8090"
