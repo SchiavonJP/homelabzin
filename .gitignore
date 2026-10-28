@@ -1,7 +1,7 @@
 # Secrets — never commit
 .env
 *.json.bak
-.bundle
+*.bundle
 # Traefik TLS certs
 acme.json
 
