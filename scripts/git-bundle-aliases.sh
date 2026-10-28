@@ -10,6 +10,10 @@ bundle() (
     fi
     local root output temporary
     root=$(git rev-parse --show-toplevel)
+    if [ -f "$(git -C "$root" rev-parse --absolute-git-dir)/MERGE_HEAD" ]; then
+        printf 'Finish or abort the current merge before bundling.\n' >&2
+        exit 1
+    fi
     if [ -n "$(git -C "$root" status --porcelain --untracked-files=all)" ]; then
         printf 'Commit or stash your changes, including untracked files, before bundling.\n' >&2
         exit 1
@@ -35,8 +39,13 @@ bundle() (
 
 unbundle() (
     set -eu
+    local merge_mode=--ff-only
+    if [ "${1:-}" = --merge ]; then
+        merge_mode=--ff
+        shift
+    fi
     if [ "$#" -lt 1 ] || [ "$#" -gt 3 ]; then
-        printf 'Usage: unbundle input.bundle [destination] [branch]\n' >&2
+        printf 'Usage: unbundle [--merge] input.bundle [destination] [branch]\n' >&2
         exit 1
     fi
     local archive destination branch
@@ -51,6 +60,10 @@ unbundle() (
         git clone --origin bundle --branch "${3:-main}" "$archive" "$destination"
     elif ! git -C "$destination" rev-parse --show-toplevel >/dev/null 2>&1; then
         printf 'Destination must be a Git checkout or a new directory.\n' >&2
+        exit 1
+    fi
+    if [ -f "$(git -C "$destination" rev-parse --absolute-git-dir)/MERGE_HEAD" ]; then
+        printf 'Finish or abort the current merge before importing another bundle.\n' >&2
         exit 1
     fi
     if [ -n "$(git -C "$destination" status --porcelain --untracked-files=all)" ]; then
@@ -75,5 +88,14 @@ unbundle() (
         '+refs/heads/*:refs/remotes/bundle/*' \
         'refs/tags/*:refs/tags/*' \
         'refs/notes/*:refs/notes/*'
-    git -C "$destination" merge --ff-only "refs/remotes/bundle/$branch"
+    if git -C "$destination" merge "$merge_mode" --no-edit "refs/remotes/bundle/$branch"; then
+        return 0
+    fi
+    if [ "$merge_mode" = --ff-only ]; then
+        printf 'For divergent histories, retry with: unbundle --merge <file> [destination] [branch]\n' >&2
+    else
+        printf 'Merge stopped. Run git status in the destination.\n' >&2
+        printf 'Resolve conflicts, git add the resolved files, then git commit; or git merge --abort.\n' >&2
+    fi
+    exit 1
 )

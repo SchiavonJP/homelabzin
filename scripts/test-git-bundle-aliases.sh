@@ -59,4 +59,47 @@ if unbundle "$test_dir/divergent.bundle" "$test_dir/receiver repo" >/dev/null 2>
     printf 'FAIL: accepted divergent histories\n' >&2; exit 1
 fi
 test "$before" = "$(git -C "$test_dir/receiver repo" rev-parse HEAD)"
-printf 'PASS: restore, updates, branches, tags, notes, ignored files, no overwrite, dirty checks, divergence\n'
+
+# Explicit merges preserve a real conflict for the user to resolve.
+incoming=$(git rev-parse HEAD)
+if unbundle --merge "$test_dir/divergent.bundle" "$test_dir/receiver repo" >/dev/null 2>&1; then
+    printf 'FAIL: a conflicting merge unexpectedly succeeded\n' >&2; exit 1
+fi
+test "$incoming" = "$(git -C "$test_dir/receiver repo" rev-parse MERGE_HEAD)"
+test "$before" = "$(git -C "$test_dir/receiver repo" rev-parse HEAD)"
+# Even after staging an all-ours resolution, a pending merge must not be bundled.
+git -C "$test_dir/receiver repo" checkout --ours -- code.txt
+git -C "$test_dir/receiver repo" add code.txt
+if (cd "$test_dir/receiver repo" && bundle "$test_dir/unfinished.bundle") >/dev/null 2>&1; then
+    printf 'FAIL: bundled an unfinished merge\n' >&2; exit 1
+fi
+if unbundle --merge "$test_dir/divergent.bundle" "$test_dir/receiver repo" >/dev/null 2>&1; then
+    printf 'FAIL: imported during an unfinished merge\n' >&2; exit 1
+fi
+printf 'first\nsecond\nlocal edit\nsource edit\n' > "$test_dir/receiver repo/code.txt"
+git -C "$test_dir/receiver repo" add code.txt
+git -C "$test_dir/receiver repo" commit -qm 'resolve both edits'
+git -C "$test_dir/receiver repo" merge-base --is-ancestor "$before" HEAD
+git -C "$test_dir/receiver repo" merge-base --is-ancestor "$incoming" HEAD
+(cd "$test_dir/receiver repo" && bundle "$test_dir/merged.bundle") >/dev/null 2>&1
+unbundle "$test_dir/merged.bundle" "$test_dir/source repo" >/dev/null 2>&1
+test "$(git rev-parse HEAD)" = "$(git -C "$test_dir/receiver repo" rev-parse HEAD)"
+cmp code.txt "$test_dir/receiver repo/code.txt"
+
+# Independent file changes merge automatically, even with merge.ff=only configured.
+printf 'source only\n' > source-only.txt
+git add source-only.txt
+git commit -qm 'independent source edit'
+incoming=$(git rev-parse HEAD)
+printf 'receiver only\n' > "$test_dir/receiver repo/receiver-only.txt"
+git -C "$test_dir/receiver repo" add receiver-only.txt
+git -C "$test_dir/receiver repo" commit -qm 'independent receiver edit'
+before=$(git -C "$test_dir/receiver repo" rev-parse HEAD)
+git -C "$test_dir/receiver repo" config merge.ff only
+bundle "$test_dir/independent.bundle" >/dev/null 2>&1
+unbundle --merge "$test_dir/independent.bundle" "$test_dir/receiver repo" >/dev/null 2>&1
+git -C "$test_dir/receiver repo" merge-base --is-ancestor "$before" HEAD
+git -C "$test_dir/receiver repo" merge-base --is-ancestor "$incoming" HEAD
+test -f "$test_dir/receiver repo/source-only.txt"
+test -f "$test_dir/receiver repo/receiver-only.txt"
+printf 'PASS: restore, updates, refs, guards, divergence, merge conflicts, merged bundle round-trip, automatic merge\n'

@@ -38,9 +38,32 @@ name as a third argument: `unbundle update.bundle ~/Projects/repo develop`.
 Git bundles do not store the symbolic branch name of HEAD, so choosing the
 initial branch explicitly avoids Git guessing incorrectly.
 
-Later imports fast-forward the current
-branch with the same name. Divergent histories are rejected; local commits are
-not overwritten. Other branches are available as `bundle/<branch>`; tags and
+Later imports fast-forward the current branch with the same name by default.
+If both computers have new commits, explicitly allow a merge:
+
+```bash
+unbundle --merge ~/Downloads/homelabzin.bundle
+```
+
+This fast-forwards when possible and otherwise creates a merge commit preserving
+both histories. If conflicts occur, the command stops with the merge in progress.
+Run `git status`, edit the conflicting files, `git add` those files, and run
+`git commit`. To cancel the pending merge instead, run `git merge --abort`.
+After completing the merge, run `bundle` to export the combined history back to
+the other computer. Never bundle an unfinished merge; both commands reject it.
+Merge commits require your Git user name and email to be configured locally.
+
+If an earlier import already fetched the bundle and then failed to fast-forward,
+you can merge those fetched commits immediately with the original functions:
+
+```bash
+git merge --ff --no-edit refs/remotes/bundle/main
+# After the merge succeeds (and any conflicts are resolved and committed):
+bundle
+```
+
+Use your current branch name instead of `main` when applicable. Other branches
+are available as `bundle/<branch>`; tags and
 Git notes are imported too. Conflicting tag/note updates are rejected. Your
 existing GitHub remote is not changed. A new checkout has a local `bundle`
 remote, which points at the input file; it does not automatically set up GitHub.
