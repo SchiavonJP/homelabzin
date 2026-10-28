@@ -62,6 +62,7 @@ services:
       LANGFUSE_HOST: http://sb_langfuse:3000
       UFSC_OLLAMA_API_BASE: ${UFSC_OLLAMA_API_BASE}
       UFSC_OLLAMA_AUTH_HEADER: ${UFSC_OLLAMA_AUTH_HEADER}
+      UFSC_CEOS_OLLAMA_API_BASE: ${UFSC_CEOS_OLLAMA_API_BASE}
     entrypoint: ["litellm", "--config", "/app/config.yaml", "--detailed_debug"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4000/health/liveliness')"]

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Arguments are one literal argv element per line; no eval or shell sourcing.
+set -euo pipefail
+case "${1:-}" in inference|embedding) mode=$1 ;; *) exit 2 ;; esac
+args_file="/etc/apollo/${mode}.args"
+[[ -r $args_file ]] || { echo "Missing $args_file" >&2; exit 1; }
+args=()
+while IFS= read -r arg || [[ -n $arg ]]; do
+  args+=("$arg")
+done < "$args_file"
+(( ${#args[@]} > 0 )) || { echo "Empty $args_file" >&2; exit 1; }
+exec /opt/apollo-llama/build/bin/llama-server "${args[@]}"

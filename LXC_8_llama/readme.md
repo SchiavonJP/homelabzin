@@ -9,6 +9,13 @@ Nó de inferência local com GPU. Roda o `llama-server` (llama.cpp) com a RTX 30
 
 ---
 
+## Planned EndeavourOS migration
+
+The independent desktop VM migration, on-demand inference installer, GPU ownership
+steps, validation, and rollback are in [migration/endeavouros](../migration/endeavouros/README.md).
+This is prepared tooling, not a completed deployment. Keep this LXC intact until
+the VM has passed gaming and inference validation.
+
 ## Hardware alocado
 
 | Recurso | Valor |

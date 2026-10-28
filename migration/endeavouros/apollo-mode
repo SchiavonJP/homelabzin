@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+case "${1:-}" in
+  start|gaming)
+    if [[ $EUID != 0 ]]; then
+      exec pkexec /usr/local/bin/apollo-mode "$1"
+    fi
+    if [[ $1 == start ]]; then
+      systemctl start apollo-inference.service apollo-embedding.service
+      echo 'Start requested. Models may still be loading; check /health on ports 8080 and 8081.'
+    else
+      systemctl stop apollo-inference.service apollo-embedding.service
+      for unit in apollo-inference.service apollo-embedding.service; do
+        pid=$(systemctl show "$unit" --property=MainPID --value)
+        state=$(systemctl show "$unit" --property=ActiveState --value)
+        [[ $pid == 0 && $state == inactive ]] || {
+          echo "STOP: $unit has not fully stopped ($state, PID $pid)." >&2; exit 1;
+        }
+      done
+      echo 'Apollo stopped. GPU remains assigned to EndeavourOS; desktop VRAM use is normal.'
+    fi
+    ;;
+  status)
+    systemctl --no-pager status apollo-inference.service apollo-embedding.service
+    ;;
+  *) echo 'Usage: apollo-mode start|gaming|status' >&2; exit 2 ;;
+esac

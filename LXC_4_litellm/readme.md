@@ -200,6 +200,55 @@ mesmo `extra_headers`/`UFSC_OLLAMA_AUTH_HEADER` usado nas entradas do vlab.
   na URL — se a senha tiver caractere especial (`:` `@` `/` `?` `#` `%`),
   embutir na URL quebra o parsing de `user:senha@host`; base64 não tem esse
   problema.
+- `UFSC_CEOS_OLLAMA_API_BASE`: `https://ollama.ceos.ufsc.br/v1`, sem
+  autenticação. Precisa estar no `.env` **e** no `environment` do serviço
+  `litellm` no `docker-compose.yml` — se faltar em qualquer um, o container
+  recebe a variável vazia (o `docker compose` avisa `variable is not set`) e
+  as entradas do ceos no `config.yaml` não resolvem. Depois de mudar o `.env`,
+  `docker compose up -d litellm` (um `restart` simples não relê o ambiente).
+
+### Ver e carregar modelos (`ufsc-models.sh`)
+
+O Ollama descarrega o modelo da memória depois de um tempo parado, e a
+primeira chamada depois disso paga o cold-load (~30-45s medidos, dentro do
+`timeout` de 90s dos aliases `ufsc-*`, mas lento). O [`ufsc-models.sh`](ufsc-models.sh)
+mostra o que está carregado agora (`/api/ps`) e carrega o modelo alvo se ele
+não estiver. Roda **na LXC 4**, dentro do container `sb_litellm` (via
+`docker exec`) — herda a rede do sidecar VPN e as variáveis `UFSC_*` do
+ambiente dele, então nenhuma credencial passa pelo script.
+
+```bash
+cd ~/second-brain-automation/LXC_4_litellm
+chmod +x ufsc-models.sh                 # só na primeira vez, se o bit se perder
+
+./ufsc-models.sh --list                 # só lista instalados + carregados
+./ufsc-models.sh                        # ceos: carrega qwen3.8:27b se faltar
+./ufsc-models.sh --model llama3.3:70b   # outro modelo
+./ufsc-models.sh --keep-alive 8h        # quanto tempo fica em memória (padrão: 4h)
+./ufsc-models.sh --cluster all          # ceos + vlab
+```
+
+| Opção | Padrão | O que faz |
+|---|---|---|
+| `--cluster ceos\|vlab\|all` | `ceos` | Qual cluster consultar/carregar |
+| `--model` | `qwen3.8:27b` | Modelo a carregar (precisa estar instalado no cluster) |
+| `--keep-alive` | `4h` | Tempo em memória depois do último uso (formato Ollama: `30m`, `4h`) |
+| `--list` | — | Só lista, não carrega nada |
+| `--load-timeout` | `180` | Segundos de espera pela carga |
+
+Pontos de atenção:
+
+- **O default é o ceos de propósito**: o vlab trava em `POST` (ver "Status
+  conhecido" abaixo), então `--cluster vlab` lista normalmente, mas a carga
+  espera o `--load-timeout` e falha.
+- **Cluster compartilhado**: o `/api/ps` mostra os modelos carregados por
+  *todo mundo*, não só os teus. Um 27B ocupa ~26GB de VRAM — `keep-alive`
+  longo segura esse espaço pra outros usuários.
+- Se o modelo já está carregado, o script só avisa; **não renova** o
+  `keep-alive`. Pra estender, mandar um `POST /api/generate` com
+  `"prompt": ""` e o novo `keep_alive`, ou esperar expirar e rodar de novo.
+- `ERRO ... ausente ou vazia no container` = variável `UFSC_*` faltando no
+  `.env`/compose (ver "Credenciais").
 
 ### Coisas que só se confirma rodando de verdade
 

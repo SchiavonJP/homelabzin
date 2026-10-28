@@ -28,7 +28,7 @@ import urllib.request
 ap = argparse.ArgumentParser()
 ap.add_argument("--cluster", choices=["ceos", "vlab", "all"], default="ceos")
 ap.add_argument("--model", default="qwen3.8:27b")
-ap.add_argument("--keep-alive", default="30m", help="quanto tempo o modelo fica em memória")
+ap.add_argument("--keep-alive", default="4h", help="quanto tempo o modelo fica em memória")
 ap.add_argument("--list", action="store_true", help="só lista, não carrega")
 ap.add_argument("--load-timeout", type=int, default=180)
 args = ap.parse_args()
@@ -42,6 +42,9 @@ CLUSTERS = {
 
 def call(name, path, body=None, timeout=15):
     base_var, auth_var = CLUSTERS[name]
+    if not os.environ.get(base_var):
+        raise OSError(f"{base_var} ausente ou vazia no container — "
+                      "confira o .env e recrie com `docker compose up -d litellm`")
     # as vars apontam pro endpoint OpenAI-compat (/v1); aqui usamos a API nativa
     base = os.environ[base_var].rstrip("/").removesuffix("/v1")
     headers = {"Content-Type": "application/json"}
@@ -71,7 +74,7 @@ for name in (["ceos", "vlab"] if args.cluster == "all" else [args.cluster]):
         available = [m["name"] for m in call(name, "/api/tags").get("models", [])]
         print(f"  {len(available)} modelos instalados")
         loaded = show_loaded(name)
-    except (urllib.error.URLError, OSError) as e:
+    except (urllib.error.URLError, OSError, ValueError) as e:
         print(f"  ERRO ao consultar: {e}")
         rc = 1
         continue
