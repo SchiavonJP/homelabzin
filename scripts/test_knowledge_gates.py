@@ -5,6 +5,7 @@ import importlib.util
 import io
 import json
 from pathlib import Path
+import subprocess
 import unittest
 from unittest.mock import patch
 import urllib.error
@@ -178,6 +179,34 @@ class RequestTests(unittest.TestCase):
         with contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(gates.main(["model"]), 0)
         self.assertEqual(run.call_args.args[0][:4], ["docker", "exec", "-i", "sb_litellm"])
+
+    @patch.object(gates.subprocess, "run")
+    def test_failed_child_report_survives_real_wrapper_path(self, run):
+        report = {"probe_version": 3, "evidence": {
+            "gate": "G3/model-smoke", "status": "failed", "model_smoke_passed": False,
+            "tests": [{"observed_output": {"cloud_backup_status": "unknown"}}],
+        }}
+        run.return_value = subprocess.CompletedProcess([], 1, json.dumps(report), "")
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            exit_code = gates.main(["model", "--languages", "en"])
+        actual = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 1)
+        self.assertEqual(actual["process_exit_code"], 1)
+        self.assertEqual(actual["evidence"]["tests"][0]["observed_output"]["cloud_backup_status"], "unknown")
+
+    @patch.object(gates.subprocess, "run")
+    def test_command_failure_without_report_does_not_expose_stderr(self, run):
+        run.return_value = subprocess.CompletedProcess([], 1, "", "sensitive internal traceback")
+        result = gates.run_json(["docker"], preserve_gate_report=True)
+        self.assertEqual(result, {"status": "blocked", "reason": "command_failed", "exit_code": 1})
+
+    @patch.object(gates.subprocess, "run")
+    def test_non_gate_failure_stays_command_failure(self, run):
+        run.return_value = subprocess.CompletedProcess([], 1, '{"error": "private detail"}', "")
+        result = gates.run_json(["docker"], preserve_gate_report=True)
+        self.assertEqual(result["reason"], "command_failed")
+        self.assertNotIn("private detail", json.dumps(result))
 
 
 if __name__ == "__main__":

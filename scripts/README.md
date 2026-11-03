@@ -131,6 +131,15 @@ can mean `unknown`, an invalid enum, or `approved`, so inspect the value before
 diagnosing an invented decision. The fixture, prompt, and acceptance criteria are
 unchanged. Use `model --languages en` for a single-request diagnostic rerun.
 
+Probe version 3 preserves structured failure reports from the Docker child even
+when its exit code is 1. Earlier host-side wrappers could replace a model assertion
+failure with `command_failed`, hiding the diagnostic. To bypass an older wrapper
+on LXC 4, run the script directly inside the existing container:
+
+```bash
+docker exec -i sb_litellm python3 - model --inside-container --languages en < scripts/knowledge-gates.py
+```
+
 The `deployments` command reads `/model/info` without running inference. It emits
 only the selected alias, deployment ID, provider model, backend hostname, priority,
 and timeout. It does not print API keys, headers, URL credentials, or query strings.

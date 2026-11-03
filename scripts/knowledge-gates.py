@@ -104,19 +104,28 @@ def request_json(url, payload, token, timeout):
         raise ProbeError("network_or_invalid_json") from None
 
 
-def run_json(argv, stdin=None, timeout=15):
+def run_json(argv, stdin=None, timeout=15, preserve_gate_report=False):
     try:
         result = subprocess.run(argv, input=stdin, text=True, capture_output=True, timeout=timeout)
     except subprocess.TimeoutExpired:
         return {"status": "blocked", "reason": "command_timeout"}
     except OSError:
         return {"status": "blocked", "reason": "command_unavailable"}
-    if result.returncode:
+    if result.returncode and not preserve_gate_report:
         return {"status": "blocked", "reason": "command_failed", "exit_code": result.returncode}
     try:
-        return json.loads(result.stdout)
+        parsed = json.loads(result.stdout)
     except ValueError:
+        if result.returncode:
+            return {"status": "blocked", "reason": "command_failed", "exit_code": result.returncode}
         return {"status": "failed", "reason": "invalid_command_json"}
+    if result.returncode:
+        evidence = parsed.get("evidence") if isinstance(parsed, dict) else None
+        if not (isinstance(evidence, dict) and isinstance(evidence.get("gate"), str)
+                and evidence.get("status") in {"failed", "blocked"}):
+            return {"status": "blocked", "reason": "command_failed", "exit_code": result.returncode}
+        parsed["process_exit_code"] = result.returncode
+    return parsed
 
 
 def network_probe(timeout):
@@ -395,14 +404,15 @@ def main(argv=None):
         if args.command == "model":
             child_args.extend(["--languages", *args.languages])
         request_count = len(args.models) * len(args.languages) if args.command == "model" else 1
-        evidence = run_json(child_args, stdin=source, timeout=args.timeout * request_count + 20)
+        evidence = run_json(child_args, stdin=source, timeout=args.timeout * request_count + 20,
+                            preserve_gate_report=True)
         print(json.dumps(evidence, indent=2, ensure_ascii=False))
         outcome = evidence.get("evidence", evidence)
         if args.command == "model":
             return 0 if outcome.get("model_smoke_passed") else 1
         return 1 if outcome.get("status") in {"failed", "blocked"} else 0
     report = {"recorded_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-              "probe_version": 2, "evidence": evidence}
+              "probe_version": 3, "evidence": evidence}
     print(json.dumps(report, indent=2, ensure_ascii=False))
     return 1 if evidence.get("status") in {"failed", "blocked"} else 0
 
