@@ -43,12 +43,10 @@ services:
     depends_on:
       ufsc-vpn:
         condition: service_healthy
-    # Compartilha a rede do sidecar VPN — assim o tráfego pra rede da UFSC
-    # sai pelo túnel, e o resto (Postgres/Redis/Apollo/OpenRouter) continua
-    # pela rota normal, contanto que a UFSC faça split-tunnel (ver readme).
-    # Não dá pra combinar `network_mode` com `networks`/`ports` no compose —
-    # por isso a porta 4000 e a rede `router` migraram pro ufsc-vpn acima.
-    network_mode: "service:ufsc-vpn"
+    # The VPN has a fixed container_name. Refer to it directly so --no-deps
+    # can recreate only LiteLLM without Compose rediscovering the sidecar.
+    # The health dependency above still orders a complete fresh startup.
+    network_mode: "container:sb_ufsc_vpn"
     volumes:
       - ./config.yaml:/app/config.yaml
     environment:
@@ -101,7 +99,7 @@ volumes:
 networks:
   router:
     name: sb_router
-    driver: bridge
+    external: true
   observability:
     name: sb_observability
     external: true

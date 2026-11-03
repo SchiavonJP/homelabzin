@@ -200,11 +200,28 @@ que realmente respondeu ao comparar resultados.
 
 Depois de sincronizar `config.yaml` e ajustar o `.env` na LXC 4:
 
+Use o projeto dos containers existentes; o nome do diretório atual pode ser
+outro e causar conflito com `sb_ufsc_vpn`. O serviço usa
+`network_mode: container:sb_ufsc_vpn` para permitir recriar somente LiteLLM.
+A rede compartilhada `sb_router` é externa e precisa existir; no primeiro
+setup, confira `docker network inspect sb_router` e crie-a se necessário
+com `docker network create sb_router`. Recrie apenas LiteLLM, reutilizando
+o namespace de rede do sidecar existente:
+
 ```bash
-docker compose config --quiet
-docker compose up -d --force-recreate litellm
-./ufsc-models.sh --cluster all --list
+LITELLM_PROJECT="$(docker inspect sb_ufsc_vpn --format '{{ index .Config.Labels "com.docker.compose.project" }}')"
+if [ -n "$LITELLM_PROJECT" ] && [ "$LITELLM_PROJECT" != '<no value>' ]; then
+  docker compose -p "$LITELLM_PROJECT" config --quiet &&
+    docker compose -p "$LITELLM_PROJECT" up -d --no-deps --force-recreate litellm
+else
+  docker inspect sb_ufsc_vpn --format '{{.Name}} project={{ index .Config.Labels "com.docker.compose.project" }} service={{ index .Config.Labels "com.docker.compose.service" }}'
+fi
 ```
+
+Se o projeto estiver vazio, confira o inventário mostrado
+antes de recriar. Não remova/renomeie o VPN, não execute `down -v` e não crie
+uma segunda stack para contornar o conflito. Após a recriação bem-sucedida,
+confira `./ufsc-models.sh --cluster all --list`.
 
 A recriação é necessária para reler o ambiente; mudar só o arquivo local ou
 executar `restart` não atualiza as variáveis do container.
