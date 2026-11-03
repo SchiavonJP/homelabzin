@@ -19,7 +19,7 @@ def good_output(language="en"):
     sources = gates.FIXTURES[language]
     return {
         "retention_values_days": [14, 30], "retention_conflict": True,
-        "backup_decision": "local", "cloud_backup_status": "suggested",
+        "backup_decision": "local", "cloud_backup_suggested": True, "cloud_backup_approval": "not_approved",
         "unresolved_question": "Which retention policy is current?",
         "evidence": [{"source_id": key, "quote": text} for key, text in sources.items()],
     }
@@ -32,10 +32,24 @@ class EvidenceTests(unittest.TestCase):
 
     def test_suggestion_cannot_become_decision(self):
         output = good_output()
-        output.update(backup_decision="cloud", cloud_backup_status="approved")
+        output.update(backup_decision="cloud", cloud_backup_approval="approved")
         checks = gates.validate_fixture(output, gates.FIXTURES["en"])
         self.assertFalse(checks["explicit_decision_preserved"])
         self.assertFalse(checks["suggestion_not_approved"])
+
+    def test_recognizing_suggestion_does_not_establish_approval(self):
+        output = good_output()
+        output["cloud_backup_approval"] = "unknown"
+        checks = gates.validate_fixture(output, gates.FIXTURES["en"])
+        self.assertTrue(checks["suggestion_recognized"])
+        self.assertFalse(checks["suggestion_not_approved"])
+
+    def test_unapproved_proposal_still_has_to_be_recognized(self):
+        output = good_output()
+        output["cloud_backup_suggested"] = False
+        checks = gates.validate_fixture(output, gates.FIXTURES["en"])
+        self.assertTrue(checks["suggestion_not_approved"])
+        self.assertFalse(checks["suggestion_recognized"])
 
     def test_fabricated_quote_and_missing_sources_fail(self):
         output = good_output()
@@ -104,16 +118,18 @@ class RequestTests(unittest.TestCase):
     @patch.dict(gates.os.environ, {"LITELLM_MASTER_KEY": "test-secret"}, clear=True)
     def test_failed_assertion_preserves_actual_value_without_changing_expectation(self, request):
         output = good_output()
-        output["cloud_backup_status"] = "unknown"
+        output["cloud_backup_approval"] = "unknown"
         request.return_value = ({"choices": [{"finish_reason": "stop", "message": {
             "content": json.dumps(output)}}]}, "deployment")
         result = gates.model_probe(["ufsc-vision"], 1, ["en"])
         self.assertEqual(len(result["tests"]), 1)
         test = result["tests"][0]
-        self.assertEqual(test["observed_output"]["cloud_backup_status"], "unknown")
+        self.assertEqual(test["observed_output"]["cloud_backup_approval"], "unknown")
         self.assertFalse(test["assertions"]["suggestion_not_approved"])
         self.assertFalse(result["model_smoke_passed"])
-        self.assertEqual(result["fixture_version"], 1)
+        self.assertEqual(result["fixture_version"], 2)
+        self.assertEqual(len(test["request_sha256"]), 64)
+        self.assertNotIn("cloud_backup_status", request.call_args.args[1]["response_format"]["json_schema"]["schema"]["properties"])
 
     @patch.object(gates, "request_json")
     @patch.dict(gates.os.environ, {"LITELLM_MASTER_KEY": "test-secret"}, clear=True)
@@ -182,9 +198,9 @@ class RequestTests(unittest.TestCase):
 
     @patch.object(gates.subprocess, "run")
     def test_failed_child_report_survives_real_wrapper_path(self, run):
-        report = {"probe_version": 3, "evidence": {
+        report = {"probe_version": 4, "evidence": {
             "gate": "G3/model-smoke", "status": "failed", "model_smoke_passed": False,
-            "tests": [{"observed_output": {"cloud_backup_status": "unknown"}}],
+            "tests": [{"observed_output": {"cloud_backup_approval": "unknown"}}],
         }}
         run.return_value = subprocess.CompletedProcess([], 1, json.dumps(report), "")
         output = io.StringIO()
@@ -193,7 +209,7 @@ class RequestTests(unittest.TestCase):
         actual = json.loads(output.getvalue())
         self.assertEqual(exit_code, 1)
         self.assertEqual(actual["process_exit_code"], 1)
-        self.assertEqual(actual["evidence"]["tests"][0]["observed_output"]["cloud_backup_status"], "unknown")
+        self.assertEqual(actual["evidence"]["tests"][0]["observed_output"]["cloud_backup_approval"], "unknown")
 
     @patch.object(gates.subprocess, "run")
     def test_command_failure_without_report_does_not_expose_stderr(self, run):

@@ -56,8 +56,12 @@ OUTPUT_SCHEMA = {
     "properties": {
         "retention_values_days": {"type": "array", "items": {"type": "integer"}},
         "retention_conflict": {"type": "boolean"},
-        "backup_decision": {"type": "string", "enum": ["local", "cloud", "unknown"]},
-        "cloud_backup_status": {"type": "string", "enum": ["approved", "suggested", "unknown"]},
+        "backup_decision": {"type": "string", "enum": ["local", "cloud", "unknown"],
+                            "description": "The owner's explicitly established backup decision, not an agent's recommendation."},
+        "cloud_backup_suggested": {"type": "boolean",
+                                   "description": "Whether a source says someone suggested cloud backups, regardless of approval."},
+        "cloud_backup_approval": {"type": "string", "enum": ["approved", "not_approved", "unknown"],
+                                  "description": "Owner approval: approved if explicitly approved; not_approved if explicitly unapproved or rejected; unknown only when sources do not establish approval state."},
         "unresolved_question": {"type": "string"},
         "evidence": {"type": "array", "items": {
             "type": "object", "additionalProperties": False,
@@ -66,7 +70,7 @@ OUTPUT_SCHEMA = {
         }},
     },
     "required": ["retention_values_days", "retention_conflict", "backup_decision",
-                 "cloud_backup_status", "unresolved_question", "evidence"],
+                 "cloud_backup_suggested", "cloud_backup_approval", "unresolved_question", "evidence"],
 }
 
 
@@ -232,7 +236,8 @@ def validate_fixture(output, sources):
         "both_retention_values": isinstance(days, list) and len(days) == 2 and all(type(x) is int for x in days) and sorted(days) == [14, 30],
         "contradiction_detected": output.get("retention_conflict") is True,
         "explicit_decision_preserved": output.get("backup_decision") == "local",
-        "suggestion_not_approved": output.get("cloud_backup_status") == "suggested",
+        "suggestion_recognized": output.get("cloud_backup_suggested") is True,
+        "suggestion_not_approved": output.get("cloud_backup_approval") == "not_approved",
         "question_present": isinstance(output.get("unresolved_question"), str) and bool(output["unresolved_question"].strip()),
         "quotes_grounded": valid_evidence,
         "all_sources_cited": source_ids == set(sources),
@@ -284,7 +289,7 @@ def model_probe(models, timeout, languages=None):
             payload = {
                 "model": model, "temperature": 0, "max_tokens": 1200,
                 "messages": [
-                    {"role": "system", "content": "Extract only from the supplied synthetic source notes. Do not reconcile conflicting retention values without evidence. Distinguish an explicit owner decision from an unapproved agent suggestion. Ask one question about the unresolved retention policy, in the source language. Cite each source with an exact, nonempty quote."},
+                    {"role": "system", "content": "Extract only from the supplied synthetic source notes. Do not reconcile conflicting retention values without evidence. Distinguish an explicit owner decision from an unapproved agent suggestion. cloud_backup_suggested records whether a suggestion was made, independently of approval. cloud_backup_approval must be not_approved when a source explicitly says the owner has not approved it; use unknown only when sources do not address approval. Ask one question about the unresolved retention policy, in the source language. Cite each source with an exact, nonempty quote."},
                     {"role": "user", "content": json.dumps(sources, ensure_ascii=False)},
                 ],
                 "response_format": {"type": "json_schema", "json_schema": {
@@ -292,7 +297,8 @@ def model_probe(models, timeout, languages=None):
             }
             started = time.monotonic()
             test = {"requested_model": model, "language": language,
-                    "fixture_sha256": hashlib.sha256(json.dumps(sources, sort_keys=True).encode()).hexdigest()}
+                    "fixture_sha256": hashlib.sha256(json.dumps(sources, sort_keys=True).encode()).hexdigest(),
+                    "request_sha256": hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()}
             try:
                 response, deployment = request_json(base + "/chat/completions", payload, key, timeout)
                 if not isinstance(response, dict):
@@ -321,7 +327,7 @@ def model_probe(models, timeout, languages=None):
                 test.update({"status": "failed", "reason": str(exc)})
             test["seconds"] = round(time.monotonic() - started, 3)
             tests.append(test)
-    return {"gate": "G3/model-smoke", "fixture_version": 1,
+    return {"gate": "G3/model-smoke", "fixture_version": 2,
             "status": "partial" if all(t["status"] == "passed" for t in tests) else "failed",
             "model_smoke_passed": all(t["status"] == "passed" for t in tests), "tests": tests,
             "remaining": "Confirm actual backend/fallback; test Hindsight retain, consolidation, reflect, deletion, graph, persistence and resource use."}
@@ -412,7 +418,7 @@ def main(argv=None):
             return 0 if outcome.get("model_smoke_passed") else 1
         return 1 if outcome.get("status") in {"failed", "blocked"} else 0
     report = {"recorded_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-              "probe_version": 3, "evidence": evidence}
+              "probe_version": 4, "evidence": evidence}
     print(json.dumps(report, indent=2, ensure_ascii=False))
     return 1 if evidence.get("status") in {"failed", "blocked"} else 0
 

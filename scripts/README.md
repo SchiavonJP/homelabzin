@@ -125,16 +125,17 @@ the returned model and deployment ID when available. Correlate router logs to
 establish which backend/fallback actually answered; absent headers mean attribution
 is unverified. The smoke test does not claim to validate Hindsight itself.
 
-Probe version 2 also reports the actual `observed_output` for these synthetic
-fixtures. In particular, `cloud_backup_status` must be `suggested`: a failed check
-can mean `unknown`, an invalid enum, or `approved`, so inspect the value before
-diagnosing an invented decision. The fixture, prompt, and acceptance criteria are
-unchanged. Use `model --languages en` for a single-request diagnostic rerun.
+The probe reports `observed_output` for the synthetic fixtures. Probe version 4
+uses fixture version 2: suggestion existence (`cloud_backup_suggested: true`) and
+owner approval (`cloud_backup_approval: not_approved`) are separate, explicitly
+defined fields. Returning `unknown` still fails when the source explicitly states
+the owner has not approved the suggestion. Source text is unchanged; the schema
+and system instruction changed, so compare runs by fixture version and request
+hash, not source hash alone. Use `model --languages en` for one request.
 
-Probe version 3 preserves structured failure reports from the Docker child even
-when its exit code is 1. Earlier host-side wrappers could replace a model assertion
-failure with `command_failed`, hiding the diagnostic. To bypass an older wrapper
-on LXC 4, run the script directly inside the existing container:
+Structured failure reports survive a nonzero Docker child exit. Earlier host-side
+wrappers could replace a model assertion failure with `command_failed`, hiding the
+diagnostic. To bypass an older wrapper on LXC 4, run directly in the container:
 
 ```bash
 docker exec -i sb_litellm python3 - model --inside-container --languages en < scripts/knowledge-gates.py
@@ -164,10 +165,20 @@ For the current UFSC pilot, these commands use the explicit personal SSH key:
 ssh -o IdentitiesOnly=yes -i ~/.ssh/id_ed25519_personal root@192.168.0.211 \
   'docker exec -i sb_litellm python3 - deployments --inside-container' < scripts/knowledge-gates.py
 
-# Then inspect one synthetic result with the original acceptance criteria.
+# Then inspect one synthetic result using the explicitly defined approval fields.
 ssh -o IdentitiesOnly=yes -i ~/.ssh/id_ed25519_personal root@192.168.0.211 \
   'docker exec -i sb_litellm python3 - model --inside-container --languages en' < scripts/knowledge-gates.py
 ```
+
+Pilot evidence supplied on 2026-11-03 mapped the responding deployment
+`17bcca4edf04d9c3046145467ab1658de8a10a6b862d68c7f0f18a0eb48f3c9d`
+to VLAB's `qwen3.8:27b`. Fixture version 1 passed seven of eight checks in both
+languages. The inspected English output preserved the local-backup decision and
+quoted the unapproved suggestion, but returned `cloud_backup_status: unknown`.
+This prompted the separate proposal/approval fields in fixture version 2; it does
+not qualify the revised smoke test or the full Hindsight gate as passed. Reported
+request times were 90.499 seconds (English), 12.252 seconds (Portuguese), and
+32.291 seconds (English diagnostic); the source of that variation is unverified.
 
 For AFFiNE's read-only MCP probe, create a scoped credential through its normal
 settings UI, and supply it through `AFFINE_MCP_TOKEN` in the invoking shell's
