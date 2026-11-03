@@ -6,9 +6,17 @@ Load the two Bash functions on each computer:
 source /path/to/homelabzin/scripts/git-bundle-aliases.sh
 ```
 
-Add that line to `~/.bashrc` to load them in future Bash sessions. These are
-functions rather than literal aliases because they accept arguments. They also
-work in Zsh. Git, `mktemp`, and standard shell utilities must be installed.
+Add that line to `~/.bashrc` for Bash or `~/.zshrc` for Zsh to load the functions
+in future sessions. Run the `source` line in any already-open terminal too;
+editing a startup file does not update existing shells. Use the absolute path
+or a path beginning with `~/`, so loading works from any repository.
+
+These are functions rather than literal aliases because they accept arguments.
+Git, `mktemp`, and standard shell utilities must be installed.
+
+If `bundle` reports `Could not locate Gemfile`, your shell is running Ruby's
+Bundler instead of this function. Load this script, then run `type bundle`:
+it must identify a function. Ruby's command remains available as `command bundle`.
 
 From inside a repository, commit your changes and create a bundle:
 

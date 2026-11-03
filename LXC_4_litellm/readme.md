@@ -175,16 +175,44 @@ ou no free tier do OpenRouter — critério documentado inline no `config.yaml`:
 | `ufsc-vision` | `qwen3.8:27b` | Primeiro modelo com visão no stack |
 | `ufsc-ocr` | `glm-ocr:latest` | OCR especializado, categoria própria |
 
-**Dois clusters, um pool por alias**: existe também `ollama.ceos.ufsc.br` —
-um cluster mais simples que o DGX do `vlab`, mas que **funciona de verdade**
-pra geração (o `vlab` trava em `POST`, só `GET` responde — ver "Status
-conhecido" abaixo). Cada alias acima tem **duas entradas** no
-`config.yaml` com o mesmo `model_name` (ceos primeiro, vlab depois) — o
-Router do LiteLLM (`routing_strategy: least-busy` + `num_retries`, em
-`router_settings`) trata isso como um pool só, com retry/cooldown
-automático se uma falhar. Não precisou de lógica de fallback separada.
-`ceos` não exigiu Basic Auth no teste manual — se isso mudar, adicionar o
-mesmo `extra_headers`/`UFSC_OLLAMA_AUTH_HEADER` usado nas entradas do vlab.
+**Prioridade explícita (2026-11-03): VLAB primeiro; CEOS como fallback.**
+Cada alias UFSC mantém duas entradas, mas `litellm_params.order` determina
+qual delas deve ser tentada: VLAB usa `order: 1`, CEOS usa `order: 2`.
+`least-busy` só escolhe entre entradas da mesma prioridade; a posição no
+YAML não estabelece preferência. `num_retries: 0` em cada entrada UFSC
+permite avançar para o fallback após uma tentativa, sem repetir cinco vezes
+no backend que falhou. Os outros modelos mantêm sua configuração anterior.
+Veja [deployment ordering no LiteLLM](https://docs.litellm.ai/docs/routing#deployment-ordering-priority).
+
+Os dois destinos precisam ser diferentes no `.env` do servidor:
+
+```dotenv
+UFSC_OLLAMA_API_BASE=https://ollama.vlab.ufsc.br/v1
+UFSC_CEOS_OLLAMA_API_BASE=https://ollama.ceos.ufsc.br/v1
+```
+
+VLAB usa o `UFSC_OLLAMA_AUTH_HEADER` existente; CEOS não recebe esse header.
+O alias `ufsc-vision` limita cada backend a 50 segundos para manter duas
+tentativas dentro do limite de 120 segundos do cliente de revisão.
+Os outros aliases UFSC mantêm 90 segundos por backend. Em `ufsc-frontier`,
+o fallback troca o modelo 122B do VLAB pelo 72B do CEOS; registre o modelo
+que realmente respondeu ao comparar resultados.
+
+Depois de sincronizar `config.yaml` e ajustar o `.env` na LXC 4:
+
+```bash
+docker compose config --quiet
+docker compose up -d --force-recreate litellm
+./ufsc-models.sh --cluster all --list
+```
+
+A recriação é necessária para reler o ambiente; mudar só o arquivo local ou
+executar `restart` não atualiza as variáveis do container.
+A verificação autenticada de 2026-11-03 encontrou Qwen no GPU do VLAB e em
+RAM do CEOS. Uma geração real curta no VLAB ainda excedeu 40 segundos:
+modelo carregado não equivale a inferência saudável. A prioridade corrigida
+precisa ser verificada no gateway depois do deploy; isso não declara o
+problema de geração resolvido.
 
 ### Credenciais
 
@@ -222,7 +250,7 @@ cd ~/second-brain-automation/LXC_4_litellm
 chmod +x ufsc-models.sh                 # só na primeira vez, se o bit se perder
 
 ./ufsc-models.sh --list                 # só lista instalados + carregados
-./ufsc-models.sh                        # ceos: carrega qwen3.8:27b se faltar
+./ufsc-models.sh                        # vlab: carrega qwen3.8:27b se faltar
 ./ufsc-models.sh --model llama3.3:70b   # outro modelo
 ./ufsc-models.sh --keep-alive 8h        # quanto tempo fica em memória (padrão: 4h)
 ./ufsc-models.sh --cluster all          # ceos + vlab
@@ -230,7 +258,7 @@ chmod +x ufsc-models.sh                 # só na primeira vez, se o bit se perde
 
 | Opção | Padrão | O que faz |
 |---|---|---|
-| `--cluster ceos\|vlab\|all` | `ceos` | Qual cluster consultar/carregar |
+| `--cluster ceos\|vlab\|all` | `vlab` | Qual cluster consultar/carregar |
 | `--model` | `qwen3.8:27b` | Modelo a carregar (precisa estar instalado no cluster) |
 | `--keep-alive` | `4h` | Tempo em memória depois do último uso (formato Ollama: `30m`, `4h`) |
 | `--list` | — | Só lista, não carrega nada |
@@ -238,9 +266,10 @@ chmod +x ufsc-models.sh                 # só na primeira vez, se o bit se perde
 
 Pontos de atenção:
 
-- **O default é o ceos de propósito**: o vlab trava em `POST` (ver "Status
-  conhecido" abaixo), então `--cluster vlab` lista normalmente, mas a carga
-  espera o `--load-timeout` e falha.
+- **O default é VLAB** para acompanhar a prioridade do gateway. Use
+  `--cluster ceos` para inspecionar o fallback e `--cluster all` para comparar
+  ambos. `--list` consulta metadados; não executa geração e não prova que uma
+  chamada real vai responder.
 - **Cluster compartilhado**: o `/api/ps` mostra os modelos carregados por
   *todo mundo*, não só os teus. Um 27B ocupa ~26GB de VRAM — `keep-alive`
   longo segura esse espaço pra outros usuários.

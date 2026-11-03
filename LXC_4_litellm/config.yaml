@@ -77,30 +77,25 @@ model_list:
   # pelo free tier do OpenRouter — sem sentido duplicar isso com latência
   # extra de VPN. Critério de cada um documentado inline.
 
-  # Dois clusters da UFSC, mesmo Basic Auth do vlab não é exigido no ceos
-  # (testado manualmente). Modelos que existem nos dois (llama3.3:70b,
-  # qwen3.8:27b, glm-ocr:latest) ganham DUAS entradas com o mesmo
-  # model_name — o Router do LiteLLM (routing_strategy: least-busy +
-  # num_retries, já configurado abaixo) trata isso como um pool e faz
-  # retry/cooldown automático se uma das duas falhar, sem precisar de
-  # lógica de fallback separada. ceos vem primeiro porque é o confirmado
-  # funcionando agora (vlab trava em POST — ver "Status conhecido" no
-  # readme); se a UFSC resolver o DGX, o pool já absorve isso sozinho.
-  # timeout em 90s: cobre um cold-load real (~40-45s, medido) sem esperar
-  # os 600s antigos num travamento de verdade do vlab.
-
-  # 72B no ceos (confirmado) + 125B MoE no vlab (trava hoje, mas fica no
-  # pool pra quando for corrigido) — nenhum cabe nos 12GB do Apollo.
+  # VLAB is primary (order 1); CEOS is fallback (order 2).
+  # Entries sharing a model_name are load-balanced unless order is explicit.
+  # No retries on a failed UFSC deployment: proceed to the next order tier.
+  # Vision's two 50-second attempts fit the guided client's 120-second deadline.
+  # The frontier alias changes model size on fallback (122B VLAB -> 72B CEOS).
   - model_name: ufsc-frontier
     litellm_params:
       model: openai/qwen2.5:72b
       api_base: os.environ/UFSC_CEOS_OLLAMA_API_BASE
+      order: 2
+      num_retries: 0
       api_key: "none"
       timeout: 90
   - model_name: ufsc-frontier
     litellm_params:
       model: openai/qwen3.5:122b
       api_base: os.environ/UFSC_OLLAMA_API_BASE
+      order: 1
+      num_retries: 0
       api_key: "none"
       extra_headers:
         Authorization: os.environ/UFSC_OLLAMA_AUTH_HEADER
@@ -112,12 +107,16 @@ model_list:
     litellm_params:
       model: openai/llama3.3:70b
       api_base: os.environ/UFSC_CEOS_OLLAMA_API_BASE
+      order: 2
+      num_retries: 0
       api_key: "none"
       timeout: 90
   - model_name: ufsc-llama70b
     litellm_params:
       model: openai/llama3.3:70b
       api_base: os.environ/UFSC_OLLAMA_API_BASE
+      order: 1
+      num_retries: 0
       api_key: "none"
       extra_headers:
         Authorization: os.environ/UFSC_OLLAMA_AUTH_HEADER
@@ -129,16 +128,20 @@ model_list:
     litellm_params:
       model: openai/qwen3.8:27b
       api_base: os.environ/UFSC_CEOS_OLLAMA_API_BASE
+      order: 2
+      num_retries: 0
       api_key: "none"
-      timeout: 90
+      timeout: 50
   - model_name: ufsc-vision
     litellm_params:
       model: openai/qwen3.8:27b
       api_base: os.environ/UFSC_OLLAMA_API_BASE
+      order: 1
+      num_retries: 0
       api_key: "none"
       extra_headers:
         Authorization: os.environ/UFSC_OLLAMA_AUTH_HEADER
-      timeout: 90
+      timeout: 50
 
   # Modelo especializado em OCR — categoria própria, nada parecido no
   # resto do stack (não é um vision-chat genérico, é dedicado a extração
@@ -147,12 +150,16 @@ model_list:
     litellm_params:
       model: openai/glm-ocr:latest
       api_base: os.environ/UFSC_CEOS_OLLAMA_API_BASE
+      order: 2
+      num_retries: 0
       api_key: "none"
       timeout: 90
   - model_name: ufsc-ocr
     litellm_params:
       model: openai/glm-ocr:latest
       api_base: os.environ/UFSC_OLLAMA_API_BASE
+      order: 1
+      num_retries: 0
       api_key: "none"
       extra_headers:
         Authorization: os.environ/UFSC_OLLAMA_AUTH_HEADER

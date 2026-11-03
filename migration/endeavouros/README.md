@@ -1,9 +1,11 @@
 # EndeavourOS VM + Apollo migration
 
-Status: tooling prepared; **no lab machines have been changed**. SSH from the
-implementation session returned `No route to host`. Run the host steps from the
-workstation terminal that can reach the lab. Do not run VM-only steps on the
-physical notebook. Source notebook and original Apollo LXC remain rollback copies.
+Status (2026-10-31): **VM 100 restored and first EndeavourOS desktop boot confirmed
+by the user**, with networking disconnected. GPU passthrough and Apollo migration
+remain pending. SSH from the implementation session returned `No route to host`;
+the user executes lab steps from their reachable terminal. Do not run VM-only steps
+on the physical notebook. Source notebook and original Apollo LXC remain rollback
+copies.
 
 ## Recorded inventory and decisions
 
@@ -17,7 +19,7 @@ physical notebook. Source notebook and original Apollo LXC remain rollback copie
 | Source system disk | 119.2 GiB, formerly `sdb`: 2 GiB EFI + Btrfs; about 104 GiB used |
 | Excluded disk | 931.5 GiB, formerly `sda`, mounted at `/mnt/dados` |
 | Image repository | Mini PC `192.168.0.12:/storage`, about 880 GiB free |
-| Original Apollo | LXC 110 per repo; **verify live**, IP `192.168.0.217` |
+| Original Apollo | LXC 110 (`apollo`) confirmed running in supplied preflight; IP `192.168.0.217` per existing configuration |
 | Target VM | Independent clone, 160 GiB disk, 8 vCPUs, 32 GiB fixed RAM |
 | Interaction | Direct monitor on RTX 3060; USB keyboard/mouse on Proxmox |
 | Inference | Manual start; both services stopped for gaming |
@@ -25,6 +27,80 @@ physical notebook. Source notebook and original Apollo LXC remain rollback copie
 Host maintenance reboot is accepted. Primary LiteLLM remote routes remain in
 their existing container. There is no automatic synchronization of the two OS
 installations. Never attach the original notebook disks directly to the VM.
+
+### Proxmox preflight verified from user-supplied output (2026-10-29)
+
+- IOMMU groups are present. Group **9** contains only the RTX 3060 VGA function
+  `0000:10:00.0` (`10de:2503`) and its audio function `0000:10:00.1`
+  (`10de:228e`). This satisfies the isolation check; guest behavior still needs
+  validation. Use these BDFs after rechecking them before the maintenance reboot.
+- The RTX 3060 currently uses `nvidia`; its audio uses `snd_hda_intel`.
+  Leave ownership unchanged until the backup and restore stages are complete.
+- Integrated AMD graphics `0000:30:00.0` use `amdgpu` in separate group 12.
+  Confirm firmware primary-display selection before relying on this for host output.
+- Group 10 combines chipset USB, SATA, Wi-Fi, and the host Ethernet controller.
+  Do not pass this group/controller to the VM. Continue with individual USB devices.
+- Host `local-lvm` has about 588 GiB free and memory reports 37 GiB available.
+  Apollo is running; recheck memory after stopping it before assigning VM RAM.
+- `nvme0n1` appears as a 953.9 GiB disk without partitions/filesystem in this
+  output. That does **not** establish that it is empty or safe to overwrite.
+  Exclude it and the existing NTFS disk from migration writes.
+- No keyboard/mouse is visible in the supplied USB inventory. Connect the intended
+  peripherals and identify their actual USB IDs/ports before attaching them.
+
+### Execution progress (user-run, through 2026-10-31)
+
+- Source image is named **`endeavour-system`**; EFI and Btrfs Partclone image
+  verification logs both report 100% completion and a successful image check.
+  The image directory contains approximately 98 GiB. Its exact NFS subdirectory
+  should be confirmed from the Mini PC rather than inferred from the image name.
+- Clonezilla ISO `3.3.3-37-amd64` passed SHA-256 verification on notebook and host.
+- VM **100**, `endeavour-vm`, uses q35/OVMF, 8 vCPUs, CPU `host`, 4 GiB fixed
+  staging RAM, a 160 GiB VirtIO SCSI disk, and a 4 MiB EFI disk on `local-lvm`.
+  Host disk inventory confirms this storage is on SATA SSD `sda` (`SSD 1TB`,
+  ROTA=0), not the HDD or NVMe. Its MAC is `BC:24:11:6C:F6:60` on `vmbr0`.
+- Restore completed and powered the VM off. Rescue mounting confirmed original
+  filesystem UUIDs and all five Btrfs mounts. Inside the cloned-root chroot,
+  `dracut --force --no-hostonly --kver 6.18.57-2-lts` rebuilt the primary LTS
+  initramfs with persistent VirtIO driver additions. Both GRUB EFI installs and
+  configuration generation completed without errors.
+- Clone hostname is `endeavour-vm`; `/etc/machine-id` was emptied for first-boot
+  regeneration, the D-Bus machine ID was linked to it, and the HDD mount was
+  commented out. Original identity/config files are in `/root/vm-migration-backup`.
+- Tailscale system service, `syncthing@schiva`, and global Syncthing user service
+  were masked. Copied Tailscale state and SSH host keys were moved into the clone's
+  backup directory; fresh SSH host keys were generated. The original desktop
+  autostart directory (containing `Nextcloud.desktop`) was backed up and replaced
+  with an empty directory owned by `schiva`. Desktop session restoration and
+  user-specific services still need review before network access.
+- Rescue SSH worked from Proxmox to `user@192.168.0.191` but not directly from
+  the user's Mac. This is a temporary Clonezilla address, not the guest's final IP.
+- Boot order is now `scsi0`; NIC is `link_down=1`; VM autostart remains off.
+  First offline EndeavourOS desktop boot works but is slow through noVNC with
+  staging resources. Disk growth, resource increase, GPU/USB passthrough, Apollo
+  export/installation/cutover, and acceptance checks remain pending.
+
+### Notebook boot layout verified from user-supplied output
+
+- Current EFI loader is GRUB; installed package is GRUB `2:2.16-1` while the
+  currently booted EFI binary reports 2.14. Preserve GRUB and reinstall the guest
+  EFI binary after restoring. `systemd-boot not installed` is expected here.
+- Initramfs generator: `dracut 112_eos-1`. Secure Boot is disabled.
+- Source system disk is identified in EFI as ADATA SU810NS38 SATA 128 GB. Verify
+  its serial before capture; device letters are not stable between boot media.
+- EFI UUID `128E-A280`, mounted at `/boot/efi`; Btrfs UUID
+  `fe421868-78de-40f5-a0d8-6fa996399c6e`.
+- Mount `@` at `/`, `@home` at `/home`, `@cache` at `/var/cache`, `@log` at
+  `/var/log`, and `@swap` at `/swap`. Preserve `/swap/swapfile`.
+  The nested `var/lib/portables` and `var/lib/machines` subvolumes are also included
+  in the whole-disk image; they do not need separate fstab mount entries.
+- The excluded HDD is already `nofail,x-systemd.automount` in fstab. It is not a
+  required root-boot mount; comment its entry in the clone to avoid stale automounts.
+- Installed runtime kernel package shown is `linux-lts 6.18.57-2` with matching
+  headers; `linux-headers` alone does not prove the regular `linux` kernel is
+  installed. Verify actual kernel images/modules when regenerating the clone.
+- Existing NVIDIA stack is `nvidia-580xx-dkms`/`nvidia-580xx-utils`. Preserve the
+  source image before changing this stack; test driver/CUDA compatibility in the VM.
 
 ## 1. Inventory, export Apollo, and prepare media
 
@@ -140,18 +216,32 @@ required. **All edits below target the mounted clone, never the notebook.**
 - Disable copied Syncthing system/user units and Obsidian/other sync autostarts.
   Do not launch Obsidian until LiveSync is disabled or reviewed for this clone.
   Preserve the notebook as the existing Hermes vault source.
-- In an `arch-chroot`, add `virtio_pci`, `virtio_scsi`, and `virtio_blk` using the
-  **installed** initramfs generator. With mkinitcpio, preserve existing `MODULES`
-  entries and regenerate with `mkinitcpio -P`; with dracut use a persistent
-  `add_drivers` configuration and regenerate with `dracut --regenerate-all --force`.
-- Repair the **existing** bootloader, preserving Btrfs `rootflags=subvol=@`.
-  For GRUB, reinstall its EFI loader into the mounted EFI directory and regenerate
-  its config. For systemd-boot, install to the recorded ESP and repair loader entries
-  referencing the recorded kernel/initramfs paths. Source machine NVRAM entries
-  are not copied into OVMF. Do not switch bootloaders during migration.
+- Use the confirmed **dracut + GRUB** procedure below, preserving Btrfs
+  `rootflags=subvol=@`. Source machine NVRAM entries are not copied into OVMF.
+  Do not switch bootloaders during migration.
 - Grow the final Btrfs partition to the end of the 160 GiB virtual disk using the
   rescue partition editor, preserving its start sector and filesystem UUID. Then
   run `btrfs filesystem resize max` against the mounted Btrfs filesystem.
+
+After mounting the clone's root, recorded subvolumes, and EFI in the rescue VM,
+enter `arch-chroot /mnt`. Run the following **only inside that cloned-root chroot**:
+
+```bash
+mkdir -p /etc/dracut.conf.d
+cat > /etc/dracut.conf.d/90-endeavour-vm.conf <<'EOF'
+add_drivers+=" virtio_pci virtio_scsi virtio_blk "
+EOF
+dracut --regenerate-all --force
+grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=EndeavourOS
+grub-install --target=x86_64-efi --efi-directory=/boot/efi --removable --no-nvram
+grub-mkconfig -o /boot/grub/grub.cfg
+```
+
+Verify regeneration succeeds for each installed kernel, the generated GRUB entries
+point to existing kernel/initramfs files and the cloned root UUID/subvolume, and
+the new OVMF entry/fallback loader exists. If dracut reports missing drivers or
+GRUB installation fails, remain in rescue and fix that before attempting normal boot.
+The fallback EFI loader allows booting independently of a persisted NVRAM entry.
 
 Boot the cloned installation from disk with the NIC still disconnected. Verify
 login and identities first. Then reconnect the NIC, use DHCP, regenerate SSH host
@@ -310,6 +400,8 @@ autostart preference only after recovery. No original disks/images are deleted.
 
 References: [Clonezilla NFS imaging](https://clonezilla.org/clonezilla-usage/general-live-use.php),
 [Proxmox PCI passthrough](https://github.com/proxmox/pve-docs/blob/master/qm-pci-passthrough.adoc).
+Boot repair: [dracut driver configuration](https://dracut-ng.github.io/dracut/man/dracut.conf.5.html),
+[GRUB EFI installation](https://www.gnu.org/software/grub/manual/grub/html_node/Installing-GRUB-using-grub_002dinstall.html).
 
 ## Local tooling checks
 

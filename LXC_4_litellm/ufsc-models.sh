@@ -7,9 +7,9 @@
 # ambiente — nada de credencial passa por aqui.
 #
 # Uso:
-#   ./ufsc-models.sh                      # ceos: lista + carrega qwen3.8:27b se faltar
+#   ./ufsc-models.sh                      # vlab: lista + carrega qwen3.8:27b se faltar
 #   ./ufsc-models.sh --list               # só lista, não carrega nada
-#   ./ufsc-models.sh --cluster vlab       # vlab (hoje trava em POST — ver readme)
+#   ./ufsc-models.sh --cluster ceos       # fallback CEOS
 #   ./ufsc-models.sh --cluster all        # os dois
 #   ./ufsc-models.sh --model llama3.3:70b --keep-alive 2h
 set -euo pipefail
@@ -26,7 +26,7 @@ import urllib.error
 import urllib.request
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--cluster", choices=["ceos", "vlab", "all"], default="ceos")
+ap.add_argument("--cluster", choices=["ceos", "vlab", "all"], default="vlab")
 ap.add_argument("--model", default="qwen3.8:27b")
 ap.add_argument("--keep-alive", default="4h", help="quanto tempo o modelo fica em memória")
 ap.add_argument("--list", action="store_true", help="só lista, não carrega")
@@ -68,7 +68,7 @@ def show_loaded(name):
 
 
 rc = 0
-for name in (["ceos", "vlab"] if args.cluster == "all" else [args.cluster]):
+for name in (["vlab", "ceos"] if args.cluster == "all" else [args.cluster]):
     print(f"== {name} ==")
     try:
         available = [m["name"] for m in call(name, "/api/tags").get("models", [])]
