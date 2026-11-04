@@ -180,9 +180,66 @@ not qualify the revised smoke test or the full Hindsight gate as passed. Reporte
 request times were 90.499 seconds (English), 12.252 seconds (Portuguese), and
 32.291 seconds (English diagnostic); the source of that variation is unverified.
 
-For AFFiNE's read-only MCP probe, create a scoped credential through its normal
-settings UI, and supply it through `AFFINE_MCP_TOKEN` in the invoking shell's
-environment. Supply `AFFINE_WORKSPACE_ID` the same way. Do not put tokens in command
+At 21:04 UTC, probes run on `sb-litellm` reached Proxmox SSH, Hermes MCP,
+LiteLLM, Postgres, AFFiNE, and Mini PC SSH. Notebook SSH at `100.80.3.58:22`
+timed out; its power, VPN, and SSH state remain unverified. Router inventory
+identified LiteLLM image digest
+`sha256:89ccaccfda9083f7693777597ca27f8ffca12045e4fa9277155fb7c5f06e68b2`,
+about 4 GiB free on the working filesystem, and about 1.6 GiB reported available
+memory. A separate health check returned HTTP 200; the running process started
+at 20:54 UTC and reported one restart. These qualify reachability and local
+liveness subchecks, not full G0: source identity, other-host capacity, and backup
+restoration still require evidence. Notebook failure keeps Obsidian snapshot
+availability and freshness open under G1.
+
+Subsequent server-side requests confirmed AFFiNE `0.27.4`, `Selfhosted`, initialized,
+with `Comment`, `LocalWorkspace`, and `CopilotEmbedding` features; `Copilot` was
+absent. That release guards its native MCP controller with `copilot.enabled` and
+restricts advertised write tools to development/canary environments. At 21:11 UTC,
+the live MCP initialization probe returned HTTP 403 with `Copilot is disabled.`
+Native MCP fails the access gate as configured. AFFiNE can remain a source through
+a separately verified adapter or explicit exports. The user subsequently selected
+a manual AFFiNE import for the pilot while deferring continuous-sync repairs.
+Released `0.27.4` source confirms an Obsidian-folder importer (with wiki-link and
+folder handling) and a Markdown ZIP importer, independent of Copilot. Manual import
+still needs a live check; it does not qualify automated read/write publishing.
+Hermes `/health` reported `/vault`, `/skills`, and `/opt/data` present;
+this establishes directory existence, not a mounted/readable vault or working MCP
+session. `/mcp/` redirected to `/mcp`, `/mcp/mcp` returned 404, and POST `/mcp`
+returned 405 with `Allow: GET`. A subsequent GET returned HTTP 200,
+`Content-Type: text/event-stream`, and an `endpoint` event pointing to
+`/mcp/messages/?session_id=...`, confirming SSE endpoint availability. Its OpenAPI
+reports app version `1.0.0` and REST routes for vault listing/reading, search, and
+user/session memory. This differs from the repository's version `2.0.0` server;
+the deployed service needs inventory before any transport migration. Full MCP
+initialization and actual source access remain unverified; the read-only REST
+routes can establish source access independently.
+Subsequent REST probes returned zero notes from `/vault/notes` and no string
+`content` from `/memory/user` or `/memory/session`. G1 remains blocked for the
+pilot corpus until the mount and real memory-file locations are inspected on
+Hermes. This does not establish an empty original vault or absent agent memory:
+the API may be looking at an unmounted directory or different storage paths.
+Inventory from the actual `sb-hermes` host subsequently confirmed its LAN address
+`192.168.0.213` and Tailscale address `100.81.255.52`. `findmnt -T
+/mnt/obsidian-vault` resolved to the LXC root ext4 filesystem, not SSHFS. The MCP
+container binds that local path to `/vault`, establishing the missing live mount
+as a source-access blocker. The fstab source matches the documented notebook
+`schiva@100.80.3.58:/home/schiva/Documentos/Obsidian Vault`; its mount unit timed
+out at 10:44 UTC. A subsequent Tailscale ping from Hermes reached
+`schiva-g77588` directly in 1 ms, making a retry of the existing mount the next
+recovery step. MCP reads `root_hermes_data` at `/opt/data`, while the running
+agent writes to the different `lxc_2_hermes_mcp_hermes_data` volume at that path.
+This is a confirmed data-volume mismatch; actual memory-file locations still
+need inspection before replacing the MCP container's mapping.
+SilverBullet `192.168.0.12:3011` timed out from LiteLLM, leaving G4 open. Notebook
+SSH timeout from LiteLLM does not establish notebook downtime: the documented
+Tailscale participant for the vault mount is Hermes, not the LiteLLM host.
+
+After an AFFiNE deployment passes the MCP feature gate, its read-only probe uses
+a scoped credential from the normal settings UI through `AFFINE_MCP_TOKEN` in
+the invoking shell's environment. Supply `AFFINE_WORKSPACE_ID` the same way.
+The currently tested deployment fails that feature gate; no credential is needed
+to establish its present restriction. Do not put tokens in command
 arguments, commit evidence reports, or paste `.env`/full Docker inspect output.
 
 ```bash
@@ -204,4 +261,66 @@ switch to canary just to expose MCP writes.
 The vault probe refuses to scan an underlying local directory when SSHFS is absent.
 Its sample hashes still need comparison against the active notebook, especially
 during the notebook/VM migration. It never modifies LiveSync or CouchDB. Snapshot
-collection and freshness checks are subsequent G1 work, not implemented here.
+collection and freshness remain separate G1 checks. Use the snapshot helper below
+for collection; the inventory probe itself does not create snapshots.
+
+## Persistent pilot copy and AFFiNE import
+
+`knowledge-snapshot.py` creates a server-side Markdown copy and a ZIP for the
+agreed pilot of up to 30 notes. It reads the host's vault directly, avoiding the
+MCP container's stale bind mount and mismatched memory volume. It does not copy
+Hermes memory until the correct memory location is verified.
+
+Run on **sb-hermes**, from the repository root, after synchronizing the new script
+into that checkout and while the existing notebook SSHFS mount is working:
+
+```bash
+python3 scripts/knowledge-snapshot.py \
+  --source /mnt/obsidian-vault \
+  --output /root/knowledge-pilot \
+  --limit 30
+```
+
+From `LXC_2_hermes_mcp/`, the script path is `../scripts/knowledge-snapshot.py`.
+An existing output directory is never overwritten; choose a different output path
+for another capture. A missing or different SSHFS mount, empty source, changed
+file, or exceeded import limit stops the export. `--source-kind directory` is an
+explicit alternative for a separately verified local copy; it does not verify
+that copy's freshness.
+
+The result contains:
+
+- `vault/`: original Markdown bytes and folder paths, plus a generated linked index.
+- `affine-pilot.zip`: a transport archive containing that folder.
+- `manifest.json`: source identity, capture times, selection counts, per-note hashes,
+  source modification times, and the archive hash. The index is marked as derived.
+
+Selection uses relative path order. Hidden/configuration directories, generated
+`_AgentKnowledge` content, symlinks, and non-Markdown files are excluded. Notes with
+uppercase Markdown extensions get a lowercase `.md` extension in the copy for the
+importer; original filenames remain in the manifest. Case/Unicode path collisions
+are rejected. Media/attachments are excluded from this first pilot, and links to
+notes outside the selected sample may remain unresolved.
+
+The browser importer in AFFiNE 0.27.4 allows at most 32 MiB total, 8 MiB per file,
+1000 files, and 250 documents. The exporter includes its generated index in these
+limits and allows at most 249 selected notes. Outputs are private to the invoking
+user. The raw folder remains readable when the notebook goes offline.
+
+On the computer running AFFiNE, retrieve `affine-pilot.zip` using your existing
+SFTP/SCP access, extract it, choose **Import → Obsidian**, and select the extracted
+`vault` folder. The ZIP is for transport; the Obsidian importer takes a folder.
+Validate the imported note count (selected notes plus one index), folder layout,
+Portuguese accents, a wiki link between two included notes, and source content.
+This is an initial copy into AFFiNE, not an automatic synchronization or upsert:
+re-importing can create duplicate pages. Use a dedicated pilot workspace/area.
+Human changes in AFFiNE do not flow back to Obsidian through this workflow.
+
+The server manifest starts with `affine_import_verified: false`; only an actual
+successful import establishes that gate. Nightly source reads can use the server
+copy once it is captured and verified. The notebook's connection is needed for
+refreshing this copy until the independent source-sync layer is addressed.
+
+```bash
+python3 -m unittest discover -s scripts -p 'test_knowledge_snapshot.py' -v
+```
