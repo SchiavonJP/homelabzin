@@ -1,0 +1,16 @@
+{
+  "mode": "local_external",
+  "api_url": "http://sb_hindsight_pilot:8888",
+  "bank_id": "hermes-experience-pilot",
+  "memory_mode": "hybrid",
+  "recall_prefetch_method": "recall",
+  "recall_types": ["observation", "world", "experience"],
+  "recall_budget": "mid",
+  "recall_max_tokens": 2000,
+  "retain_tags": "agent:hermes",
+  "retain_source": "hermes",
+  "auto_recall": true,
+  "auto_retain": false,
+  "retain_async": true,
+  "timeout": 150
+}

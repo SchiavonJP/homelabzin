@@ -1,0 +1,44 @@
+{
+  "async": false,
+  "items": [
+    {
+      "content": "O projeto Cedro guarda snapshots por 14 dias. Decisão do responsável: os backups ficam locais.",
+      "document_id": "source-a",
+      "timestamp": "unset",
+      "metadata": {
+        "source_id": "a",
+        "fixture": "cedro-synthetic"
+      },
+      "tags": [
+        "gate:synthetic",
+        "language:pt"
+      ]
+    },
+    {
+      "content": "O projeto Cedro guarda snapshots por 30 dias. Esta nota não explica a divergência.",
+      "document_id": "source-b",
+      "timestamp": "unset",
+      "metadata": {
+        "source_id": "b",
+        "fixture": "cedro-synthetic"
+      },
+      "tags": [
+        "gate:synthetic",
+        "language:pt"
+      ]
+    },
+    {
+      "content": "Um agente sugeriu backups na nuvem para Cedro. O responsável não aprovou essa sugestão.",
+      "document_id": "source-c",
+      "timestamp": "unset",
+      "metadata": {
+        "source_id": "c",
+        "fixture": "cedro-synthetic"
+      },
+      "tags": [
+        "gate:synthetic",
+        "language:pt"
+      ]
+    }
+  ]
+}

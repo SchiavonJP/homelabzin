@@ -1,0 +1,61 @@
+name: knowledge-pilot
+
+# Isolated acceptance environment. Keep Hermes's production memory provider
+# unchanged until retain/recall/reflect, deletion and recovery tests pass.
+services:
+  hindsight:
+    # Release 1.1.0-slim, verified against the public registry on 2026-11-05 UTC.
+    image: ghcr.io/vectorize-io/hindsight@sha256:fbc37d194bce007b6cce2fd9f66cd7f8c050bd18b80e662090a92835d9cb191d
+    container_name: sb_hindsight_pilot
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8888:8888"
+      - "127.0.0.1:9999:9999"
+    environment:
+      HINDSIGHT_API_DATABASE_URL: ${HINDSIGHT_API_DATABASE_URL:?Set the isolated pilot database URL}
+      HINDSIGHT_API_LLM_PROVIDER: openai
+      HINDSIGHT_API_LLM_BASE_URL: http://192.168.0.211:4000/v1
+      HINDSIGHT_API_LLM_API_KEY: ${HINDSIGHT_API_LLM_API_KEY:?Use the existing gateway credential}
+      HINDSIGHT_API_LLM_MODEL: ${HINDSIGHT_PILOT_MODEL:?Choose a model that passed the smoke test}
+      HINDSIGHT_API_LLM_REASONING_EFFORT: none
+      HINDSIGHT_API_LLM_EXTRA_BODY: '{"allowed_openai_params":["reasoning_effort"],"timeout":120}'
+      HINDSIGHT_API_LLM_MAX_CONCURRENT: "1"
+      HINDSIGHT_API_LLM_TIMEOUT: "150"
+      HINDSIGHT_API_LLM_MAX_RETRIES: "0"
+      HINDSIGHT_API_EMBEDDINGS_PROVIDER: openai
+      HINDSIGHT_API_EMBEDDINGS_OPENAI_BASE_URL: http://192.168.0.211:4000/v1
+      HINDSIGHT_API_EMBEDDINGS_OPENAI_API_KEY: ${HINDSIGHT_API_LLM_API_KEY:?Use the existing gateway credential}
+      HINDSIGHT_API_EMBEDDINGS_OPENAI_MODEL: embed
+      # Autodetect the verified 1024 dimensions. Sending a dimensions override
+      # is rejected by LiteLLM for the BGE-M3 route.
+      # Explicit retrieval baseline; neural reranking still needs its own gate.
+      HINDSIGHT_API_RERANKER_PROVIDER: rrf
+      HINDSIGHT_API_VECTOR_EXTENSION: pgvector
+      HINDSIGHT_API_TEXT_SEARCH_EXTENSION: native
+      # Preserve Portuguese and English tokens without language-specific stemming.
+      HINDSIGHT_API_TEXT_SEARCH_EXTENSION_NATIVE_LANGUAGE: simple
+      HINDSIGHT_API_DB_POOL_MIN_SIZE: "1"
+      HINDSIGHT_API_DB_POOL_MAX_SIZE: "5"
+      HINDSIGHT_API_WORKER_MAX_SLOTS: "2"
+      HINDSIGHT_API_WORKER_CONSOLIDATION_RESERVED_SLOTS: "0"
+      # Run consolidation explicitly during acceptance, before nightly scheduling.
+      HINDSIGHT_API_ENABLE_AUTO_CONSOLIDATION: "false"
+      HINDSIGHT_API_LLM_TRACE_ENABLED: "false"
+      OMP_NUM_THREADS: "1"
+      TZ: America/Sao_Paulo
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8888/health', timeout=5).read()"]
+      interval: 20s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+          cpus: "1.0"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "2"

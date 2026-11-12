@@ -1,0 +1,155 @@
+# Curated profile approved 2026-11-09; deployment evidence is in model-audit-2026-11-09.json.
+# OpenRouter is free-only. Catalog presence is not a quality benchmark.
+general_settings:
+  request_timeout: 600
+
+model_list:
+  # Four OpenRouter choices, each with a distinct purpose.
+  - model_name: default-agent
+    litellm_params:
+      model: openrouter/nvidia/nemotron-3.5-super-vl:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: coder
+    litellm_params:
+      model: openrouter/cohere/north-mini-code:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: fast
+    litellm_params:
+      model: openrouter/google/gemma-4-26b-a4b-it:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: reasoning
+    litellm_params:
+      model: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  # Generalist and vision are separate public choices using the same model
+  # until a better vision deployment has been validated. Both retain VLAB
+  # priority and the existing 180-second deployment timeout.
+  - model_name: generalist
+    litellm_params:
+      model: openai/qwen3.8:27b
+      api_base: os.environ/UFSC_OLLAMA_API_BASE
+      order: 1
+      num_retries: 0
+      api_key: "none"
+      extra_headers:
+        Authorization: os.environ/UFSC_OLLAMA_AUTH_HEADER
+      timeout: 180
+
+  - model_name: generalist
+    litellm_params:
+      model: openai/qwen3.8:27b
+      api_base: os.environ/UFSC_CEOS_OLLAMA_API_BASE
+      order: 2
+      num_retries: 0
+      api_key: "none"
+      timeout: 180
+
+  - model_name: vision
+    litellm_params:
+      model: openai/qwen3.8:27b
+      api_base: os.environ/UFSC_OLLAMA_API_BASE
+      order: 1
+      num_retries: 0
+      api_key: "none"
+      extra_headers:
+        Authorization: os.environ/UFSC_OLLAMA_AUTH_HEADER
+      timeout: 180
+
+  - model_name: vision
+    litellm_params:
+      model: openai/qwen3.8:27b
+      api_base: os.environ/UFSC_CEOS_OLLAMA_API_BASE
+      order: 2
+      num_retries: 0
+      api_key: "none"
+      timeout: 180
+
+  # Explicit large-model choice. Do not silently substitute Qwen2.5 72B.
+  - model_name: frontier
+    litellm_params:
+      model: openai/qwen3.5:122b
+      api_base: os.environ/UFSC_OLLAMA_API_BASE
+      num_retries: 0
+      api_key: "none"
+      extra_headers:
+        Authorization: os.environ/UFSC_OLLAMA_AUTH_HEADER
+      timeout: 90
+
+  # Dedicated image-to-text OCR remains separate from general chat.
+  - model_name: ocr
+    litellm_params:
+      model: openai/glm-ocr:latest
+      api_base: os.environ/UFSC_OLLAMA_API_BASE
+      order: 1
+      num_retries: 0
+      api_key: "none"
+      extra_headers:
+        Authorization: os.environ/UFSC_OLLAMA_AUTH_HEADER
+      timeout: 90
+
+  - model_name: ocr
+    litellm_params:
+      model: openai/glm-ocr:latest
+      api_base: os.environ/UFSC_CEOS_OLLAMA_API_BASE
+      order: 2
+      num_retries: 0
+      api_key: "none"
+      timeout: 90
+
+  # Apollo's CPU embedding service is active; its GPU chat service is not.
+  - model_name: embed
+    litellm_params:
+      model: openai/bge-m3
+      api_base: http://192.168.0.217:8081/v1
+      api_key: "none"
+
+litellm_settings:
+  success_callback: ["langfuse"]
+  failure_callback: ["langfuse"]
+  request_timeout: 600
+
+router_settings:
+  routing_strategy: least-busy
+  num_retries: 1
+  timeout: 600
+  max_fallbacks: 1
+
+  # Validated aliases, not unregistered provider model IDs.
+  # No generic fallback for embeddings, OCR, or explicit UFSC routes.
+  fallbacks:
+    - default-agent: [fast]
+    - coder: [default-agent]
+    - fast: [default-agent]
+    - reasoning: [default-agent]
+
+  # Compatibility names remain callable but do not clutter model selection.
+  # These map chat to chat; local-only aliases are deliberately not sent cloudward.
+  model_group_alias:
+    ufsc-vision:
+      model: vision
+      hidden: true
+    ufsc-frontier:
+      model: frontier
+      hidden: true
+    ufsc-ocr:
+      model: ocr
+      hidden: true
+    agent:
+      model: default-agent
+      hidden: true
+    writer:
+      model: default-agent
+      hidden: true
+    extraction:
+      model: default-agent
+      hidden: true
+    auto-heavy:
+      model: default-agent
+      hidden: true
+    auto-light:
+      model: fast
+      hidden: true

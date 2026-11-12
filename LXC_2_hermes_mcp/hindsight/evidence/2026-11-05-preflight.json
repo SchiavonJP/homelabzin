@@ -1,0 +1,94 @@
+{
+  "recorded_at": "2026-11-05T02:45:12.905610+00:00",
+  "scope": "pilot preflight; aggregate metadata only",
+  "access": {
+    "via": "existing Proxmox SSH ControlMaster",
+    "hermes_ct": 107,
+    "router_ct": 105,
+    "data_ct": 104
+  },
+  "obsidian_snapshot": {
+    "capture_completed_at": "2026-11-04T05:24:44.047218+00:00",
+    "notes_copied": 30,
+    "notes_available": 101,
+    "archive_sha256": "27a631da826884b299d932178339f60da30387d95bc4547f97ef55b7e68d67e0",
+    "archive_crc_passed": true,
+    "note_hashes_passed": 30,
+    "live_notebook_hash_matches": 30,
+    "off_host_restore_verified_notes": 30,
+    "affine_import_verified": false,
+    "media_included": false
+  },
+  "hermes": {
+    "active_volume": "lxc_2_hermes_mcp_hermes_data",
+    "active_markdown_memories": 0,
+    "active_sqlite_sessions": 0,
+    "active_sqlite_messages": 0,
+    "legacy_volume": "root_hermes_data",
+    "legacy_sqlite_sessions": 2,
+    "legacy_sqlite_messages": 5,
+    "volumes_preserved": true,
+    "mcp_initialize_passed": true,
+    "mcp_tools_count": 13,
+    "legacy_mcp_vault_notes_returned": 0
+  },
+  "database": {
+    "server_version": "17.10",
+    "pgvector_version": "0.8.6",
+    "pg_trgm_version": "1.6",
+    "synthetic_restore_passed": true,
+    "restored_rows": 2,
+    "restored_vector_query_passed": true,
+    "dump_bytes": 2853,
+    "dump_sha256": "af54134b55ef354f9b228905f851a3b7422c7e1e0cc4356320e9d2cf18d8b550",
+    "existing_databases_modified": false
+  },
+  "embeddings": {
+    "model": "embed",
+    "provider_model": "openai/bge-m3",
+    "backend_host": "192.168.0.217",
+    "languages": [
+      "en",
+      "pt"
+    ],
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "finite_values": true,
+    "seconds": 1.705
+  },
+  "model_review": {
+    "report": "2026-11-05-model-smoke.json",
+    "fixture_version": 3,
+    "automatic_assertions_passed": true,
+    "english_question_review": "passed",
+    "portuguese_question_review": "passed",
+    "reviewer": "assistant",
+    "full_hindsight_gate_passed": false
+  },
+  "deployment_image": {
+    "tag": "1.1.0-slim",
+    "image": "ghcr.io/vectorize-io/hindsight@sha256:fbc37d194bce007b6cce2fd9f66cd7f8c050bd18b80e662090a92835d9cb191d",
+    "amd64_digest": "sha256:e71cecde455c05f4909cbe3f8d20c6db714c8e4878f15952b624e9d851a6b077",
+    "compressed_bytes": 541052426
+  },
+  "capacity": {
+    "hermes_memory_limit_mib": 4096,
+    "hermes_disk_free_bytes_before_pull": 11918876672,
+    "data_disk_free_bytes": 16101650432,
+    "proxmox_available_memory_bytes": 54134820864,
+    "proxmox_local_storage_available_kib": 4456508,
+    "proxmox_local_lvm_available_kib": 486283824,
+    "proxmox_local_backup_files": 0
+  },
+  "remaining": [
+    "AFFiNE manual import and UI verification",
+    "Hindsight retain/recall/reflect/consolidation/graph/update/delete/recovery acceptance",
+    "Selected AFFiNE source pages",
+    "Hermes integration",
+    "Nightly curation and question lifecycle",
+    "Independent source refresh",
+    "Off-host database backup and production recovery policy"
+  ]
+}

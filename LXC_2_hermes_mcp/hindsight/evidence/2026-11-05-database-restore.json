@@ -1,0 +1,45 @@
+{
+  "recorded_at": "2026-11-05T02:59:03.695165+00:00",
+  "scope": "isolated Hindsight pilot database; synthetic data only",
+  "status": "passed",
+  "tables": {
+    "banks": {
+      "rows": 1,
+      "row_digest": "e662132c702492ff40854bdc9fbdfba9"
+    },
+    "documents": {
+      "rows": 3,
+      "row_digest": "34a97c371589cfac30f015a590830ed3"
+    },
+    "memory_units": {
+      "rows": 5,
+      "row_digest": "309f10989959ad929655ee76f2a362a9"
+    },
+    "memory_links": {
+      "rows": 13,
+      "row_digest": "672ce80fe7680849f474e76c13cca496"
+    },
+    "entities": {
+      "rows": 6,
+      "row_digest": "4e6062095a531a4d0e96ea8917726d98"
+    },
+    "unit_entities": {
+      "rows": 11,
+      "row_digest": "30b72ae89c9a873b555008d7192b6d03"
+    }
+  },
+  "table_checks": {
+    "banks": true,
+    "documents": true,
+    "memory_units": true,
+    "memory_links": true,
+    "entities": true,
+    "unit_entities": true
+  },
+  "restored_vector_dimensions_counts": "1024|5",
+  "restored_as_role": "knowledge_pilot",
+  "archive_path": "/root/knowledge-gate-evidence/hindsight-pilot-20261105025857.dump",
+  "archive_bytes": 115498,
+  "archive_sha256": "5cee78919aecf405d928b202ec183111896dc0f6123b41208f4651058440db02",
+  "original_database_restored": false
+}

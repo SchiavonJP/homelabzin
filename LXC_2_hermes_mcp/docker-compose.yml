@@ -14,9 +14,9 @@ services:
       - ./mcp-config.json:/opt/data/mcp-config.json:ro  # MCP server do vault
     environment:
       # LLM provider — aponta para o LXC 4 (LiteLLM)
-      OPENAI_API_BASE: http://192.168.0.211:4000
+      OPENAI_BASE_URL: http://192.168.0.211:4000/v1
       OPENAI_API_KEY: ${LITELLM_MASTER_KEY}
-      HERMES_DEFAULT_MODEL: auto-heavy
+      # O modelo e a lista de seleção são persistidos em /opt/data/config.yaml.
 
       # Dashboard auth
       HERMES_DASHBOARD: "true"

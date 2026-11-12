@@ -1,0 +1,41 @@
+name: xereta
+services:
+  app:
+    build: .
+    image: xereta:0.6.0
+    container_name: sb_xereta
+    restart: unless-stopped
+    # Hindsight's accepted pilot binds to host loopback. Reuse it without
+    # changing that service's network, port exposure or production provider.
+    network_mode: host
+    env_file: ${XERETA_ENV_FILE:-/root/xereta/.env}
+    volumes:
+      - xereta_state:/data
+      - /root/skills:/skills:ro
+      - root_hermes_data:/opt/data:ro
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:3101/health/live',timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits: {memory: 512m, cpus: '1.0'}
+  worker:
+    image: xereta:0.6.0
+    container_name: sb_xereta_worker
+    restart: unless-stopped
+    command: [python, -m, app.worker]
+    network_mode: host
+    env_file: ${XERETA_ENV_FILE:-/root/xereta/.env}
+    volumes:
+      - xereta_state:/data
+    depends_on:
+      app: {condition: service_healthy}
+    deploy:
+      resources:
+        limits: {memory: 512m, cpus: '1.0'}
+volumes:
+  xereta_state:
+  root_hermes_data:
+    external: true

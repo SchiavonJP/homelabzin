@@ -1,0 +1,86 @@
+{
+  "recorded_at": "2026-11-05T03:13:28.124524+00:00",
+  "status": "passed",
+  "checks": {
+    "knowledge-gate-en-20261105-f0441d58": true,
+    "knowledge-gate-pt-86c4fe58c7": true
+  },
+  "before": {
+    "knowledge-gate-en-20261105-f0441d58": {
+      "memories": 5,
+      "memory_state_sha256": "1ff748b54d252507b45bfcaeddbf77284d843cfcb436be09e9a03f53a5dd4e20",
+      "graph_nodes": [
+        "08b8c15c-e12b-4054-8881-070f63248280",
+        "0a171922-7110-4b51-8687-b4b2c4f49e72",
+        "3ad0496f-8bd9-4a03-9603-87ed14eed52c",
+        "6adf8cef-4a52-40f7-bc14-fd3f31393fb5",
+        "907c48b1-ea74-4ddd-b350-b4d9ddd1840b"
+      ],
+      "graph_edges": 32,
+      "policy_present": {
+        "retain_mission": true,
+        "reflect_mission": true,
+        "observations_mission": true
+      }
+    },
+    "knowledge-gate-pt-86c4fe58c7": {
+      "memories": 8,
+      "memory_state_sha256": "3d682653ad8c7adffb310e9680279b4780e2e214ef1e73e64e333c6c217473a3",
+      "graph_nodes": [
+        "0c3bf4a0-007b-4e69-88f7-4f5a95bcc584",
+        "30c0411a-e06c-48f1-a045-31c173b868f4",
+        "40bc1652-a42c-460d-b7bd-86d9f45afa46",
+        "41916435-356e-4cf0-8f93-84f45821e7bc",
+        "5178b142-f25d-4655-bdf2-e27258513c8f",
+        "54dd55d2-6a27-491c-9e36-5e66419558d7",
+        "5b31c891-4357-4e13-8dca-61dcb8280ca4",
+        "743ea0cf-54bb-40ba-8d11-9a84f5d9a936"
+      ],
+      "graph_edges": 79,
+      "policy_present": {
+        "retain_mission": true,
+        "reflect_mission": true,
+        "observations_mission": true
+      }
+    }
+  },
+  "after": {
+    "knowledge-gate-en-20261105-f0441d58": {
+      "memories": 5,
+      "memory_state_sha256": "1ff748b54d252507b45bfcaeddbf77284d843cfcb436be09e9a03f53a5dd4e20",
+      "graph_nodes": [
+        "08b8c15c-e12b-4054-8881-070f63248280",
+        "0a171922-7110-4b51-8687-b4b2c4f49e72",
+        "3ad0496f-8bd9-4a03-9603-87ed14eed52c",
+        "6adf8cef-4a52-40f7-bc14-fd3f31393fb5",
+        "907c48b1-ea74-4ddd-b350-b4d9ddd1840b"
+      ],
+      "graph_edges": 32,
+      "policy_present": {
+        "retain_mission": true,
+        "reflect_mission": true,
+        "observations_mission": true
+      }
+    },
+    "knowledge-gate-pt-86c4fe58c7": {
+      "memories": 8,
+      "memory_state_sha256": "3d682653ad8c7adffb310e9680279b4780e2e214ef1e73e64e333c6c217473a3",
+      "graph_nodes": [
+        "0c3bf4a0-007b-4e69-88f7-4f5a95bcc584",
+        "30c0411a-e06c-48f1-a045-31c173b868f4",
+        "40bc1652-a42c-460d-b7bd-86d9f45afa46",
+        "41916435-356e-4cf0-8f93-84f45821e7bc",
+        "5178b142-f25d-4655-bdf2-e27258513c8f",
+        "54dd55d2-6a27-491c-9e36-5e66419558d7",
+        "5b31c891-4357-4e13-8dca-61dcb8280ca4",
+        "743ea0cf-54bb-40ba-8d11-9a84f5d9a936"
+      ],
+      "graph_edges": 79,
+      "policy_present": {
+        "retain_mission": true,
+        "reflect_mission": true,
+        "observations_mission": true
+      }
+    }
+  }
+}

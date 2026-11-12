@@ -1,0 +1,107 @@
+{
+  "ready": true,
+  "owner_login": true,
+  "agent_config_denied": true,
+  "agent_reference_search": true,
+  "model": "generalist",
+  "new_ingestion_paused": true,
+  "organization_paused": true,
+  "active_runs": 0,
+  "schedule": {
+    "hour": 3,
+    "timezone": "America/Sao_Paulo",
+    "last_due": "2026-11-09T03:00:00-03:00",
+    "enabled": true,
+    "id": 1,
+    "minute": 0,
+    "revision": 1
+  },
+  "automatic_mode": "automatic",
+  "automatic_paused": false,
+  "notes_per_day": 10,
+  "minutes_per_day": 20,
+  "karakeep_configured": false,
+  "catalogue_items": 0,
+  "old_tables_preserved": 19,
+  "protected_files_preserved": 42,
+  "version": "0.6.0",
+  "fresh_backup_restored": true,
+  "backup_sha256": "fe85ce54e20d272448319fffd4da63ff2bb8a0b328c7e71492df28db294da894",
+  "recorded_at": "2026-11-09T19:48:02.507293+00:00",
+  "release": "reference-library-karakeep",
+  "tests": {
+    "backend_passed": 135,
+    "backend_skipped_postgresql_only": 3,
+    "dedicated_postgresql_passed": 15,
+    "browser_passed": 11,
+    "backend_image_source_files_matched": 32
+  },
+  "canary": {
+    "gate": "reference-readiness-generalist-real-hindsight",
+    "passed": true,
+    "synthetic_readiness": true,
+    "model": "generalist",
+    "catalogue_items": 3,
+    "retained_sources": 1,
+    "unread_retention_calls": 0,
+    "grounded_citations": 2,
+    "unchanged_rerun_no_duplicate_work": true,
+    "shared_budget": true,
+    "metadata_organization_no_hindsight_calls": true,
+    "reflect_completed": true,
+    "owner_knowledge_approvals": 0
+  },
+  "live_after_startup": {
+    "catalogue_items": 3,
+    "protected_files_preserved_after_startup": 42,
+    "reference_index_published": true,
+    "native_link_targets_verified": 3,
+    "all_references_undigested": true,
+    "active_runs": 0,
+    "affine_approved": true,
+    "affine_paused": false,
+    "library_sync": {
+      "last_at": "2026-11-09T19:46:39.283511+00:00",
+      "next_at": "2026-11-09T20:01:39.283518+00:00"
+    },
+    "human_editor_navigation_verified": false
+  },
+  "migration": {
+    "migration_id": "ac12da6d-c7a3-408b-a8ce-a853e4343dba",
+    "reference_notes_created": 3,
+    "reference_ids": [
+      "bc058283-8d46-4d79-981e-34192c14530b",
+      "d12ae218-916c-4557-9862-5e13a621901c",
+      "5a27ef44-7819-46c9-8b5a-7618e1d5f49c"
+    ],
+    "originals_preserved": 72,
+    "unchanged_rerun_no_duplicates": true,
+    "native_relative_links_resolve": true,
+    "digestion_authorized": false,
+    "hindsight_or_digest_work_created": false,
+    "karakeep_items_migrated": 0,
+    "preview_total": 72,
+    "suggested_karakeep": 50,
+    "suggested_reference": 22,
+    "remaining_reference_candidates": 19,
+    "remaining_reading_queue": 50
+  },
+  "cleanup": {
+    "disposable_databases_removed": 3,
+    "restricted_roles_removed": 1,
+    "canary_bank_deleted": true,
+    "production_and_owner_proof_banks_preserved": true
+  },
+  "backup": {
+    "private_environment": true,
+    "checkout": true,
+    "state": true,
+    "karakeep_consistent_sqlite_and_assets": true,
+    "rollback_image": "xereta:rollback-before-0.6.0"
+  },
+  "pending_gates": [
+    "Karakeep API token, authenticated adapter check and private list setup",
+    "Reading-queue migration and owner classification of remaining items",
+    "Human navigation/backlink verification in Obsidian and SilverBullet"
+  ]
+}

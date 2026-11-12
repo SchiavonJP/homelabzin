@@ -1,0 +1,26 @@
+name: xereta-affine
+services:
+  reader:
+    image: ${XERETA_AFFINE_IMAGE:?Set the running AFFiNE image digest}
+    container_name: sb_xereta_affine_reader
+    restart: unless-stopped
+    network_mode: host
+    user: '10001:10001'
+    entrypoint: [node, /reader/service.cjs]
+    working_dir: /app
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs: ['/tmp:size=64m,mode=1777']
+    volumes:
+      - ./affine-reader:/reader:ro
+      - ../../scripts/knowledge-affine-reader.cjs:/scripts/knowledge-affine-reader.cjs:ro
+      - /root/xereta-affine:/state
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://192.168.0.221:3012/health/live').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits: {memory: 512m, cpus: '1.0'}

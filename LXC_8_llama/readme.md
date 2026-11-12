@@ -1,11 +1,28 @@
-# LXC 8 — Apollo (llama.cpp inference)
+# LXC 110 — Apollo (CPU embeddings)
 
-> **Codename:** Apollo  
-> **IP:** 192.168.0.217  
-> **Porta API:** 8080  
-> **URL pública:** https://apollo.joaopaulo.me  
+> **Codename:** Apollo
+>
+> **IP:** 192.168.0.217
+>
+> **Porta API:** 8081
+>
+> **Modelo ativo:** bge-m3-Q4_K_M (CPU)
 
-Nó de inferência local com GPU. Roda o `llama-server` (llama.cpp) com a RTX 3060 passada via LXC. Expõe uma API compatível com OpenAI consumida pelo LiteLLM (LXC 4).
+Estado em 2026-11-04: Apollo serve apenas embeddings bge-m3 na CPU. O serviço
+`llama-server` de chat está parado e desabilitado; os arquivos dos modelos foram
+preservados. A RTX 3060 pertence à VM via VFIO.
+
+O endpoint continua em `http://192.168.0.217:8081/v1/embeddings`, com vetores de
+1024 dimensões e o alias `embed` no LiteLLM. O contexto de 8192 tokens e o pooling
+existente foram preservados.
+
+`/etc/bge-embedding.env` usa `BGE_NGL=0`. O override
+`/etc/systemd/system/bge-embedding.service.d/cpu-only.conf` define
+`CUDA_VISIBLE_DEVICES=-1` e `LLAMA_ARG_DEVICE=none`. `bge-embedding.service` está
+habilitado e o LXC tem `onboot: 1`.
+
+Backups desta mudança: `/root/apollo-cpu-backup.cDteHs/110.conf` no Proxmox e
+`/root/apollo-cpu-backup-dbijbut0/` dentro do LXC.
 
 ---
 
@@ -13,23 +30,31 @@ Nó de inferência local com GPU. Roda o `llama-server` (llama.cpp) com a RTX 30
 
 The independent desktop VM migration, on-demand inference installer, GPU ownership
 steps, validation, and rollback are in [migration/endeavouros](../migration/endeavouros/README.md).
-This is prepared tooling, not a completed deployment. Keep this LXC intact until
-the VM has passed gaming and inference validation.
+The LXC currently retains the embedding endpoint at `192.168.0.217`; do not assign
+that address to the VM while this LXC is active. The CPU embedding configuration
+above supersedes the earlier plan to stop the entire LXC.
 
 ## Hardware alocado
 
 | Recurso | Valor |
 |---------|-------|
-| CPU | 8 cores visíveis no LXC (llama-server usa 6 threads) |
-| RAM | 48 GB |
-| Swap | 8 GB |
+| CPU | 8 cores visíveis no LXC (bge-m3 usa 4 threads) |
+| RAM | 4 GiB (4096 MiB) |
+| Swap | 1 GiB (1024 MiB) |
 | Disco | 50 GB |
-| GPU | RTX 3060 12 GB (passthrough) |
+| GPU | Nenhuma usada pelo serviço de embeddings |
 | Bind mount | `/mnt/models` → `/models` (modelos GGUF) |
 
 ---
 
-## Pré-requisitos no host Proxmox
+## Histórico: implantação com GPU e chat
+
+As instruções abaixo documentam a implantação anterior. **Não execute `setup.sh`
+para manter o estado atual**: ele instala a stack CUDA, reativa chat e embeddings
+e pode sobrescrever os parâmetros do modo CPU. As estimativas de desempenho GPU
+abaixo também se referem à implantação anterior.
+
+### Pré-requisitos no host Proxmox
 
 O driver NVIDIA já deve estar instalado no host (veja `drivers-nvidia.md` na raiz do repo).
 

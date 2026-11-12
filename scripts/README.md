@@ -1,5 +1,13 @@
 # Offline Git updates
 
+> **Current Xereta integration (2026-11-05):** the active source is SilverBullet's Nextcloud-backed `space/` vault on the Mini PC. Nextcloud Desktop on the notebook bridges it to Obsidian; CouchDB/LiveSync connects the Obsidian devices separately. See the [verified synchronization path and indexing repair](../minipc/silverbullet/readme.md) and [Xereta deployment and gates](../apps/xereta/README.md). The AFFiNE sections below describe the preserved earlier pilot.
+
+The [2026-11-08 isolated AFFiNE proof](../LXC_2_hermes_mcp/hindsight/README.md#affine-isolated-ingestion-proof--2026-11-08)
+recaptured three notes, checked citations and duplicate handling, and retained
+a private review bundle. It does not add AFFiNE to Xereta's current source UI.
+Its reader fix preserves full Yjs block IDs; unknown blocks and nonempty canvases
+remain incomplete captures.
+
 Load the two Bash functions on each computer:
 
 ```bash
@@ -125,13 +133,29 @@ the returned model and deployment ID when available. Correlate router logs to
 establish which backend/fallback actually answered; absent headers mean attribution
 is unverified. The smoke test does not claim to validate Hindsight itself.
 
-The probe reports `observed_output` for the synthetic fixtures. Probe version 4
-uses fixture version 2: suggestion existence (`cloud_backup_suggested: true`) and
+The probe reports `observed_output` for the synthetic fixtures. Probe version 5
+uses fixture version 3: suggestion existence (`cloud_backup_suggested: true`) and
 owner approval (`cloud_backup_approval: not_approved`) are separate, explicitly
 defined fields. Returning `unknown` still fails when the source explicitly states
 the owner has not approved the suggestion. Source text is unchanged; the schema
 and system instruction changed, so compare runs by fixture version and request
 hash, not source hash alone. Use `model --languages en` for one request.
+Fixture 3 explicitly names English or Portuguese for the generated question.
+Language quality still requires reviewing `observed_output`; the automatic
+assertions check question presence, not language identification.
+
+The live UFSC probe passed both languages with request-specific thinking disabled:
+
+```bash
+docker exec -i sb_litellm python3 - model --inside-container \
+  --languages en pt --reasoning-effort none < scripts/knowledge-gates.py
+```
+
+This option adds `reasoning_effort` and a LiteLLM `allowed_openai_params` list to
+that request only, without changing shared router settings. It records those
+settings and includes them in the request hash. The current gated deployment and
+evidence are documented in
+[the Hindsight pilot runbook](../LXC_2_hermes_mcp/hindsight/README.md).
 
 Structured failure reports survive a nonzero Docker child exit. Earlier host-side
 wrappers could replace a model assertion failure with `command_failed`, hiding the
@@ -190,7 +214,8 @@ memory. A separate health check returned HTTP 200; the running process started
 at 20:54 UTC and reported one restart. These qualify reachability and local
 liveness subchecks, not full G0: source identity, other-host capacity, and backup
 restoration still require evidence. Notebook failure keeps Obsidian snapshot
-availability and freshness open under G1.
+availability and freshness open under G1. This describes the earlier snapshot
+workflow; AFFiNE was subsequently selected as the authoritative editing source.
 
 Subsequent server-side requests confirmed AFFiNE `0.27.4`, `Selfhosted`, initialized,
 with `Comment`, `LocalWorkspace`, and `CopilotEmbedding` features; `Copilot` was
@@ -317,10 +342,41 @@ re-importing can create duplicate pages. Use a dedicated pilot workspace/area.
 Human changes in AFFiNE do not flow back to Obsidian through this workflow.
 
 The server manifest starts with `affine_import_verified: false`; only an actual
-successful import establishes that gate. Nightly source reads can use the server
-copy once it is captured and verified. The notebook's connection is needed for
-refreshing this copy until the independent source-sync layer is addressed.
+successful import establishes that gate. The notebook is needed to refresh this
+Obsidian backup. Current knowledge processing uses fresh AFFiNE sources;
+unattended scheduling requires the authenticated AFFiNE reader gate in the
+Hindsight runbook.
+
+On 2026-11-04, after the notebook was awake and SSH was reachable, restarting the
+existing mount succeeded. The source root listed 21 entries, and the exporter
+reported `snapshot_created` at `/root/knowledge-pilot` on Hermes, with 101 notes
+available and 30 copied. The transport archive is
+`/root/knowledge-pilot/affine-pilot.zip` and the manifest is
+`/root/knowledge-pilot/manifest.json`. Media is excluded and AFFiNE import remains
+unverified. This establishes the first persistent pilot copy, not full-vault
+coverage, automatic refresh, Hindsight ingestion, or automated AFFiNE publishing.
 
 ```bash
 python3 -m unittest discover -s scripts -p 'test_knowledge_snapshot.py' -v
+```
+
+## AFFiNE curator
+
+`knowledge-curator.py` implements the bounded source registry, version archives,
+idempotent Hindsight ingestion, server-provenance and literal-quotation checks,
+five review-page proposals, owner feedback capture, and recoverable private
+state. Use `--state` outside this repository. No scheduler or automatic AFFiNE
+publisher is enabled. `knowledge-affine-login.py` provisions a private session
+without saving the password; `knowledge-affine-reader.cjs` provides the release-matched
+snapshot reader; `knowledge-mcp-gate.py` qualifies the official Hindsight MCP in
+a disposable synthetic bank. See the [current runbook](../LXC_2_hermes_mcp/hindsight/README.md#authoritative-sources-and-curator)
+for direct-on-Hermes commands, operator feedback and remaining live gates.
+The first review area is already created in AFFiNE. `edit-review` validates
+editorial corrections; `bind-review` stores the actual published page links.
+Use existing pages for later updates; repeated imports would create copies.
+
+```bash
+python3 scripts/knowledge-curator.py --help
+python3 -m unittest discover -s scripts -p 'test_knowledge_curator.py'
+node --test scripts/test_knowledge_affine_reader.cjs
 ```

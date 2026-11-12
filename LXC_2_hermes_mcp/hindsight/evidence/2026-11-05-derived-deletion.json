@@ -1,0 +1,24 @@
+{
+  "recorded_at": "2026-11-05T03:11:31.697908+00:00",
+  "bank": "knowledge-gate-en-20261105-f0441d58",
+  "synthetic_only": true,
+  "status": "passed",
+  "checks": {
+    "source_fact_ids_removed": true,
+    "dependent_observation_removed": true,
+    "remaining_raw_facts_preserved": true,
+    "no_cloud_claim_in_active_memories": true,
+    "no_cloud_claim_in_recall": true,
+    "other_bank_unchanged": true,
+    "removed_nodes_absent_from_graph": true,
+    "source_returns_404": true,
+    "deleted_memory_endpoints_return_404": true
+  },
+  "removed_raw_facts": 2,
+  "removed_dependent_observations": 1,
+  "remaining_nodes": 5,
+  "other_bank": "knowledge-gate-pt-86c4fe58c7",
+  "other_bank_nodes": 8,
+  "verification_note": "Post-deletion checks rerun after correcting nested graph-node ID parsing; baseline comes from persisted pre-deletion receipts.",
+  "post_state": "English bank intentionally lacks source-c after this forgetting test; Portuguese bank remains complete."
+}

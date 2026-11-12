@@ -2,6 +2,88 @@
 
 LiteLLM · endpoint único OpenAI-compatível para toda a stack
 
+## Revisão do catálogo — 2026-11-09
+
+A configuração em produção é `config.yaml`. O perfil aprovado com nove nomes
+principais foi implantado em 2026-11-09; `config.proposed.yaml` mantém uma cópia
+do perfil revisado para referência. As evidências sanitizadas estão em
+[`model-audit-2026-11-09.json`](model-audit-2026-11-09.json). Presença no catálogo
+não equivale a um benchmark de qualidade.
+
+A consulta ao catálogo público do OpenRouter encontrou quatro IDs usados por
+cinco aliases da configuração anterior que já não constam da listagem: Nemotron 3 Super, Qwen3 Coder,
+Qwen3 Next e GPT-OSS 120B, nas variantes `:free` anteriormente configuradas.
+Quinze dos vinte destinos de `fallback_models` também não constam da listagem.
+O construtor do Router instalado não aceita `fallback_models`; o perfil usa
+`fallbacks` entre grupos registrados, conforme a
+[documentação do LiteLLM](https://docs.litellm.ai/docs/proxy/reliability).
+
+| Opção principal | Backend | Função |
+|---|---|---|
+| `default-agent` | OpenRouter Nemotron 3.5 Super VL `:free` | Uso geral, imagens e ferramentas |
+| `coder` | OpenRouter Cohere North Mini Code `:free` | Assistência de código |
+| `fast` | OpenRouter Gemma 4 26B A4B `:free` | Tarefas menores; latência a medir |
+| `reasoning` | OpenRouter Nemotron 3 Ultra `:free` | Raciocínio solicitado explicitamente |
+| `generalist` | Qwen3.8 27B, VLAB → CEOS | Texto e código; deployments equivalentes aos de `vision` |
+| `vision` | Qwen3.8 27B, VLAB → CEOS | Imagens; mantido até validar um upgrade real |
+| `frontier` | Qwen3.5 122B no VLAB | Modelo grande, sem substituição automática por Qwen2.5 72B |
+| `ocr` | GLM-OCR, VLAB → CEOS | OCR especializado |
+| `embed` | bge-m3 no Apollo, CPU | Embeddings existentes, sem mudar o espaço vetorial |
+
+O perfil revisado tem nove opções principais. `ufsc-vision`, `ufsc-frontier` e
+`ufsc-ocr` são aliases ocultos para `vision`, `frontier` e `ocr`, mantendo
+compatibilidade com os consumidores existentes. Não é preciso alterar os nomes
+das variáveis de ambiente dos endpoints UFSC.
+
+`agent`, `writer` e `extraction` são aliases de compatibilidade ocultos
+para `default-agent`; `auto-heavy` e `auto-light` recuperam nomes antigos,
+apontando para `default-agent` e `fast`. O perfil retira `oss`, `free-auto`,
+`ufsc-llama70b` e os dois aliases de chat local, cujo servidor no Apollo está
+desativado. Estes últimos não são redirecionados para a nuvem. Clientes externos
+que ainda usem aliases removidos devem ser atualizados; permissões de virtual
+keys precisam incluir os nomes canônicos usados por esses clientes.
+
+O GLM-4.7-Flash já está baixado no CEOS, mas fica como candidato a comparação,
+sem aumentar o menu principal. A revisão não iniciou downloads, carregou modelos
+grandes na UFSC nem alterou o provider persistido do Hermes. A prioridade VLAB,
+o modelo Qwen3.8 e o timeout de 180 segundos da rota de visão foram preservados.
+O usuário escolheu manter Qwen3.8 em `vision`: o maior porte de Qwen3.5 122B
+não demonstra vantagem nas tarefas visuais. `generalist` é uma escolha pública
+separada, com o mesmo modelo e parâmetros de backend, sem provisionar outro servidor.
+
+Validação: o Router instalado aceitou os doze deployments, nove grupos e oito
+aliases ocultos. O catálogo autenticado passou a listar exatamente os nove
+nomes aprovados. Os dois novos modelos OpenRouter passaram em tool calling
+direto; pelo gateway, passaram `coder`, o alias legado `agent` e `embed` com
+1024 dimensões. `generalist` e `vision` têm parâmetros de backend equivalentes.
+Não foram repetidos benchmarks de qualidade, testes de imagem/OCR ou geração
+do modelo 122B. Não há fallback genérico para embeddings, OCR ou rotas UFSC.
+
+A implantação reiniciou somente `sb_litellm`. O primeiro intento restaurou
+automaticamente o YAML anterior ao exceder o prazo de inicialização. Além da
+alteração de DNS pelo strongSwan, houve espera de disco durante os imports;
+o ClickHouse havia voltado após o reboot do host. Sua pausa foi restaurada
+conforme a instrução anterior do usuário. A segunda implantação ficou saudável,
+com backup no CT 105 em `/root/litellm-profile-backup-20261109-175706`.
+
+Para diagnósticos que enumeram `/model/info`, use os nomes canônicos, por exemplo
+`--models vision`: aliases ocultos continuam roteáveis, mas não aparecem nessa
+listagem.
+
+Durante a revisão, o arquivo DNS compartilhado por `sb_litellm` e `sb_ufsc_vpn`
+estava vazio. Foi salvo no CT 105 em
+`/root/litellm-dns-backup-20261109-151706` e restaurado para o resolvedor interno
+do Docker (`127.0.0.11`, `ndots:0`). Os catálogos OpenRouter, CEOS e VLAB
+voltaram a responder HTTP 200, sem reiniciar containers naquele reparo.
+Durante o deploy o strongSwan voltou a escrever nesse arquivo; a cópia anterior
+foi salva no backup do primeiro intento e o resolvedor Docker foi restaurado.
+A causa original do arquivo vazio e uma correção durável dessa disputa de DNS
+ainda precisam ser investigadas.
+
+As instruções antigas sobre Mac M1 e aliases abaixo são históricas e não
+representam o catálogo atual; use a configuração ativa e esta revisão como
+referência para a próxima mudança.
+
 ## Specs recomendadas do LXC
 
 ```
@@ -192,8 +274,16 @@ UFSC_CEOS_OLLAMA_API_BASE=https://ollama.ceos.ufsc.br/v1
 ```
 
 VLAB usa o `UFSC_OLLAMA_AUTH_HEADER` existente; CEOS não recebe esse header.
-O alias `ufsc-vision` limita cada backend a 50 segundos para manter duas
-tentativas dentro do limite de 120 segundos do cliente de revisão.
+O alias `ufsc-vision` permite até 180 segundos por backend. O cliente de
+revisão usa `LLM_CALL_DEADLINE_S=420` e `LLM_MAX_ATTEMPTS=1`: o gateway
+tenta VLAB e, se necessário, CEOS, sem uma nova tentativa do aplicativo.
+O alias `ufsc-vision` preserva o raciocínio padrão do modelo; o aplicativo
+não força esforço baixo para contornar limites de rede. O VLAB informa
+`medium` como padrão atual.
+O cliente de revisão permite até 8.192 tokens de geração; o texto exibido
+continua sujeito aos limites de concisão. Respostas que ultrapassam 125 segundos
+podem atingir o limite de leitura do Cloudflare, apesar dos prazos maiores
+no gateway e no aplicativo.
 Os outros aliases UFSC mantêm 90 segundos por backend. Em `ufsc-frontier`,
 o fallback troca o modelo 122B do VLAB pelo 72B do CEOS; registre o modelo
 que realmente respondeu ao comparar resultados.

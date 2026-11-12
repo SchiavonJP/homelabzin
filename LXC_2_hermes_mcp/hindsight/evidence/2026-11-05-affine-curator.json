@@ -1,0 +1,80 @@
+{
+  "recorded_on": "2026-11-05",
+  "gate": "affine-curator-first-pilot",
+  "status": "partial",
+  "private_content_included": false,
+  "source_authority": "AFFiNE self-hosted; Obsidian and prior snapshots are backups",
+  "source_documents": 3,
+  "source_versions": 3,
+  "raw_facts_processed_by_consolidation": 10,
+  "idempotency": {
+    "unchanged_rerun_passed": true,
+    "source_documents_after_rerun": 3,
+    "remote_operations_after_rerun": 7,
+    "open_questions": 2,
+    "withdrawn_unpublished_draft_questions": 3
+  },
+  "drafting": {
+    "model": "ufsc-vision",
+    "hindsight_multistep_reflection": "unqualified: restart-related connection error, client timeout, upstream 504",
+    "bounded_gateway_draft": "passed literal citations and independently verified Hindsight provenance",
+    "editorial_review_required": true,
+    "editorial_correction": "Removed unsupported interpretations about tool names and licensing; accepted three neutral summaries and two intent/status questions",
+    "owner_approval_inferred": false
+  },
+  "human_interface": {
+    "main_pages_created": 5,
+    "versioned_evidence_pages_created": 3,
+    "disposable_adapter_page_created": 1,
+    "source_and_evidence_links_read_back": true,
+    "bindings_saved_privately": true,
+    "native_markdown_paste_passed": true,
+    "scoped_click_and_type_readback_passed": true,
+    "separate_human_notes_preserved_on_disposable_page": true,
+    "accented_text_read_back": true,
+    "contenteditable_fill": "unreliable BlockSuite selection; do not use for publishing",
+    "owner_answer_roundtrip": "pending owner answer"
+  },
+  "reader": {
+    "affine_version": "0.27.4",
+    "authenticated_snapshot_reads_passed": true,
+    "original_export_text_fidelity_passed": 3,
+    "comparison_normalization": [
+      "separate title",
+      "URL punctuation escaping",
+      "heading trailing whitespace",
+      "equivalent nested-list indentation"
+    ],
+    "fenced_code_preserved": true,
+    "layout_warnings": "Preserved; note containers require per-document qualification; canvases accepted only after independent Yjs inspection proves they are empty",
+    "unknown_or_nonempty_canvas_content": "incomplete capture",
+    "invalid_session_test": "three incomplete HTTP 403 captures; no inferred deletion",
+    "password_saved": false,
+    "automatic_session_refresh": false,
+    "unattended_transport": "not configured"
+  },
+  "official_mcp": {
+    "shared_bank_read_passed": true,
+    "shared_bank_mutating_tools_not_advertised": true,
+    "disposable_bank_retain_and_update_invocations_denied": true,
+    "remote_authenticated_client_rollout": "pending"
+  },
+  "recovery": {
+    "curator_archive_restore_passed": true,
+    "curator_off_host_checksum_matched": true,
+    "real_note_database_restore_passed": true,
+    "content_tables_with_matching_row_digests": 6,
+    "recurring_backup_schedule": "not enabled"
+  },
+  "offline_checks": {"python_tests": 82, "reader_tests": 10},
+  "hermes_production_provider_changed": false,
+  "nightly_schedule_enabled": false,
+  "automatic_affine_publisher_enabled": false,
+  "remaining": [
+    "Capture an actual owner answer from AFFiNE, reconcile it into Hindsight, and preserve owner edits",
+    "Qualify and activate Hermes with an isolated experience bank and shared read-only MCP",
+    "Provide server-to-server reader transport independent of the workstation SSH control connection",
+    "Qualify notebook-offline operation, interruption recovery and credential expiry handling before installing a timer",
+    "Keep automatic AFFiNE updates gated by concurrent-edit protection"
+  ]
+}

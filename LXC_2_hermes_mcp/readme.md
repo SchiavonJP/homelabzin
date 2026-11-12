@@ -38,10 +38,30 @@ docker run -it --rm \
 
 O wizard vai perguntar:
 - LLM provider → escolhe **OpenAI-compatible**
-- API base URL → `http://<IP_LXC4>:4000`
+- API base URL → `http://192.168.0.211:4000/v1`
 - API key → valor do LITELLM_MASTER_KEY
-- Modelo default → `auto-heavy`
+- Modelo default → `generalist`
 - Gateway (Telegram, Discord) → configura agora ou depois
+
+### Roteamento LiteLLM — atualizado em 2026-11-09
+
+O Hermes em `sb_hermes` (LXC 107) usa `custom:litellm`, com endpoint
+`http://192.168.0.211:4000/v1` e a chave existente em `OPENAI_API_KEY`.
+A configuração persistente `/opt/data/config.yaml` determina o provedor e o
+modelo; mudar somente as variáveis do Compose não substitui essa configuração.
+
+O arquivo `model-provider.example.yaml` contém os blocos `model` e `providers`
+para mesclar ao arquivo persistente, preservando suas demais configurações.
+O padrão é `generalist`. Os aliases de conversa selecionáveis são `generalist`,
+`default-agent`, `coder`, `fast`, `reasoning`, `vision`, `frontier` e `ocr`.
+`embed` permanece disponível no LiteLLM exclusivamente para embeddings.
+
+Depois de alterar a configuração, reinicie somente `sb_hermes`. Conversas já
+abertas podem manter o modelo anterior: use `/model` para selecionar o novo
+modelo ou inicie uma nova conversa.
+
+Backup anterior à aplicação: no volume do Hermes, em
+`/opt/data/migration-backups/litellm-20261109-152227/config.yaml`.
 
 ### Passo 2 — Deploy via Git
 

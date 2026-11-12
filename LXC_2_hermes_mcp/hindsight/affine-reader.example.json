@@ -1,0 +1,8 @@
+{
+  "workspace": "WORKSPACE_ID",
+  "documents": [
+    {"id": "DOCUMENT_ID_1", "title": "Comandos"},
+    {"id": "DOCUMENT_ID_2", "title": "Ideas"},
+    {"id": "DOCUMENT_ID_3", "title": "Agentics models"}
+  ]
+}

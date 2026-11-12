@@ -1,0 +1,44 @@
+{
+  "async": false,
+  "items": [
+    {
+      "content": "Project Cedar keeps snapshots for 14 days. Decision by the owner: backups stay local.",
+      "document_id": "source-a",
+      "timestamp": "unset",
+      "metadata": {
+        "source_id": "a",
+        "fixture": "cedar-synthetic"
+      },
+      "tags": [
+        "gate:synthetic",
+        "language:en"
+      ]
+    },
+    {
+      "content": "Project Cedar keeps snapshots for 30 days. This note does not explain the discrepancy.",
+      "document_id": "source-b",
+      "timestamp": "unset",
+      "metadata": {
+        "source_id": "b",
+        "fixture": "cedar-synthetic"
+      },
+      "tags": [
+        "gate:synthetic",
+        "language:en"
+      ]
+    },
+    {
+      "content": "An agent suggested cloud backups for Cedar. The owner has not approved that suggestion.",
+      "document_id": "source-c",
+      "timestamp": "unset",
+      "metadata": {
+        "source_id": "c",
+        "fixture": "cedar-synthetic"
+      },
+      "tags": [
+        "gate:synthetic",
+        "language:en"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,232 @@
+{
+  "gate": "notebook-offline-digest",
+  "recorded_at": "2026-11-06T01:11:26.891204+00:00",
+  "status": "passed",
+  "server_phase_passed": true,
+  "run_id": "1c32cf4d-b0ff-456b-886e-02383c7b1e6b",
+  "run_state": "completed",
+  "run_stage": "complete",
+  "started_at": "2026-11-06T00:59:54.075737+00:00",
+  "finished_at": "2026-11-06T01:03:58.178612+00:00",
+  "error": "",
+  "checks": {
+    "notebook_unreachable_before": true,
+    "notebook_unreachable_after": true,
+    "run_completed": true,
+    "exactly_three_original_notes": true,
+    "original_note_versions_and_bodies_unchanged": true,
+    "sources_retained_and_verified_in_hindsight": true,
+    "pending_owner_feedback_completed": true,
+    "owner_answers_and_revisions_preserved": true,
+    "owner_finding_reviews_preserved": true,
+    "owner_feedback_records_preserved": true,
+    "citations_literal_and_current": true,
+    "published_citations_link_to_source_and_version": true,
+    "all_review_pages_published": true,
+    "question_answers_match_published_notes": true,
+    "accepted_findings_match_published_notes": true,
+    "human_annotations_preserved": true,
+    "generated_review_files_excluded_from_ingestion": true,
+    "at_most_three_unresolved_questions": true,
+    "legacy_inbox_unchanged": true,
+    "completed_sync_test_unchanged": true,
+    "publication_complete": true,
+    "xereta_ui_reachable": true,
+    "xereta_ready": true,
+    "schedule_disabled": true,
+    "receipt_published_while_notebook_unreachable": true,
+    "owner_answers_and_revisions_preserved_after_reconnect": true,
+    "owner_finding_reviews_preserved_after_reconnect": true,
+    "schedule_still_disabled_after_reconnect": true,
+    "same_digest_run_still_completed": true,
+    "original_notes_unchanged_after_reconnect": true,
+    "legacy_unchanged_after_reconnect": true,
+    "completed_sync_test_unchanged_after_reconnect": true,
+    "server_publications_unchanged_since_offline_test": true,
+    "offline_receipt_downloaded_unchanged": true,
+    "all_review_pages_downloaded_unchanged": true,
+    "original_notes_match_server_after_reconnect": true,
+    "protected_legacy_and_sync_files_match_server": true
+  },
+  "counts": {
+    "original_notes": 3,
+    "total_sources_including_owner_feedback": 9,
+    "pending_feedback_completed": 2,
+    "questions": 3,
+    "new_questions": 0,
+    "open_questions": 0,
+    "findings": 4,
+    "review_pages": 8,
+    "verified_citations": 6
+  },
+  "offline_before": {
+    "tailscale": true,
+    "lan": true
+  },
+  "offline_after": {
+    "tailscale": true,
+    "lan": true
+  },
+  "reconnection_verified": true,
+  "published_pages": [
+    {
+      "path": "space/_AgentKnowledge/Perguntas/dockhand-monitoring-fa14397f.md",
+      "sha256": "d616f5a92d81c3c815330e946d355758f1124d5b380131e28f0ec09185f90aaf"
+    },
+    {
+      "path": "space/_AgentKnowledge/Perguntas/agentics-models-status-b2b86800.md",
+      "sha256": "f53b51e4aab4ff920a3eb7f3d3a8e738637692bca02676ac10cd8fd920b576e6"
+    },
+    {
+      "path": "space/_AgentKnowledge/Conhecimento/a-implementacao-de-dockhand-para-gerenciar-containers-e-agentes-e62d32e9.md",
+      "sha256": "d511d799f6f02e7986bdd3dcb936f3a15a1bcde39e8424350e708649caf8e285"
+    },
+    {
+      "path": "space/_AgentKnowledge/Conhecimento/as-notas-descrevem-o-procedimento-para-adicionar-um-servico-ao-c-35096878.md",
+      "sha256": "fda49ef11c3a18e160a84ecf9c9e8f332801382a72383a05075008a84184fda1"
+    },
+    {
+      "path": "space/_AgentKnowledge/Conhecimento/a-implementacao-de-dockhand-para-gerenciar-containers-e-agentes-a5eda589.md",
+      "sha256": "c7defcb6a59b9e01bb06e0ff50e80fb7cf77ce28e76f18f8fe17e31b6ec213db"
+    },
+    {
+      "path": "space/_AgentKnowledge/Conhecimento/o-tunel-cloudflare-no-casaos-utiliza-a-imagem-docker-wisdomsky-c-11246068.md",
+      "sha256": "a518671662bad533d976c1f272c88604dc91566123def193d360d4560f1dc063"
+    },
+    {
+      "path": "space/_AgentKnowledge/Index.md",
+      "sha256": "ca2883b26521c0907214f6955524c4ee2da8406f5248bbc3094997416a5abf85"
+    },
+    {
+      "path": "space/_AgentKnowledge/Perguntas/cloudflare-dns-config-0e3cc421.md",
+      "sha256": "a27ab0c71247cfec396b54f77e7def35ee56b9431d02ed7839b96eef10071f1a"
+    }
+  ],
+  "offline_receipt": {
+    "path": "space/_AgentKnowledge/Sync/notebook-offline-1c32cf4d.md",
+    "sha256": "77fa8198f160810e31703ebfa128e37a1bc23a31bf46f15395af0630d9f52cb4",
+    "published_at": "2026-11-06T01:04:45.014274+00:00",
+    "written_by": "acceptance_probe_after_digest",
+    "not_knowledge_evidence": true
+  },
+  "reconnection": {
+    "verified_at": "2026-11-06T01:11:26.891204+00:00",
+    "read_method": "SFTP read-only with temporary copies removed after hashing",
+    "checks": {
+      "owner_answers_and_revisions_preserved_after_reconnect": true,
+      "owner_finding_reviews_preserved_after_reconnect": true,
+      "schedule_still_disabled_after_reconnect": true,
+      "same_digest_run_still_completed": true,
+      "original_notes_unchanged_after_reconnect": true,
+      "legacy_unchanged_after_reconnect": true,
+      "completed_sync_test_unchanged_after_reconnect": true,
+      "server_publications_unchanged_since_offline_test": true,
+      "offline_receipt_downloaded_unchanged": true,
+      "all_review_pages_downloaded_unchanged": true,
+      "original_notes_match_server_after_reconnect": true,
+      "protected_legacy_and_sync_files_match_server": true
+    },
+    "files": [
+      {
+        "path": "space/_AgentKnowledge/Sync/notebook-offline-1c32cf4d.md",
+        "kind": "offline_receipt",
+        "exists": true,
+        "sha256": "77fa8198f160810e31703ebfa128e37a1bc23a31bf46f15395af0630d9f52cb4",
+        "matches": true
+      },
+      {
+        "path": "space/_AgentKnowledge/Perguntas/dockhand-monitoring-fa14397f.md",
+        "kind": "review",
+        "exists": true,
+        "sha256": "d616f5a92d81c3c815330e946d355758f1124d5b380131e28f0ec09185f90aaf",
+        "matches": true
+      },
+      {
+        "path": "space/_AgentKnowledge/Perguntas/agentics-models-status-b2b86800.md",
+        "kind": "review",
+        "exists": true,
+        "sha256": "f53b51e4aab4ff920a3eb7f3d3a8e738637692bca02676ac10cd8fd920b576e6",
+        "matches": true
+      },
+      {
+        "path": "space/_AgentKnowledge/Conhecimento/a-implementacao-de-dockhand-para-gerenciar-containers-e-agentes-e62d32e9.md",
+        "kind": "review",
+        "exists": true,
+        "sha256": "d511d799f6f02e7986bdd3dcb936f3a15a1bcde39e8424350e708649caf8e285",
+        "matches": true
+      },
+      {
+        "path": "space/_AgentKnowledge/Conhecimento/as-notas-descrevem-o-procedimento-para-adicionar-um-servico-ao-c-35096878.md",
+        "kind": "review",
+        "exists": true,
+        "sha256": "fda49ef11c3a18e160a84ecf9c9e8f332801382a72383a05075008a84184fda1",
+        "matches": true
+      },
+      {
+        "path": "space/_AgentKnowledge/Conhecimento/a-implementacao-de-dockhand-para-gerenciar-containers-e-agentes-a5eda589.md",
+        "kind": "review",
+        "exists": true,
+        "sha256": "c7defcb6a59b9e01bb06e0ff50e80fb7cf77ce28e76f18f8fe17e31b6ec213db",
+        "matches": true
+      },
+      {
+        "path": "space/_AgentKnowledge/Conhecimento/o-tunel-cloudflare-no-casaos-utiliza-a-imagem-docker-wisdomsky-c-11246068.md",
+        "kind": "review",
+        "exists": true,
+        "sha256": "a518671662bad533d976c1f272c88604dc91566123def193d360d4560f1dc063",
+        "matches": true
+      },
+      {
+        "path": "space/_AgentKnowledge/Index.md",
+        "kind": "review",
+        "exists": true,
+        "sha256": "ca2883b26521c0907214f6955524c4ee2da8406f5248bbc3094997416a5abf85",
+        "matches": true
+      },
+      {
+        "path": "space/_AgentKnowledge/Perguntas/cloudflare-dns-config-0e3cc421.md",
+        "kind": "review",
+        "exists": true,
+        "sha256": "a27ab0c71247cfec396b54f77e7def35ee56b9431d02ed7839b96eef10071f1a",
+        "matches": true
+      },
+      {
+        "path": "space/Homelab/Comandos.md",
+        "kind": "original",
+        "exists": true,
+        "sha256": "89d51cd30a9fdfdc24698d83c7bbf8e6bf687641700de186f6cf253cefa86134",
+        "matches": true
+      },
+      {
+        "path": "space/Homelab/Ideas.md",
+        "kind": "original",
+        "exists": true,
+        "sha256": "f69d41774ec55648ec60a08ab613edaaa1cf6a8672f000285e25678c2c6baba8",
+        "matches": true
+      },
+      {
+        "path": "space/AI assets/models notes/Agentics models.md",
+        "kind": "original",
+        "exists": true,
+        "sha256": "49860c98ee19b5235cbdadfa6b65817c1313c59045accc418534d3389c72c545",
+        "matches": true
+      },
+      {
+        "path": "space/_AgentKnowledge/Inbox.md",
+        "kind": "legacy",
+        "exists": true,
+        "sha256": "24f9c45cac0b436dcdbb4a94a5c542b5abe2306c1c6e73e436debb6a2f83da2e",
+        "matches": true
+      },
+      {
+        "path": "space/_AgentKnowledge/Sync/obsidian-efc120f1-5d26-4d99-b7a8-c16a35e98918.md",
+        "kind": "completed_sync_test",
+        "exists": true,
+        "sha256": "23df2dbae4563d94d8de26bdcb7be3d0b003c20ea3089a3cf8463f4cbb968024",
+        "matches": true
+      }
+    ],
+    "matched_files": 14,
+    "total_files": 14
+  }
+}

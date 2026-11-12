@@ -1,0 +1,83 @@
+{
+  "recorded_date": "2026-11-05",
+  "application": "Xereta",
+  "sources": 3,
+  "source_versions": 3,
+  "initial_run": "b8ca44ac-453b-4b77-9e6e-59817db35079",
+  "initial_state": "completed",
+  "question_count": 1,
+  "finding_count": 1,
+  "inbox": "space/_AgentKnowledge/Inbox.md",
+  "inbox_state": "published",
+  "unchanged_rerun": {
+    "run_id": "8d1d2eeb-ebc9-41d9-a16e-6fbc2dadc93f",
+    "passed": true,
+    "same_source_versions": true,
+    "same_questions_and_revisions": true,
+    "same_findings": true,
+    "same_retain_operation_ids": true
+  },
+  "worker_recovery": {
+    "passed": true,
+    "scope": "Restart during extraction; same run resumed and completed; exactly one batch retain per original version.",
+    "persisted_operation_ids": [
+      "fdaad130-e3fe-467e-888f-bb991c50b03d",
+      "dd6800a1-76d9-43cc-b57b-adf1d284dd3a",
+      "1db7dd65-368e-4204-aa9e-2f2d0a8db0d0"
+    ]
+  },
+  "browser": {
+    "owner_login": true,
+    "citation_context": true,
+    "archived_original_note_dialog": true,
+    "schedule_toggle_disabled": true,
+    "desktop_overflow": false
+  },
+  "backend_tests": {
+    "passed": 20,
+    "warning": "Starlette TestClient httpx deprecation"
+  },
+  "frontend": {
+    "typecheck": "passed",
+    "production_build": "passed",
+    "generated_openapi_types": "passed"
+  },
+  "agent_mcp": {
+    "streamable_http_lan": "passed",
+    "tool_names": 15,
+    "reader_reads": "passed",
+    "reader_run_denial": "passed",
+    "reader_write_denial": "passed"
+  },
+  "resource_snapshot_mib": {
+    "app": 104.5,
+    "worker": 80.59,
+    "hindsight": 312
+  },
+  "remaining_gates": [
+    "real owner answer and following digest",
+    "end-to-end Obsidian LiveSync edit with offline notebook server run",
+    "public hostname ingress",
+    "legacy MCP/provider replacement compatibility"
+  ],
+  "scheduling_enabled": false,
+  "final_image_manifest": "sha256:a98f3aea54f80ef6c90607d78154445a97f039f6b15cf6c0ed36aa75d2596015",
+  "final_rerun": {
+    "run_id": "e681f2cc-3218-4995-9f63-bb01945e62cf",
+    "passed": true,
+    "same_source_versions": true,
+    "same_question_revisions": true,
+    "same_findings": true,
+    "publication": "published",
+    "inbox_labels": "Portuguese"
+  },
+  "final_health": {
+    "ready_http": 200,
+    "worker_healthy": true,
+    "publication": "published",
+    "inbox_sha256": "c78d6b6caa3443003b3547321c9ec0c08e657e5758bd7701127297b9609be588",
+    "portuguese_state_and_confirmation": true,
+    "owner_feedback": false,
+    "schedule_enabled": false
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "recorded_at": "2026-11-05T03:02:29.611241+00:00",
+  "bank": "knowledge-gate-crud-def14c0456",
+  "synthetic_only": true,
+  "steps": [
+    {
+      "step": "create_document",
+      "status": "passed",
+      "checks": {
+        "retain_success": true,
+        "current_port_present": true,
+        "old_port_absent": true,
+        "document_ids_correct": true
+      },
+      "facts": 1,
+      "seconds": 10.917
+    },
+    {
+      "step": "replace_document",
+      "status": "passed",
+      "checks": {
+        "retain_success": true,
+        "current_port_present": true,
+        "old_port_absent": true,
+        "document_ids_correct": true
+      },
+      "facts": 1,
+      "seconds": 9.176
+    },
+    {
+      "step": "delete_document",
+      "status": "passed",
+      "checks": {
+        "source_returns_404": true,
+        "no_memories": true,
+        "no_graph_nodes": true,
+        "no_graph_edges": true,
+        "recall_empty": true
+      }
+    }
+  ]
+}

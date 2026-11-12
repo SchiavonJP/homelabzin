@@ -1,0 +1,67 @@
+{
+  "gate": "per-item-review-files",
+  "passed": true,
+  "checks": {
+    "one_page_per_item": true,
+    "unique_question_paths": true,
+    "all_pages_published": true,
+    "all_pages_readback": true,
+    "question_answers_match": true,
+    "no_visible_template_comments": true,
+    "index_is_links_only": true,
+    "review_excluded_from_evidence": true,
+    "publication_complete": true,
+    "schedule_disabled": true,
+    "schema_migrated": true,
+    "answers_and_revisions_preserved": true,
+    "feedback_records_preserved": true,
+    "source_versions_preserved": true,
+    "findings_preserved": true,
+    "legacy_file_preserved": true,
+    "legacy_private_backup_verified": true
+  },
+  "counts": {
+    "questions": 2,
+    "findings": 2,
+    "pages": 5
+  },
+  "image": "xereta:0.2.1",
+  "manifest": "sha256:4ca84a1149a4ff9224c4447ef4f54de725b586548fa3ca3736c6457e0b9f0f27",
+  "backend_tests": 34,
+  "frontend_typecheck": "passed",
+  "frontend_build": "passed",
+  "browser": {
+    "owner_login": true,
+    "question_filters": true,
+    "existing_answer_editable": true,
+    "save_unchanged_answer": true,
+    "individual_note_rendered_in_silverbullet": true,
+    "answer_and_checkboxes_visible": true,
+    "sync_test_created_from_frontend": true,
+    "unchecked_sync_test_not_passed": true
+  },
+  "unchanged_rerun": {
+    "gate": "unchanged-rerun",
+    "run_id": "bd38ff58-6e9c-411e-a549-33a369f58147",
+    "passed": true,
+    "checks": {
+      "completed": true,
+      "unchanged_state": true,
+      "published": true
+    },
+    "counts": {
+      "sources": 4,
+      "versions": 4,
+      "questions": 2,
+      "findings": 2
+    },
+    "error": ""
+  },
+  "scheduling_enabled": false,
+  "real_obsidian_sync": "awaiting_owner_checkboxes",
+  "post_migration_restore": {
+    "verified": true,
+    "tables": 14,
+    "offhost_checksum_verified": true
+  }
+}

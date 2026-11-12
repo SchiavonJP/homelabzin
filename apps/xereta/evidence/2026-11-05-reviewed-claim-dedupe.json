@@ -1,0 +1,37 @@
+{
+  "gate": "reviewed-claim-deduplication",
+  "passed": true,
+  "checks": {
+    "unique_current_claims": true,
+    "two_owner_validations_preserved": true,
+    "two_answers_still_resolved": true,
+    "all_owner_feedback_processed": true,
+    "duplicate_history_links_to_current_record": true,
+    "all_review_files_published": true,
+    "schedule_disabled": true
+  },
+  "active_findings": 3,
+  "accepted_findings": 2,
+  "archived_duplicate_proposals": 1,
+  "backend_tests": 38,
+  "image": "xereta:0.2.2",
+  "unchanged_rerun": {
+    "gate": "unchanged-rerun",
+    "run_id": "eca84075-7638-4583-b3e4-d5bc6cc8d644",
+    "passed": true,
+    "checks": {
+      "completed": true,
+      "unchanged_state": true,
+      "published": true
+    },
+    "counts": {
+      "sources": 7,
+      "versions": 7,
+      "questions": 3,
+      "findings": 4,
+      "feedback": 4
+    },
+    "error": ""
+  },
+  "image_manifest": "sha256:600c1d30f6543f9203e096f3ed3e46a0d1221f41f8d0b38762a233cd64dbb0b1"
+}

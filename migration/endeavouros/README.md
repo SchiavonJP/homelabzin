@@ -1,5 +1,16 @@
 # EndeavourOS VM + Apollo migration
 
+Disk expansion (2026-11-10): VM 100 `scsi0` increased from 160 GiB to
+300 GiB with `qm resize 100 scsi0 300G`. Before the change, configuration and
+partition-table backups were saved on Proxmox under
+`/root/endeavour-disk-resize-20261110-163130/`. The VM was started after the
+change. **Guest partition and Btrfs expansion completed and verified over SSH**:
+`/dev/sda2` is 319972949504 bytes; `df -h /` reports 298 GiB total, 126 GiB
+used and 173 GiB available (43% used). Filesystem UUID was preserved; no fstab
+change was required. The user completed interactive partition expansion and ran
+`sudo btrfs filesystem resize max /` in the guest. The script
+`expand-root-300g.sh` is retained in this directory and `/home/schiva/` in the VM.
+
 Status (2026-10-31): **VM 100 restored and first EndeavourOS desktop boot confirmed
 by the user**, with networking disconnected. GPU passthrough and Apollo migration
 remain pending. SSH from the implementation session returned `No route to host`;

@@ -1,0 +1,25 @@
+{
+  "status": "restore_verified",
+  "source_database": "knowledge_curator",
+  "database": "xereta_restore_3c7e0a4df247",
+  "dump_path": "/root/xereta-knowledge_curator-2bd6dae7b91e.dump",
+  "tables_checked": 14,
+  "row_digests": {
+    "alembic_version": "1|768070fc1c48fe2d63f9bc742d125c77",
+    "artifact": "7|49adaf9ec7e1369be6a3e319064a98a0",
+    "event": "21|250987314b887c4c30818cda9e90090c",
+    "feedback": "1|2382b5d409929fd6a3e6774cc482f7b0",
+    "finding": "2|63ba9716c104bde37fc2340e82bc6f9d",
+    "heartbeat": "1|81928b1f0b1cb304d17d4338d4718c66",
+    "publication": "1|0b593e4202a404fbdb8da0ebb728f4d4",
+    "question": "2|f4da91b0a308c191743fa08f4bf82944",
+    "reviewpage": "5|d7c35ef9270c408eb94b8797fd6d57a4",
+    "run": "7|da303d1f213fb0dbb9fec840b36e6bb7",
+    "schedule": "1|b7338671a931913f3cfba9d2e004ec4f",
+    "source": "4|af08543bcb241ccea75387b05b361bfd",
+    "user": "1|480abba27e32bfec55ce1bb675ca16cf",
+    "version": "4|9f2f4ced20a24f90ab47fdd65b17eb8d"
+  },
+  "offhost_copy_sha256": "e21c2e1404fbc9715030d4c93cc83f6dd4e2a51c86715d521cbffd26ff7ae310",
+  "offhost_copy_verified": true
+}

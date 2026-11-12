@@ -1,0 +1,215 @@
+{
+  "reviewed_at": "2026-11-09T15:19:23.902954+00:00",
+  "status": "deployed",
+  "sources": {
+    "openrouter_catalog": "https://openrouter.ai/api/v1/models",
+    "litellm_fallbacks": "https://docs.litellm.ai/docs/proxy/reliability",
+    "litellm_aliases": "https://docs.litellm.ai/docs/router/api_reference/configuration"
+  },
+  "active_config_sha256": "2097e4e7dfd3726afad9b898ff7502f901078fc57fd862a4969483dfcac2107d",
+  "openrouter_catalog_sha256": "69dca80e4e964edfa9b4ba6e53e676e444c130e2e9b12a3e58561d734b1c7c23",
+  "openrouter_active_aliases": [
+    {
+      "alias": "default-agent",
+      "model": "nvidia/nemotron-3-super-120b-a12b:free",
+      "listed": false
+    },
+    {
+      "alias": "coder",
+      "model": "qwen/qwen3-coder:free",
+      "listed": false
+    },
+    {
+      "alias": "reasoning",
+      "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "listed": true
+    },
+    {
+      "alias": "agent",
+      "model": "nvidia/nemotron-3-super-120b-a12b:free",
+      "listed": false
+    },
+    {
+      "alias": "writer",
+      "model": "qwen/qwen3-next-80b-a3b-instruct:free",
+      "listed": false
+    },
+    {
+      "alias": "extraction",
+      "model": "google/gemma-4-31b-it:free",
+      "listed": true
+    },
+    {
+      "alias": "fast",
+      "model": "google/gemma-4-26b-a4b-it:free",
+      "listed": true
+    },
+    {
+      "alias": "oss",
+      "model": "openai/gpt-oss-120b:free",
+      "listed": false
+    },
+    {
+      "alias": "free-auto",
+      "model": "openrouter/free",
+      "listed": true
+    }
+  ],
+  "fallbacks": {
+    "configured_parameter": "fallback_models",
+    "accepted_by_installed_router": false,
+    "entries": 20,
+    "absent_from_current_catalog": [
+      "nex-agi/nex-n2-pro:free",
+      "nvidia/nemotron-3.5-content-safety:free",
+      "poolside/laguna-xs.2:free",
+      "poolside/laguna-m.1:free",
+      "nvidia/nemotron-3-super-120b-a12b:free",
+      "liquid/lfm-2.5-1.2b-thinking:free",
+      "liquid/lfm-2.5-1.2b-instruct:free",
+      "nvidia/nemotron-3-nano-30b-a3b:free",
+      "nvidia/nemotron-nano-12b-v2-vl:free",
+      "qwen/qwen3-next-80b-a3b-instruct:free",
+      "nvidia/nemotron-nano-9b-v2:free",
+      "openai/gpt-oss-120b:free",
+      "openai/gpt-oss-20b:free",
+      "qwen/qwen3-coder:free",
+      "cognitivecomputations/dolphin-mistral-24b-venice-edition:free"
+    ]
+  },
+  "proposal": {
+    "visible_groups": [
+      "default-agent",
+      "coder",
+      "fast",
+      "reasoning",
+      "generalist",
+      "vision",
+      "frontier",
+      "ocr",
+      "embed"
+    ],
+    "hidden_compatibility_aliases": {
+      "ufsc-vision": "vision",
+      "ufsc-frontier": "frontier",
+      "ufsc-ocr": "ocr",
+      "agent": "default-agent",
+      "writer": "default-agent",
+      "extraction": "default-agent",
+      "auto-heavy": "default-agent",
+      "auto-light": "fast"
+    },
+    "removed_groups": [
+      "oss",
+      "free-auto",
+      "local-coder",
+      "local-fast",
+      "ufsc-llama70b"
+    ],
+    "preserved_consumers": [
+      "ufsc-vision -> vision: same Qwen3.8 model, endpoints, priority and timeout",
+      "ufsc-frontier -> frontier; ufsc-ocr -> ocr",
+      "embed: same existing 1024-dimension bge-m3 service"
+    ],
+    "frontier_change": "VLAB qwen3.5:122b only; remove silent CEOS qwen2.5:72b fallback",
+    "cost_policy": "OpenRouter :free models only; no cross-provider fallback from UFSC/OCR/embedding routes"
+  },
+  "runtime_repair": {
+    "issue": "Empty shared Docker resolv.conf broke DNS for sb_litellm and sb_ufsc_vpn",
+    "action": "Backed up empty file and restored Docker embedded resolver 127.0.0.11, options ndots:0",
+    "backup_on_ct105": "/root/litellm-dns-backup-20261109-151706",
+    "verification": "OpenRouter catalog and both UFSC catalogs returned HTTP 200 after repair",
+    "containers_restarted": false,
+    "followup": "strongSwan later rewrote shared resolver; restored Docker resolver again and saved previous file under first deployment backup. Durable DNS ownership fix remains open."
+  },
+  "limits": [
+    "Smoke tests confirm routing/tool calling, not comparative model quality.",
+    "Vision/OCR model selection and existing vision timeout/priorities were preserved; their quality was not rebenchmarked.",
+    "The 122B model was not loaded or benchmarked by this deployment.",
+    "Hermes persisted provider still points directly to OpenRouter; not changed.",
+    "Hidden aliases do not appear in /model/info enumeration; diagnostic consumers should select canonical names.",
+    "Durable DNS ownership between strongSwan and Docker remains unresolved."
+  ],
+  "revised_at": "2026-11-09T17:51:02.019547+00:00",
+  "vision_decision": {
+    "user_choice": "Keep Qwen3.8 27B until a better vision model is validated",
+    "generalist": "Separate visible group using the same deployment parameters as vision"
+  },
+  "validation": {
+    "local_routing_invariants": "passed",
+    "remote_router": "passed: 12 deployments, 9 groups, 8 hidden aliases",
+    "public_model_list": "exactly the approved nine names",
+    "generalist_equals_vision": true,
+    "deployed": true,
+    "openrouter_direct_tool_smokes": [
+      {
+        "model": "nvidia/nemotron-3.5-super-vl:free",
+        "http": 200,
+        "tool_call_valid": true,
+        "seconds": 1.92
+      },
+      {
+        "model": "cohere/north-mini-code:free",
+        "http": 200,
+        "tool_call_valid": true,
+        "seconds": 0.97
+      }
+    ],
+    "gateway_smokes": [
+      {
+        "alias": "coder",
+        "http": 200,
+        "tool_call_valid": true,
+        "seconds": 3.88
+      },
+      {
+        "alias": "agent",
+        "http": 200,
+        "tool_call_valid": true,
+        "seconds": 4.48
+      },
+      {
+        "alias": "embed",
+        "http": 200,
+        "dimensions": 1024,
+        "seconds": 3.07
+      }
+    ]
+  },
+  "previous_active_config_sha256": "7cf85b1d037e4e1d0a9f332b9f72af7192fe6f2476304ce4b537389819840b08",
+  "deployed_at": "2026-11-09T17:59:37.629658+00:00",
+  "deployment": {
+    "deployed": true,
+    "backup": "/root/litellm-profile-backup-20261109-175706",
+    "sha256": "2097e4e7dfd3726afad9b898ff7502f901078fc57fd862a4969483dfcac2107d",
+    "models": [
+      "coder",
+      "default-agent",
+      "embed",
+      "fast",
+      "frontier",
+      "generalist",
+      "ocr",
+      "reasoning",
+      "vision"
+    ],
+    "liveness": "http_200",
+    "restarted": [
+      "sb_litellm"
+    ]
+  },
+  "deployment_attempts": [
+    {
+      "backup": "/root/litellm-profile-backup-20261109-175247",
+      "outcome": "automatic rollback after liveness timeout"
+    },
+    {
+      "backup": "/root/litellm-profile-backup-20261109-175706",
+      "outcome": "healthy; nine public aliases verified"
+    }
+  ],
+  "clickhouse": {
+    "paused": true,
+    "reason": "Restore previous explicit user instruction after host reboot resumed the container; disk pressure delayed LiteLLM startup."
+  }
+}

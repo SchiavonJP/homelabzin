@@ -1,0 +1,201 @@
+{
+  "recorded_at": "2026-11-05T03:08:27.904005+00:00",
+  "bank": "knowledge-gate-en-20261105-f0441d58",
+  "synthetic_only": true,
+  "hindsight_version": "1.1.0",
+  "retain": {
+    "passed": true,
+    "seconds": 50.787,
+    "documents": 3,
+    "facts": 5
+  },
+  "recall": {
+    "results": 5,
+    "documents": [
+      "source-a",
+      "source-b",
+      "source-c"
+    ]
+  },
+  "graph": {
+    "nodes": 5,
+    "rendered_edges": 19
+  },
+  "reflection": {
+    "seconds": 93.297,
+    "semantic_and_metadata_checks": {
+      "both_retention_values": true,
+      "conflict_preserved": true,
+      "local_owner_decision": true,
+      "suggestion_recognized": true,
+      "proposal_not_approved": true,
+      "question_present": true,
+      "based_on_ids_valid": true,
+      "all_source_documents_in_metadata": true,
+      "raw_source_chunks_match": true
+    },
+    "question_language_manual_review": "English; passed",
+    "structured_output": {
+      "retention_values_days": [
+        14,
+        30
+      ],
+      "retention_conflict": true,
+      "backup_decision": "local",
+      "cloud_backup_suggested": true,
+      "cloud_backup_approval": "not_approved",
+      "unresolved_question": "which retention period is currently in effect, and is one of these values the result of a later change to the other?",
+      "supporting_memory_ids": [
+        "source-a",
+        "source-b"
+      ]
+    },
+    "generated_memory_ids_valid": false,
+    "trusted_provenance_source": "based_on.memories plus verified original source chunks; generated ID field rejected"
+  },
+  "consolidation": {
+    "baseline_conflict_preserved": false,
+    "with_explicit_policy": {
+      "operation": {
+        "operation_id": "c431827b-7ede-444c-bea3-cdaea871a832",
+        "status": "completed",
+        "operation_type": "consolidation",
+        "id": "c431827b-7ede-444c-bea3-cdaea871a832",
+        "task_type": "consolidation",
+        "mental_model_id": null,
+        "created_at": "2026-11-05T03:04:30.690865+00:00",
+        "updated_at": "2026-11-05T03:04:55.266933+00:00",
+        "completed_at": "2026-11-05T03:04:55.266933+00:00",
+        "error_message": null,
+        "retry_count": 0,
+        "next_retry_at": null,
+        "progress": {
+          "stage": "refreshing_mental_models",
+          "at": "2026-11-05T03:04:55.231990+00:00",
+          "processed": 5,
+          "total": 5,
+          "detail": null
+        },
+        "result_metadata": {
+          "progress": {
+            "at": "2026-11-05T03:04:55.231990+00:00",
+            "stage": "refreshing_mental_models",
+            "total": 5,
+            "processed": 5
+          },
+          "document_events": [
+            {
+              "kind": "consolidation",
+              "fact_id": null,
+              "created_at": "2026-11-05T03:04:55.245080Z",
+              "document_id": "source-a",
+              "facts_added": 0,
+              "facts_removed": 0,
+              "observations_created": {
+                "ids": [
+                  "6adf8cef-4a52-40f7-bc14-fd3f31393fb5",
+                  "907c48b1-ea74-4ddd-b350-b4d9ddd1840b"
+                ],
+                "count": 2
+              },
+              "observations_removed": {
+                "ids": [],
+                "count": 0
+              },
+              "observations_updated": {
+                "ids": [],
+                "count": 0
+              }
+            },
+            {
+              "kind": "consolidation",
+              "fact_id": null,
+              "created_at": "2026-11-05T03:04:55.245103Z",
+              "document_id": "source-b",
+              "facts_added": 0,
+              "facts_removed": 0,
+              "observations_created": {
+                "ids": [
+                  "6adf8cef-4a52-40f7-bc14-fd3f31393fb5"
+                ],
+                "count": 1
+              },
+              "observations_removed": {
+                "ids": [],
+                "count": 0
+              },
+              "observations_updated": {
+                "ids": [],
+                "count": 0
+              }
+            },
+            {
+              "kind": "consolidation",
+              "fact_id": null,
+              "created_at": "2026-11-05T03:04:55.245117Z",
+              "document_id": "source-c",
+              "facts_added": 0,
+              "facts_removed": 0,
+              "observations_created": {
+                "ids": [
+                  "7a1ecbf3-6026-4319-b016-7396fd346687"
+                ],
+                "count": 1
+              },
+              "observations_removed": {
+                "ids": [],
+                "count": 0
+              },
+              "observations_updated": {
+                "ids": [],
+                "count": 0
+              }
+            }
+          ]
+        },
+        "details": null,
+        "child_operations": null,
+        "task_payload": null
+      },
+      "observations": [
+        {
+          "id": "7a1ecbf3-6026-4319-b016-7396fd346687",
+          "text": "An agent suggested cloud backups for Project Cedar, but the owner has not approved the suggestion.",
+          "source_memory_ids": [
+            "fb251bbc-5430-428f-a472-8ec3aa7f8ebf",
+            "736653c2-c73c-4919-87c4-06ee824a157d"
+          ],
+          "proof_count": 2
+        },
+        {
+          "id": "6adf8cef-4a52-40f7-bc14-fd3f31393fb5",
+          "text": "Project Cedar keeps snapshots for 14 days according to one source and 30 days according to another; the authoritative retention period is unresolved.",
+          "source_memory_ids": [
+            "0a171922-7110-4b51-8687-b4b2c4f49e72",
+            "3ad0496f-8bd9-4a03-9603-87ed14eed52c"
+          ],
+          "proof_count": 2
+        },
+        {
+          "id": "907c48b1-ea74-4ddd-b350-b4d9ddd1840b",
+          "text": "The owner of Project Cedar explicitly decided that backups stay local.",
+          "source_memory_ids": [
+            "08b8c15c-e12b-4054-8881-070f63248280"
+          ],
+          "proof_count": 1
+        }
+      ]
+    }
+  },
+  "capacity_observed": {
+    "hindsight_memory_mib": 381.8,
+    "container_memory_limit_mib": 1024,
+    "oom_killed": false
+  },
+  "limitations": [
+    "Generated reference strings must be validated; current model-authored memory-ID field is invalid.",
+    "Proof counts count supporting facts, not independent source documents.",
+    "Entity label Cedar (owner) needs review; graph existence is not entity-resolution quality.",
+    "This is synthetic acceptance, not a real-corpus or nightly-workflow qualification."
+  ]
+}

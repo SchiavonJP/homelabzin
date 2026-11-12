@@ -1,6 +1,7 @@
 """Offline tests for gate safety and evidence validation; no inference calls."""
 
 import contextlib
+import hashlib
 import importlib.util
 import io
 import json
@@ -20,7 +21,8 @@ def good_output(language="en"):
     return {
         "retention_values_days": [14, 30], "retention_conflict": True,
         "backup_decision": "local", "cloud_backup_suggested": True, "cloud_backup_approval": "not_approved",
-        "unresolved_question": "Which retention policy is current?",
+        "unresolved_question": {"en": "Which retention policy is current?",
+                                "pt": "Qual é a política de retenção atual?"}[language],
         "evidence": [{"source_id": key, "quote": text} for key, text in sources.items()],
     }
 
@@ -127,9 +129,36 @@ class RequestTests(unittest.TestCase):
         self.assertEqual(test["observed_output"]["cloud_backup_approval"], "unknown")
         self.assertFalse(test["assertions"]["suggestion_not_approved"])
         self.assertFalse(result["model_smoke_passed"])
-        self.assertEqual(result["fixture_version"], 2)
+        self.assertEqual(result["fixture_version"], 3)
         self.assertEqual(len(test["request_sha256"]), 64)
         self.assertNotIn("cloud_backup_status", request.call_args.args[1]["response_format"]["json_schema"]["schema"]["properties"])
+
+    @patch.object(gates, "request_json")
+    @patch.dict(gates.os.environ, {"LITELLM_MASTER_KEY": "test-secret"}, clear=True)
+    def test_reasoning_control_is_scoped_and_hashes_the_actual_request(self, request):
+        request.return_value = ({"choices": [{"finish_reason": "stop", "message": {
+            "content": json.dumps(good_output())}}]}, None)
+        baseline = gates.model_probe(["ufsc-vision"], 1, ["en"])
+        baseline_payload = request.call_args.args[1]
+        self.assertNotIn("reasoning_effort", baseline_payload)
+        self.assertNotIn("allowed_openai_params", baseline_payload)
+        tuned = gates.model_probe(["ufsc-vision"], 1, ["en"], "none")
+        payload = request.call_args.args[1]
+        self.assertEqual(payload["allowed_openai_params"], ["reasoning_effort"])
+        self.assertEqual(payload["reasoning_effort"], "none")
+        digest = hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+        self.assertEqual(tuned["tests"][0]["request_sha256"], digest)
+        self.assertNotEqual(baseline["tests"][0]["request_sha256"], digest)
+
+    @patch.object(gates, "request_json")
+    @patch.dict(gates.os.environ, {"LITELLM_MASTER_KEY": "test-secret"}, clear=True)
+    def test_each_language_is_explicit_but_language_quality_requires_review(self, request):
+        request.return_value = ({"choices": [{"finish_reason": "stop", "message": {
+            "content": json.dumps(good_output())}}]}, None)
+        result = gates.model_probe(["ufsc-vision"], 1, ["en", "pt"])
+        for call, label in zip(request.call_args_list, ["English", "Portuguese"]):
+            self.assertIn("Write unresolved_question only in " + label, call.args[1]["messages"][0]["content"])
+        self.assertTrue(all(t["language_review_required"] for t in result["tests"]))
 
     @patch.object(gates, "request_json")
     @patch.dict(gates.os.environ, {"LITELLM_MASTER_KEY": "test-secret"}, clear=True)
@@ -195,6 +224,15 @@ class RequestTests(unittest.TestCase):
         with contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(gates.main(["model"]), 0)
         self.assertEqual(run.call_args.args[0][:4], ["docker", "exec", "-i", "sb_litellm"])
+
+    @patch.object(gates, "run_json")
+    def test_docker_wrapper_forwards_reasoning_control(self, run):
+        run.return_value = {"evidence": {"status": "partial", "model_smoke_passed": True}}
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(gates.main(["model", "--reasoning-effort", "none"]), 0)
+        argv = run.call_args.args[0]
+        index = argv.index("--reasoning-effort")
+        self.assertEqual(argv[index + 1], "none")
 
     @patch.object(gates.subprocess, "run")
     def test_failed_child_report_survives_real_wrapper_path(self, run):

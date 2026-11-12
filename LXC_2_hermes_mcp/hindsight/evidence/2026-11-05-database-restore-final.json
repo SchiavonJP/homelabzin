@@ -1,0 +1,45 @@
+{
+  "recorded_at": "2026-11-05T03:14:10.835543+00:00",
+  "scope": "final synthetic pilot state, including conflict-preserving policies and post-deletion state",
+  "status": "passed",
+  "tables": {
+    "banks": {
+      "rows": 3,
+      "row_digest": "acbc85fc2572dd46005a66ddcfa3b025"
+    },
+    "documents": {
+      "rows": 5,
+      "row_digest": "bb3ca6ac5e9a893e1529862b2c128594"
+    },
+    "memory_units": {
+      "rows": 13,
+      "row_digest": "4145121b20f19a4edb7a81c15519d530"
+    },
+    "memory_links": {
+      "rows": 25,
+      "row_digest": "b100b9dd4d3489c7451a2964272bb074"
+    },
+    "entities": {
+      "rows": 9,
+      "row_digest": "d43d5de58cb039eefbfc11188e5d1952"
+    },
+    "unit_entities": {
+      "rows": 18,
+      "row_digest": "76003d758a34ac966597ea02acde7c62"
+    }
+  },
+  "table_checks": {
+    "banks": true,
+    "documents": true,
+    "memory_units": true,
+    "memory_links": true,
+    "entities": true,
+    "unit_entities": true
+  },
+  "restored_vector_dimensions_counts": "1024|13",
+  "restored_as_role": "knowledge_pilot",
+  "archive_path": "/root/knowledge-gate-evidence/hindsight-pilot-final-20261105031400.dump",
+  "archive_bytes": 163927,
+  "archive_sha256": "fab39f5ca7a6f175cc840b8764cbfda40131034cc6f67c6bb7c6aa9499a7c2ae",
+  "original_database_restored": false
+}

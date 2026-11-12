@@ -1,0 +1,142 @@
+{
+  "gate": "recovery-runbook-repeat",
+  "identifier": "c6b480b84b98",
+  "recorded_at": "2026-11-06T06:40:53.130896+00:00",
+  "passed": true,
+  "release": "0.2.3",
+  "image_id": "sha256:b038c181fec0cdfadd10b69b4b2748e9ab9bc23eca827c72967dc99d12b90a66",
+  "earlier_attempt": {
+    "identifier": "d4d3fac68947",
+    "status": "aborted_before_live_job",
+    "evidence": "2026-11-06-recovery-attempt-d4d3fac68947.json",
+    "temporary_resources_removed": true
+  },
+  "build": {
+    "image_build_succeeded": true,
+    "unchanged_backend_and_frontend_build_cache_reused": true
+  },
+  "authorized_credential_reload": {
+    "email_and_password_from_env_applied_to_existing_account": true,
+    "account_id_preserved": true,
+    "containers_recreated": true,
+    "http_login_verified": true,
+    "login_http_status": 200,
+    "temporary_startup_configuration_removed": true
+  },
+  "runtime": {
+    "ready": true,
+    "active_runs": 0,
+    "pending_feedback": 0,
+    "schedule_enabled": false,
+    "acceptance_enabled": false
+  },
+  "cleanup": {
+    "disposable_databases_remaining": 0,
+    "disposable_roles_remaining": 0,
+    "test_bank_delete_confirmed": true,
+    "temporary_diagnostic_launcher_removed": true,
+    "private_evidence_and_backups_retained": true
+  },
+  "phases": {
+    "isolated": {
+      "gate": "recovery-isolated-postgresql",
+      "passed": true,
+      "tests": {
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "source_digest": "cd717b898e9c82bc12c52f37b4d92ac99efeefad34ae259912a6bde38017ec2d",
+      "identifier": "c6b480b84b98",
+      "recorded_at": "2026-11-06T06:36:11.760271+00:00"
+    },
+    "canary": {
+      "gate": "recovery-real-hindsight-canary",
+      "passed": true,
+      "checks": {
+        "same_run_completed": true,
+        "publication_complete": true,
+        "same_start_preserved": true,
+        "retention_operation_reused": true,
+        "one_retention_request": true,
+        "one_remote_document": true,
+        "one_remote_retention_batch": true,
+        "one_remote_item_retention": true,
+        "verified_document_complete": true,
+        "isolated_bank": true
+      },
+      "bank": "knowledge-vault-recovery-c6b480b84b98",
+      "run_id": "27a5336b-5f2c-43b4-8b9f-e2f9862ef0ce",
+      "operation_id": "95c0ffb8-5fd4-4cb3-b36d-1413f316acc8",
+      "started_at": "2026-11-06T06:36:42.821512+00:00",
+      "error": "",
+      "source_digest": "cd717b898e9c82bc12c52f37b4d92ac99efeefad34ae259912a6bde38017ec2d",
+      "identifier": "c6b480b84b98",
+      "recorded_at": "2026-11-06T06:37:26.093323+00:00"
+    },
+    "live": {
+      "gate": "recovery-live-queued-restart",
+      "passed": true,
+      "checks": {
+        "sources_preserved": true,
+        "versions_preserved": true,
+        "questions_preserved": true,
+        "findings_preserved": true,
+        "feedback_preserved": true,
+        "files_preserved": true,
+        "same_run_completed": true,
+        "one_run_added": true,
+        "publication_complete": true,
+        "schedule_disabled": true
+      },
+      "run_id": "aecb88c7-6a46-4bdc-97f5-8a1c6a56b9fb",
+      "started_at": "2026-11-06T06:38:47.936493+00:00",
+      "finished_at": "2026-11-06T06:38:48.652788+00:00",
+      "error": "",
+      "source_digest": "cd717b898e9c82bc12c52f37b4d92ac99efeefad34ae259912a6bde38017ec2d",
+      "backup_restore_verified": true,
+      "backup_tables": 14,
+      "backup_heartbeat_comparison": "row count; live heartbeat timestamps advance",
+      "baseline_files": 13,
+      "restart_mode": "worker stopped, unchanged run queued, worker started",
+      "identifier": "c6b480b84b98",
+      "recorded_at": "2026-11-06T06:38:49.767361+00:00"
+    },
+    "verification": {
+      "gate": "recovery-live-queued-restart",
+      "passed": true,
+      "checks": {
+        "sources_preserved": true,
+        "versions_preserved": true,
+        "questions_preserved": true,
+        "findings_preserved": true,
+        "feedback_preserved": true,
+        "files_preserved": true,
+        "same_run_completed": true,
+        "one_run_added": true,
+        "publication_complete": true,
+        "schedule_disabled": true
+      },
+      "run_id": "aecb88c7-6a46-4bdc-97f5-8a1c6a56b9fb",
+      "started_at": "2026-11-06T06:38:47.936493+00:00",
+      "finished_at": "2026-11-06T06:38:48.652788+00:00",
+      "error": "",
+      "identifier": "c6b480b84b98",
+      "recorded_at": "2026-11-06T06:39:09.957903+00:00"
+    },
+    "cleanup": {
+      "gate": "recovery-cleanup",
+      "passed": true,
+      "bank_deleted": true,
+      "databases_deleted": [
+        "xereta_recovery_c6b480b84b98",
+        "xereta_recovery_restore_c6b480b84b98"
+      ],
+      "role_deleted": "xereta_recovery_c6b480b84b98",
+      "evidence_and_backups_retained": true,
+      "identifier": "c6b480b84b98",
+      "recorded_at": "2026-11-06T06:39:46.152548+00:00"
+    }
+  }
+}

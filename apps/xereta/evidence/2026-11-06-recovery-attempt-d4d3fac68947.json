@@ -1,0 +1,61 @@
+{
+  "gate": "recovery-runbook-repeat",
+  "identifier": "d4d3fac68947",
+  "recorded_at": "2026-11-06T06:36:30.744183+00:00",
+  "status": "aborted_before_live_job",
+  "passed": false,
+  "error": "command_failed_during_backup_preparation",
+  "note": "The live phase stopped before recording its rollback image or queuing a test job. A separate checkout archive diagnostic succeeded. Temporary resources were removed. A new qualification is being run after the authorized runtime credential update.",
+  "phases": {
+    "isolated": {
+      "gate": "recovery-isolated-postgresql",
+      "passed": true,
+      "tests": {
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "source_digest": "cd717b898e9c82bc12c52f37b4d92ac99efeefad34ae259912a6bde38017ec2d",
+      "identifier": "d4d3fac68947",
+      "recorded_at": "2026-11-06T06:23:42.072076+00:00"
+    },
+    "canary": {
+      "gate": "recovery-real-hindsight-canary",
+      "passed": true,
+      "checks": {
+        "same_run_completed": true,
+        "publication_complete": true,
+        "same_start_preserved": true,
+        "retention_operation_reused": true,
+        "one_retention_request": true,
+        "one_remote_document": true,
+        "one_remote_retention_batch": true,
+        "one_remote_item_retention": true,
+        "verified_document_complete": true,
+        "isolated_bank": true
+      },
+      "bank": "knowledge-vault-recovery-d4d3fac68947",
+      "run_id": "724dcd14-4d96-4baa-885d-e0a84d82ebc1",
+      "operation_id": "69e27a7b-e162-427e-b464-a5e49b66aa73",
+      "started_at": "2026-11-06T06:24:10.834053+00:00",
+      "error": "",
+      "source_digest": "cd717b898e9c82bc12c52f37b4d92ac99efeefad34ae259912a6bde38017ec2d",
+      "identifier": "d4d3fac68947",
+      "recorded_at": "2026-11-06T06:24:34.670418+00:00"
+    },
+    "cleanup": {
+      "gate": "recovery-cleanup",
+      "passed": true,
+      "bank_deleted": true,
+      "databases_deleted": [
+        "xereta_recovery_d4d3fac68947",
+        "xereta_recovery_restore_d4d3fac68947"
+      ],
+      "role_deleted": "xereta_recovery_d4d3fac68947",
+      "evidence_and_backups_retained": true,
+      "identifier": "d4d3fac68947",
+      "recorded_at": "2026-11-06T06:30:20.397699+00:00"
+    }
+  }
+}

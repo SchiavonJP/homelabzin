@@ -1,0 +1,94 @@
+{
+  "automatic_affine_publishing": false,
+  "bank": "knowledge-affine-proof-20261108-76a987fcfc",
+  "code_sha256": {
+    "curator": "7cdd78bf21ec7de84af016341613bba056a30feca3abffab26e9131b28f8d53b",
+    "reader": "4194f5b724b24cef8eb8401db438791586e45577a8e720c9e2b523808a00419f"
+  },
+  "drafting": {
+    "engine": "bounded-gateway",
+    "first_run_seconds": 83.62,
+    "requested_model": "ufsc-vision",
+    "returned_model": "ufsc-vision",
+    "usage": {
+      "completion_tokens": 1141,
+      "prompt_tokens": 1390,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "total_tokens": 2531
+    }
+  },
+  "failure_handling": {
+    "changed_body": "synthetic test preserves both versions and archived bodies",
+    "invalid_session_live_test": "three incomplete HTTP 403 captures; last good versions retained in a separate local test ledger",
+    "unknown_blocks_and_nonempty_canvas": "blocked by synthetic reader tests"
+  },
+  "gate": "affine-isolated-ingestion-proof",
+  "idempotency": {
+    "additional_model_draft_calls": 0,
+    "fresh_recapture_unchanged": true,
+    "questions_unchanged": true,
+    "remote_operations_unchanged": true,
+    "source_versions_unchanged": true
+  },
+  "limitations": [
+    "Isolated CLI proof; AFFiNE is not connected to the current Xereta source UI.",
+    "Reader uses a private expiring session; automatic refresh and unattended transport remain unqualified.",
+    "Only the three approved small text documents were read; media and nonempty canvases remain unqualified.",
+    "No production cross-source identity mapping or deduplication adapter was installed."
+  ],
+  "private_artifacts": {
+    "preview": "/root/knowledge-affine-proof/20261108-76a987fcfc/state/review/b8a56c58da3f44999deb4a13bbd2cf07/_AgentKnowledge/Preview.md",
+    "state": "/root/knowledge-affine-proof/20261108-76a987fcfc/state",
+    "zip": "/root/knowledge-affine-proof/20261108-76a987fcfc/affine-proof-preview.zip",
+    "zip_sha256": "8b5a9d2c7b084e03c71c86824564cd964edde39289e7fb893ae82cf242ce386b"
+  },
+  "private_content_included": false,
+  "production": {
+    "changed_review_files": [],
+    "changed_tables": [
+      "heartbeat"
+    ],
+    "production_bank_document_listing_unchanged": true,
+    "production_bank_documents_checked": 70,
+    "review_files_checked": 19,
+    "tables_checked": 19
+  },
+  "proof_id": "20261108-76a987fcfc",
+  "proof_scheduling": "disabled",
+  "reader": {
+    "affine_version": "0.27.4",
+    "authenticated_reads_passed": true,
+    "complete_captures": 3,
+    "documents_verified": 3,
+    "fresh_markdown_matches_previously_export_verified_capture": true,
+    "full_block_id_regression_fixed": true,
+    "original_snapshots_unchanged_on_recapture": true,
+    "qualified_note_wrapper_warnings": 3,
+    "real_yjs_empty_and_nonempty_canvas_test_passed": true,
+    "reference_capture": "3c043240-7897-4d95-86de-953b9be16927",
+    "scope": "Text, accents, Markdown links, lists and fenced code; no media or canvas qualification",
+    "unknown_blocks": 0
+  },
+  "recorded_at": "2026-11-08T04:15:26.573493+00:00",
+  "remote_documents": 3,
+  "remote_operations": 7,
+  "review": {
+    "citations": 5,
+    "findings": 2,
+    "literal_citations_validated": true,
+    "owner_approval_inferred": false,
+    "questions": 3,
+    "server_provenance_validated": true
+  },
+  "source_documents": 3,
+  "source_versions": 3,
+  "status": "passed",
+  "tests": {
+    "curator_python": 40,
+    "reader_node_in_pinned_affine_image": 13,
+    "reader_node_local_passed": 12,
+    "reader_node_local_real_yjs_skipped": 1
+  }
+}

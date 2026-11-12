@@ -1,0 +1,5 @@
+# Add before the existing catch-all rule in the Mini PC Cloudflared ingress.
+# Create the matching DNS hostname on the existing tunnel after confirming its name.
+# Keep all existing tunnel credentials, hostnames and routing rules unchanged.
+- hostname: xereta.joaopaulo.me
+  service: http://192.168.0.213:3101

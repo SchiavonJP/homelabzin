@@ -1,0 +1,23 @@
+# Mesclar estes blocos a /opt/data/config.yaml; não substituir o arquivo inteiro.
+# A chave permanece no ambiente do container, sem credenciais neste arquivo.
+model:
+  default: generalist
+  provider: custom:litellm
+  base_url: http://192.168.0.211:4000/v1
+  api_mode: chat_completions
+providers:
+  litellm:
+    api: http://192.168.0.211:4000/v1
+    key_env: OPENAI_API_KEY
+    transport: chat_completions
+    default_model: generalist
+    discover_models: false
+    models:
+      generalist: {}
+      default-agent: {}
+      coder: {}
+      fast: {}
+      reasoning: {}
+      vision: {}
+      frontier: {}
+      ocr: {}

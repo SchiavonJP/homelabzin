@@ -1,0 +1,139 @@
+{
+  "recorded_at": "2026-11-05T02:41:48.422857+00:00",
+  "probe_version": 5,
+  "evidence": {
+    "gate": "G3/model-smoke",
+    "fixture_version": 3,
+    "status": "partial",
+    "model_smoke_passed": true,
+    "tests": [
+      {
+        "requested_model": "ufsc-vision",
+        "language": "en",
+        "request_settings": {
+          "reasoning_effort": "none",
+          "allowed_openai_params": [
+            "reasoning_effort"
+          ]
+        },
+        "language_review_required": true,
+        "fixture_sha256": "1f4085b8bd1e11641f3e3f4d0cac1ccbdf024bdad021a806caeb2adc0f8424c3",
+        "request_sha256": "064dbba1679a06591cf58f8128525ac1eca39fbe53054f7d482a8bf7b5f9533d",
+        "status": "passed",
+        "assertions": {
+          "schema_fields": true,
+          "both_retention_values": true,
+          "contradiction_detected": true,
+          "explicit_decision_preserved": true,
+          "suggestion_recognized": true,
+          "suggestion_not_approved": true,
+          "question_present": true,
+          "quotes_grounded": true,
+          "all_sources_cited": true
+        },
+        "finish_reason": "stop",
+        "observed_output": {
+          "retention_values_days": [
+            14,
+            30
+          ],
+          "retention_conflict": true,
+          "backup_decision": "local",
+          "cloud_backup_suggested": true,
+          "cloud_backup_approval": "not_approved",
+          "unresolved_question": "What is the correct retention period for Project Cedar snapshots, given the conflicting values of 14 and 30 days?",
+          "evidence": [
+            {
+              "source_id": "a",
+              "quote": "Project Cedar keeps snapshots for 14 days. Decision by the owner: backups stay local."
+            },
+            {
+              "source_id": "b",
+              "quote": "Project Cedar keeps snapshots for 30 days. This note does not explain the discrepancy."
+            },
+            {
+              "source_id": "c",
+              "quote": "An agent suggested cloud backups for Cedar. The owner has not approved that suggestion."
+            }
+          ]
+        },
+        "returned_model": "ufsc-vision",
+        "deployment_id": "17bcca4edf04d9c3046145467ab1658de8a10a6b862d68c7f0f18a0eb48f3c9d",
+        "backend_attribution": "correlate deployment id with router logs",
+        "usage": {
+          "completion_tokens": 227,
+          "prompt_tokens": 192,
+          "total_tokens": 419,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "seconds": 12.829
+      },
+      {
+        "requested_model": "ufsc-vision",
+        "language": "pt",
+        "request_settings": {
+          "reasoning_effort": "none",
+          "allowed_openai_params": [
+            "reasoning_effort"
+          ]
+        },
+        "language_review_required": true,
+        "fixture_sha256": "654911c8dd2dc6d132de1aa2a0824bced91fb7e6124fb3777708794fd413e6ce",
+        "request_sha256": "c62ff75c976b08806f30880fe818b236bc627d15fd5026a3feb8b176e3cb2aca",
+        "status": "passed",
+        "assertions": {
+          "schema_fields": true,
+          "both_retention_values": true,
+          "contradiction_detected": true,
+          "explicit_decision_preserved": true,
+          "suggestion_recognized": true,
+          "suggestion_not_approved": true,
+          "question_present": true,
+          "quotes_grounded": true,
+          "all_sources_cited": true
+        },
+        "finish_reason": "stop",
+        "observed_output": {
+          "retention_values_days": [
+            14,
+            30
+          ],
+          "retention_conflict": true,
+          "backup_decision": "local",
+          "cloud_backup_suggested": true,
+          "cloud_backup_approval": "not_approved",
+          "unresolved_question": "Qual é a política de retenção correta para os snapshots do projeto Cedro, considerando a divergência entre 14 e 30 dias?",
+          "evidence": [
+            {
+              "source_id": "a",
+              "quote": "O projeto Cedro guarda snapshots por 14 dias. Decisão do responsável: os backups ficam locais."
+            },
+            {
+              "source_id": "b",
+              "quote": "O projeto Cedro guarda snapshots por 30 dias. Esta nota não explica a divergência."
+            },
+            {
+              "source_id": "c",
+              "quote": "Um agente sugeriu backups na nuvem para Cedro. O responsável não aprovou essa sugestão."
+            }
+          ]
+        },
+        "returned_model": "ufsc-vision",
+        "deployment_id": "17bcca4edf04d9c3046145467ab1658de8a10a6b862d68c7f0f18a0eb48f3c9d",
+        "backend_attribution": "correlate deployment id with router logs",
+        "usage": {
+          "completion_tokens": 244,
+          "prompt_tokens": 203,
+          "total_tokens": 447,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "seconds": 13.533
+      }
+    ],
+    "remaining": "Confirm actual backend/fallback; test Hindsight retain, consolidation, reflect, deletion, graph, persistence and resource use."
+  }
+}

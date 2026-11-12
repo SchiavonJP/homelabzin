@@ -277,7 +277,7 @@ def deployment_probe(models, timeout):
                 "reason": str(exc) if isinstance(exc, ProbeError) else "invalid_backend_url"}
 
 
-def model_probe(models, timeout, languages=None):
+def model_probe(models, timeout, languages=None, reasoning_effort=None):
     key = os.environ.get("LITELLM_MASTER_KEY")
     if not key:
         return {"gate": "G3/model-smoke", "status": "blocked", "reason": "LITELLM_MASTER_KEY_missing"}
@@ -286,17 +286,28 @@ def model_probe(models, timeout, languages=None):
     for model in models:
         for language in languages if languages is not None else FIXTURES:
             sources = FIXTURES[language]
+            output_language = {"en": "English", "pt": "Portuguese"}[language]
             payload = {
                 "model": model, "temperature": 0, "max_tokens": 1200,
                 "messages": [
-                    {"role": "system", "content": "Extract only from the supplied synthetic source notes. Do not reconcile conflicting retention values without evidence. Distinguish an explicit owner decision from an unapproved agent suggestion. cloud_backup_suggested records whether a suggestion was made, independently of approval. cloud_backup_approval must be not_approved when a source explicitly says the owner has not approved it; use unknown only when sources do not address approval. Ask one question about the unresolved retention policy, in the source language. Cite each source with an exact, nonempty quote."},
+                    {"role": "system", "content": "Extract only from the supplied synthetic source notes. Do not reconcile conflicting retention values without evidence. Distinguish an explicit owner decision from an unapproved agent suggestion. cloud_backup_suggested records whether a suggestion was made, independently of approval. cloud_backup_approval must be not_approved when a source explicitly says the owner has not approved it; use unknown only when sources do not address approval. Ask one question about the unresolved retention policy. Write unresolved_question only in " + output_language + ". Keep schema enum values unchanged. Cite each source with an exact, nonempty quote."},
                     {"role": "user", "content": json.dumps(sources, ensure_ascii=False)},
                 ],
                 "response_format": {"type": "json_schema", "json_schema": {
                     "name": "knowledge_gate", "strict": True, "schema": OUTPUT_SCHEMA}},
             }
+            settings = {}
+            if reasoning_effort is not None:
+                # LiteLLM's generic OpenAI route does not recognize this Qwen
+                # model's thinking support. Allow only this explicit parameter
+                # for this request; never change the shared router configuration.
+                payload["reasoning_effort"] = reasoning_effort
+                payload["allowed_openai_params"] = ["reasoning_effort"]
+                settings = {"reasoning_effort": reasoning_effort,
+                            "allowed_openai_params": ["reasoning_effort"]}
             started = time.monotonic()
             test = {"requested_model": model, "language": language,
+                    "request_settings": settings, "language_review_required": True,
                     "fixture_sha256": hashlib.sha256(json.dumps(sources, sort_keys=True).encode()).hexdigest(),
                     "request_sha256": hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()}
             try:
@@ -327,7 +338,7 @@ def model_probe(models, timeout, languages=None):
                 test.update({"status": "failed", "reason": str(exc)})
             test["seconds"] = round(time.monotonic() - started, 3)
             tests.append(test)
-    return {"gate": "G3/model-smoke", "fixture_version": 2,
+    return {"gate": "G3/model-smoke", "fixture_version": 3,
             "status": "partial" if all(t["status"] == "passed" for t in tests) else "failed",
             "model_smoke_passed": all(t["status"] == "passed" for t in tests), "tests": tests,
             "remaining": "Confirm actual backend/fallback; test Hindsight retain, consolidation, reflect, deletion, graph, persistence and resource use."}
@@ -379,6 +390,8 @@ def main(argv=None):
     model.add_argument("--models", nargs="+", default=["ufsc-vision"])
     model.add_argument("--languages", nargs="+", choices=FIXTURES, default=list(FIXTURES))
     model.add_argument("--timeout", type=float, default=120)
+    model.add_argument("--reasoning-effort", choices=["none", "minimal", "low", "medium", "high"],
+                       help="Request-specific thinking control, with a LiteLLM parameter allowlist")
     model.add_argument("--container", default="sb_litellm")
     model.add_argument("--inside-container", action="store_true", help=argparse.SUPPRESS)
     deployments = sub.add_parser("deployments", help="Read selected gateway routing fields; no inference")
@@ -402,13 +415,15 @@ def main(argv=None):
         evidence = affine_probe(args.base_url, args.workspace_id, args.doc_id, args.timeout)
     elif args.inside_container:
         evidence = (deployment_probe(args.models, args.timeout) if args.command == "deployments"
-                    else model_probe(args.models, args.timeout, args.languages))
+                    else model_probe(args.models, args.timeout, args.languages, args.reasoning_effort))
     else:
         source = Path(__file__).read_text()
         child_args = ["docker", "exec", "-i", args.container, "python3", "-", args.command,
                       "--inside-container", "--timeout", str(args.timeout), "--models", *args.models]
         if args.command == "model":
             child_args.extend(["--languages", *args.languages])
+            if args.reasoning_effort is not None:
+                child_args.extend(["--reasoning-effort", args.reasoning_effort])
         request_count = len(args.models) * len(args.languages) if args.command == "model" else 1
         evidence = run_json(child_args, stdin=source, timeout=args.timeout * request_count + 20,
                             preserve_gate_report=True)
@@ -418,7 +433,7 @@ def main(argv=None):
             return 0 if outcome.get("model_smoke_passed") else 1
         return 1 if outcome.get("status") in {"failed", "blocked"} else 0
     report = {"recorded_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-              "probe_version": 4, "evidence": evidence}
+              "probe_version": 5, "evidence": evidence}
     print(json.dumps(report, indent=2, ensure_ascii=False))
     return 1 if evidence.get("status") in {"failed", "blocked"} else 0
 

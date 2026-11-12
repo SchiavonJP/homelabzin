@@ -1,0 +1,35 @@
+{
+  "image": "ghcr.io/vectorize-io/hindsight@sha256:fbc37d194bce007b6cce2fd9f66cd7f8c050bd18b80e662090a92835d9cb191d",
+  "status": "running",
+  "health": "healthy",
+  "oom_killed": false,
+  "ports": {
+    "8888/tcp": [
+      {
+        "HostIp": "127.0.0.1",
+        "HostPort": "8888"
+      }
+    ],
+    "9999/tcp": [
+      {
+        "HostIp": "127.0.0.1",
+        "HostPort": "9999"
+      }
+    ]
+  },
+  "memory_limit_bytes": 1073741824,
+  "restart_policy": "no",
+  "api_health": {
+    "status": "healthy",
+    "database": "connected",
+    "db_acquire_ms": 0.7,
+    "db_pool_waiting": 0,
+    "db_pool_in_use": 0,
+    "db_pool_max": 5,
+    "db_pool_idle": 2
+  },
+  "compose_sha256": "06dad2dc2bbe99b8d530dd76858c21c040d9de59281f56951d8cd6a334ac6440",
+  "real_corpus_ingested": false,
+  "nightly_schedule_enabled": false,
+  "hermes_provider_changed": false
+}

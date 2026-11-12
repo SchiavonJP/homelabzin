@@ -1,0 +1,96 @@
+{
+  "recorded_at": "2026-11-05T03:13:28.559260+00:00",
+  "bank": "knowledge-gate-pt-86c4fe58c7",
+  "synthetic_only": true,
+  "fixture_assertions": {
+    "schema_fields": true,
+    "both_retention_values": true,
+    "contradiction_detected": true,
+    "explicit_decision_preserved": true,
+    "suggestion_recognized": true,
+    "suggestion_not_approved": true,
+    "question_present": true,
+    "quotes_grounded": true,
+    "all_sources_cited": true
+  },
+  "metadata_checks": {
+    "based_on_ids_valid": true,
+    "all_original_documents_in_metadata": true
+  },
+  "question_language_manual_review": "Portuguese; passed",
+  "structured_output": {
+    "retention_values_days": [
+      14,
+      30
+    ],
+    "retention_conflict": true,
+    "backup_decision": "local",
+    "cloud_backup_suggested": true,
+    "cloud_backup_approval": "not_approved",
+    "unresolved_question": "Qual é o valor efetivo de retenção de snapshots do projeto Cedro — 14 dias (fonte a) ou 30 dias (fonte b) — e por que os dois documentos divergem entre si?",
+    "evidence": [
+      {
+        "source_id": "a",
+        "quote": "O projeto Cedro guarda snapshots por 14 dias. Decisão do responsável: os backups ficam locais."
+      },
+      {
+        "source_id": "b",
+        "quote": "O projeto Cedro guarda snapshots por 30 dias. Esta nota não explica a divergência."
+      },
+      {
+        "source_id": "c",
+        "quote": "Um agente sugeriu backups na nuvem para Cedro. O responsável não aprovou essa sugestão."
+      }
+    ]
+  },
+  "steps": [
+    {
+      "step": "retain",
+      "status": "passed",
+      "seconds": 30.121
+    },
+    {
+      "step": "consolidation",
+      "status": "completed",
+      "seconds": 27.053
+    },
+    {
+      "step": "memories",
+      "status": "observed",
+      "seconds": null
+    },
+    {
+      "step": "reflect",
+      "status": "observed",
+      "seconds": 82.99
+    }
+  ],
+  "observations": [
+    {
+      "id": "0c3bf4a0-007b-4e69-88f7-4f5a95bcc584",
+      "text": "O projeto Cedro guarda snapshots por 14 dias, embora outra fonte indique 30 dias; o valor autoritativo permanece não resolvido.",
+      "proof_count": 2,
+      "source_memory_ids": [
+        "5178b142-f25d-4655-bdf2-e27258513c8f",
+        "30c0411a-e06c-48f1-a045-31c173b868f4"
+      ]
+    },
+    {
+      "id": "54dd55d2-6a27-491c-9e36-5e66419558d7",
+      "text": "O responsável do projeto Cedro decidiu que os backups do projeto devem ficar locais.",
+      "proof_count": 1,
+      "source_memory_ids": [
+        "743ea0cf-54bb-40ba-8d11-9a84f5d9a936"
+      ]
+    },
+    {
+      "id": "5b31c891-4357-4e13-8dca-61dcb8280ca4",
+      "text": "Um agente sugeriu backups na nuvem para o projeto Cedro, mas o responsável não aprovou a sugestão.",
+      "proof_count": 2,
+      "source_memory_ids": [
+        "40bc1652-a42c-460d-b7bd-86d9f45afa46",
+        "41916435-356e-4cf0-8f93-84f45821e7bc"
+      ]
+    }
+  ]
+}

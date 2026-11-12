@@ -1,0 +1,31 @@
+{
+  "verified_at": "2026-11-09",
+  "container": "sb_hermes",
+  "lxc": 107,
+  "endpoint": "http://192.168.0.211:4000/v1",
+  "provider": "custom:litellm",
+  "default_model": "generalist",
+  "key_env": "OPENAI_API_KEY",
+  "existing_key_verified": true,
+  "selectable_models": ["generalist", "default-agent", "coder", "fast", "reasoning", "vision", "frontier", "ocr"],
+  "discover_models": false,
+  "embedding_alias_excluded_from_chat_picker": "embed",
+  "config_backup": "/opt/data/migration-backups/litellm-20261109-152227/config.yaml",
+  "validation": {
+    "installed_hermes_runtime_resolver": "custom_provider:litellm",
+    "authenticated_models_http": 200,
+    "default_generation_http": 200,
+    "default_generation_upstream_model": "qwen3.8:27b",
+    "default_generation_elapsed_seconds": 22.88,
+    "default_generation_reply": "OK",
+    "canary_reasoning_effort": "none (test request only; persistent reasoning unchanged)",
+    "dashboard_health_http": 200,
+    "container_after_restart": "running",
+    "restarted_container_only": "sb_hermes"
+  },
+  "notes": [
+    "Existing conversations may retain their selected model; choose a model with /model or start a new conversation.",
+    "Persistent config.yaml controls routing. Compose environment corrections apply on next recreation; no recreation was needed for the routing change.",
+    "No model, image, or OCR quality benchmark was performed."
+  ]
+}

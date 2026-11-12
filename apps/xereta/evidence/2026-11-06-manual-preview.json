@@ -1,0 +1,25 @@
+{
+  "recorded_at": "2026-11-06T11:07:53.550768+00:00",
+  "run_id": "80f21520-9a57-4809-ae2a-95a35741d64c",
+  "state": "completed",
+  "stage": "complete",
+  "error": "",
+  "started_at": "2026-11-06T11:06:59.428781+00:00",
+  "finished_at": "2026-11-06T11:07:01.283288+00:00",
+  "result": {
+    "sources": 9,
+    "publication": "published"
+  },
+  "new_questions": [],
+  "new_findings": [],
+  "changed_questions": 0,
+  "changed_findings": 0,
+  "open_questions": 0,
+  "proposed_findings": 0,
+  "pending_feedback": 0,
+  "publication_state": "published",
+  "review_conflicts": 0,
+  "schedule_unchanged": true,
+  "published_pages_verified": true,
+  "current_citations": true
+}

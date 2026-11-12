@@ -1,6 +1,6 @@
 # Homelab — Overview
 
-> Last updated: 2026-09-19
+> Last updated: 2026-11-05
 
 ---
 
@@ -120,7 +120,7 @@ pct exec <VMID> -- bash -c "echo 'root:NOVASENHA' | chpasswd"   # direta
 | 5 | sb-dados | **Dados** | 192.168.0.210 | Databases (Postgres + Redis + FalkorDB) |
 | 6 | sb-dev | — | 192.168.0.215 | Dev environment (deferred) |
 | 7 | sb-monitor | — | 192.168.0.216 | Monitoring + container management |
-| 8 | apollo | **Apollo** | 192.168.0.217 | Local GPU inference (RTX 3060) |
+| 8 | apollo | **Apollo** | 192.168.0.217 | CPU embeddings (bge-m3, actual VMID 110) |
 
 ### Media Stack (LXCs 9-12, sob demanda)
 
@@ -187,7 +187,7 @@ Central OpenAI-compatible LLM router. Single endpoint; no service knows which ba
 
 | Alias | Backend | Notes |
 |-------|---------|-------|
-| `local-coder` / `hermes-local` | Apollo (RTX 3060) | Qwen3.6-35B-A3B-MTP |
+| `local-coder` / `hermes-local` | Apollo chat endpoint (disabled) | Local chat service retired on 2026-11-04 |
 | `llama3.1-8b` / `qwen2.5-coder` | Mac M1 (Ollama) | Lightweight local |
 | `deepseek-r1` / `deepseek-v3` | OpenRouter | Free tier |
 | `qwen3-coder` / `llama4-scout` | OpenRouter | Free tier |
@@ -229,7 +229,26 @@ Uptime Kuma monitors all services via HTTP/TCP/SSL. Dockhand provides a Docker c
 
 ---
 
-### LXC 8 — Apollo (GPU Inference)
+### LXC 8 — Apollo (CPU Embeddings, actual VMID 110)
+
+- **Service:** bge-embedding (bge-m3 Q4_K_M), CPU only
+- **Access:** `http://192.168.0.217:8081/v1/embeddings` · LiteLLM alias `embed`
+- **Resources:** 8 cores · 4 GiB RAM · 1 GiB swap · 50 GB disk
+- **Startup:** LXC `onboot: 1`; `bge-embedding` enabled; chat `llama-server` disabled
+
+Updated 2026-11-04 after moving the RTX 3060 to VM passthrough. CPU mode sets
+`BGE_NGL=0`, `CUDA_VISIBLE_DEVICES=-1`, and `LLAMA_ARG_DEVICE=none`. Embedding
+dimensions (1024), pooling, model, context, and endpoint are unchanged. Validation
+covered four concurrent requests (12 vectors), identical output for the baseline
+input, and a successful request through LiteLLM's `embed` alias after resizing.
+No OOM events were observed during validation.
+
+The RAM limit was reduced from 48 GiB to 4 GiB. Existing model files remain
+available. See [Apollo configuration](LXC_8_llama/readme.md) for settings and backup
+locations. Port 8080 no longer serves local chat.
+
+<details>
+<summary>Historical GPU and chat configuration (before 2026-11-04)</summary>
 
 - **Services:** llama-server (Qwen3.6-35B-A3B-MTP) · bge-embedding (bge-m3)
 - **Access:** `192.168.0.217` · `apollo.joaopaulo.me`
@@ -274,6 +293,8 @@ pct exec 110 -- bash -c 'sed -i "s|Qwen3.6-35B-A3B-UD-Q4_K_M.gguf|Ornith-1.5-35B
 **Bug de GPU corrigido (2026-09-19):** depois de um reboot do LXC, o driver NVIDIA reatribuiu o major number do device `/dev/nvidia-uvm` (de 509 pra 508), mas o cgroup em `/etc/pve/lxc/110.conf` só liberava 509 — CUDA falhava silenciosamente e o llama-server caía pra CPU (sem crash, só ~10x mais lento) sem nenhum log de erro óbvio. Sintoma: `nvidia-smi` mostra 0% de uso e 1 MiB durante geração ativa. Fix: conferir o major real com `ls -la /dev/nvidia-uvm*` e ajustar a linha `lxc.cgroup2.devices.allow: c XXX:* rwm` correspondente no `.conf`, depois `pct reboot`. Pode se repetir em reboots futuros do host.
 
 ---
+
+</details>
 
 ### LXC 9 — Jellyfin (Media Streaming)
 
@@ -411,3 +432,7 @@ LXC 13 — Camera (motionEye) ── webcam USB (Proxmox host, V4L2 passthrough)
 | Jellyfin GPU passthrough | Add RTX 3060 to LXC 9 when CPU transcoding is bottleneck |
 | Navidrome public subdomain | `music.joaopaulo.me` via Cloudflare Tunnel (LAN-only for now) |
 | qBittorrent VPN | Gluetun sidecar — documented in LXC 11 readme, not active |
+
+## Xereta — knowledge review pilot
+
+Xereta runs on CT107 / `192.168.0.213:3101` as `sb_xereta` and `sb_xereta_worker`. Review happens in the frontend, with separate question/knowledge files and a linked index in the Mini PC’s SilverBullet `space/` vault. SilverBullet shares Nextcloud's storage; the notebook's Nextcloud Desktop client bridges it to Obsidian, and CouchDB/LiveSync connects the Obsidian devices. See the [verified synchronization path and indexing repair](minipc/silverbullet/readme.md). The application replaces the AFFiNE integration for this pilot. Hindsight remains isolated; the existing Hermes MCP/provider remain active. After qualification, a nightly pilot was enabled for 03:00 America/Sao_Paulo, starting November 7, limited to three approved notes and owner feedback. Review the first three runs before expanding sources. Public hostname setup remains a separate ingress gate. See [Xereta runbook](apps/xereta/README.md).
