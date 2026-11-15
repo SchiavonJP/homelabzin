@@ -1,6 +1,6 @@
 # Mini PC — SilverBullet
 
-> **Current Xereta integration (2026-11-05):** Xereta reads the Mini PC's SilverBullet `space/` vault. SilverBullet mounts Nextcloud's vault directory; Nextcloud Desktop on the notebook connects that directory to the Obsidian vault. CouchDB/LiveSync separately connects Obsidian devices. See [Xereta deployment and gates](../../apps/xereta/README.md).
+> **Current Xereta integration (2026-11-05):** Xereta reads the Mini PC's SilverBullet `space/` vault. SilverBullet mounts Nextcloud's vault directory; Nextcloud Desktop on the notebook connects that directory to the Obsidian vault. CouchDB/LiveSync separately connects Obsidian devices. See [Xereta deployment and gates](https://github.com/SchiavonJP/xereta/blob/main/README.md).
 
 ## Current shared vault
 
@@ -17,7 +17,7 @@ Xereta reads notes under `space/` from the Mini PC; it no longer reads the noteb
 - Files API: `GET /.fs` and `GET /.fs/<encoded-path>`, with SHA256 ETags on GET.
 - Live create/readback/conditional-update/stale-update gate passed on a disposable file; the probe removed its file afterward.
 - Xereta publishes individual files under `space/_AgentKnowledge/Perguntas/` and `Conhecimento/`, a small `Index.md`, and dedicated checkbox sync tests. The old Inbox is preserved as history. Original notes and source synchronization remain unchanged.
-- The owner-guided Obsidian roundtrip passed on November 5 locally (`2026-11-06T00:40:29Z`). The notebook-offline digest and reconnection test also passed: all 14 checked files matched after Nextcloud resumed, including the offline receipt, review pages and original notes. See the [offline evidence](../../apps/xereta/evidence/2026-11-06-notebook-offline.json).
+- The owner-guided Obsidian roundtrip passed on November 5 locally (`2026-11-06T00:40:29Z`). The notebook-offline digest and reconnection test also passed: all 14 checked files matched after Nextcloud resumed, including the offline receipt, review pages and original notes. See the [offline evidence](https://github.com/SchiavonJP/xereta/blob/main/evidence/2026-11-06-notebook-offline.json).
 
 Installed UI extensions include TreeView, Silversearch, PDF Viewer, Table Sorting and Filtering, Floating Journal Calendar, and Excalidraw. The Excalidraw library uses its previously qualified pinned revision; do not replace it with an unverified main-branch manifest.
 
@@ -35,7 +35,7 @@ SilverBullet previously wrote as root and bypassed Nextcloud's file index. A tar
 
 Manual scan: `/home/homelabzin/.local/bin/xereta-nextcloud-vault-scan`. To disable periodic scanning, remove only the `xereta-nextcloud-vault-sync` marked crontab block. Do not reset CouchDB or force LiveSync replication to repair this path.
 
-The owner-guided Obsidian roundtrip passed: the first check reached Xereta, its reply reached the notebook with an identical SHA256, and the owner's second check reached Xereta and completed the test. Nextcloud Desktop was found paused during the test and had to be resumed. See the [recorded evidence](../../apps/xereta/evidence/2026-11-05-nextcloud-sync-repair.json). Xereta's small nightly pilot is enabled at 03:00 America/Sao_Paulo for the three approved notes and owner feedback, starting November 7; see [activation evidence](../../apps/xereta/evidence/2026-11-06-nightly-pilot.json). The always-on server can read its local copy while the notebook is off; delivering new edits to Obsidian devices still depends on the notebook's client.
+The owner-guided Obsidian roundtrip passed: the first check reached Xereta, its reply reached the notebook with an identical SHA256, and the owner's second check reached Xereta and completed the test. Nextcloud Desktop was found paused during the test and had to be resumed. See the [recorded evidence](https://github.com/SchiavonJP/xereta/blob/main/evidence/2026-11-05-nextcloud-sync-repair.json). Xereta's small nightly pilot is enabled at 03:00 America/Sao_Paulo for the three approved notes and owner feedback, starting November 7; see [activation evidence](https://github.com/SchiavonJP/xereta/blob/main/evidence/2026-11-06-nightly-pilot.json). The always-on server can read its local copy while the notebook is off; delivering new edits to Obsidian devices still depends on the notebook's client.
 
 ## Historical setup
 

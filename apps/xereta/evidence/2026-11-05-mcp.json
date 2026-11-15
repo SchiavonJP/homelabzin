@@ -1,1 +1,0 @@
-{"gate":"xereta-mcp-streamable-lan","passed":true,"endpoint":"http://192.168.0.213:3101/mcp/","tools":15,"checks":{"initialize":true,"tools_list":true,"list_notes":true,"status":true,"reader_run_denied":true,"reader_write_denied":true},"scope":"New endpoint only; original Hermes SSE endpoint remains unchanged."}

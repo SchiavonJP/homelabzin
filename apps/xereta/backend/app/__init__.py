@@ -1,1 +1,0 @@
-"""Xereta shared application services."""

@@ -21,8 +21,9 @@ minipc/            CasaOS Mini PC services (Traefik + Cloudflare Tunnel, NFS, Li
 notebook/          Personal notebook setup (Arch, Obsidian vault, Tailscale)
 migration/         Historical migration records (EndeavourOS VM)
 scripts/           Operational tooling (knowledge-curator, gates, snapshot, git bundles)
-apps/xereta/       Xereta application (migrating to github.com/SchiavonJP/xereta)
 ```
+
+Xereta application: [`github.com/SchiavonJP/xereta`](https://github.com/SchiavonJP/xereta) (split out 2026-11-15).
 
 ## Conventions
 

@@ -15,3 +15,4 @@
 * **Update**: All deploy references in per-LXC readmes repointed from `second-brain-automation` to `homelabzin` (15 files).
 * **Decision**: Xereta ingress = Cloudflare Tunnel (no Dokploy SSL). Origin `192.168.0.213:3101` interim → `192.168.0.234:3101` post-cutover; port stays 3101. Cloudflare Access recommended.
 * **Note**: Compose review revealed CT107 coupling — host-network Hindsight loopback, Hermes `root_hermes_data` volume, `/root/skills` bind. Migration strategy decision recorded in the deploy playbook open items.
+* **Migration**: Xereta application split to its own repo (`github.com/SchiavonJP/xereta`, private, single-commit import; `apps/xereta/` removed). Strategy A decided: re-provision dependencies on CT234; MCP allowlist patch + agent-client updates recorded in the deploy playbook and the app's `docs/AGENTS.md`.

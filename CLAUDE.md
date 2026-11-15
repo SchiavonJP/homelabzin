@@ -39,7 +39,7 @@ Reverse proxy (Traefik + Cloudflare Tunnel) runs on the **Mini PC** (`192.168.0.
 
 ## Key rules
 
-- Xereta is moving to its own repo (`github.com/SchiavonJP/xereta`) and to Dokploy deployment — see `docs/ofk/playbooks/deploy-xereta-dokploy.md`.
+- Xereta lives in its own repo (`github.com/SchiavonJP/xereta`, split 2026-11-15); Dokploy deployment planned — runbook: `docs/ofk/playbooks/deploy-xereta-dokploy.md`. Its MCP endpoint is an agent gateway; migration checklist in `xereta/docs/AGENTS.md`.
 - LiteLLM approved catalog (2026-11-09): `default-agent`, `coder`, `fast`, `reasoning`, `generalist`, `vision`, `frontier`, `ocr`, `embed`. No fallback exists for `embed`.
 - `docs/ofk/` links use relative paths (Obsidian-compatible); keep it that way.
 - Deploy pattern per LXC: sparse checkout of its folder from this repo + `docker compose up -d`.

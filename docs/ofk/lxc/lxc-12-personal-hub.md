@@ -47,7 +47,7 @@ sources:
 | `ryot_app` | 8000 | [Ryot](https://github.com/ignisda/ryot) — self-hosted tracking (media, fitness) |
 | `ryot_postgres` | internal | Ryot database |
 | `hawser_agent` | 2376 | Hawser agent — image-update badges reported to [Dockhand](../services/dockhand.md) |
-| `sb_xereta_affine_reader` | — | [Xereta](../services/xereta.md) AFFiNE reader (deployed from `apps/xereta/affine-reader.compose.yml`) |
+| `sb_xereta_affine_reader` | — | [Xereta](../services/xereta.md) AFFiNE reader (deployed from `affine-reader.compose.yml` in the [xereta repo](https://github.com/SchiavonJP/xereta)) |
 
 # Notes
 

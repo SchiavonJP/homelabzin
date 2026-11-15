@@ -1,9 +1,0 @@
-.env
-.venv
-**/node_modules
-**/dist
-**/__pycache__
-**/.pytest_cache
-**/.env
-**/test-results
-**/playwright-report

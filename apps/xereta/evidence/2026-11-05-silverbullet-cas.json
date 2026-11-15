@@ -1,1 +1,0 @@
-{"gate":"silverbullet-live-cas","passed":true,"checks":{"create":true,"readback":true,"duplicate_create_denied":true,"conditional_update":true,"stale_update_denied":true,"edit_preserved":true,"cleanup":true},"scope":"Unique disposable Markdown file under space/_AgentKnowledge; original notes untouched."}

@@ -10,8 +10,12 @@ verified: { by: human:schiva, at: 2026-11-14T00:00:00-03:00 }
 stale_after: 2027-11-14T00:00:00-03:00
 sources:
   - id: xereta-readme
-    resource: ../../apps/xereta/README.md
-    title: Xereta README (historical, pre-split)
+    resource: https://github.com/SchiavonJP/xereta/blob/main/README.md
+    title: Xereta README (application repo)
+    author: human:schiva
+  - id: xereta-agents
+    resource: https://github.com/SchiavonJP/xereta/blob/main/docs/AGENTS.md
+    title: Xereta agent context — MCP surface, migration checklist
     author: human:schiva
 ---
 
@@ -19,7 +23,7 @@ sources:
 
 Xereta is the review application for the shared Obsidian/SilverBullet vault and read-only AFFiNE sources: questions and knowledge items are reviewed in the frontend, with one file per item in the vault (`space/_AgentKnowledge/`) plus a linked index. Hindsight 1.1.0 handles extraction, retention and consolidation; Xereta owns bounded jobs, questions, owner feedback, publication, review and scheduling.
 
-**As of 2026-11-14 the application is being split into its own repository:** `github.com/SchiavonJP/xereta`. The in-repo copy at `apps/xereta/` is being migrated there.
+**As of 2026-11-15 the application lives in its own repository:** [`github.com/SchiavonJP/xereta`](https://github.com/SchiavonJP/xereta) (imported from `apps/xereta/` in a single commit — this repo no longer carries the app). Agent context for the app, including the MCP tool surface and the hardcoded-host migration checklist, is at [`xereta/docs/AGENTS.md`](https://github.com/SchiavonJP/xereta/blob/main/docs/AGENTS.md).
 
 # Deployment facts
 
@@ -45,4 +49,4 @@ Xereta is the review application for the shared Obsidian/SilverBullet vault and 
 
 * Deployment via [Dokploy](../infrastructure/dokploy-host.md) — runbook: [Deploy Xereta via Dokploy](../playbooks/deploy-xereta-dokploy.md).
 
-[^xereta-readme]: apps/xereta/README.md (pre-split copy).
+[^xereta-readme]: Xereta README in the application repo (github.com/SchiavonJP/xereta).

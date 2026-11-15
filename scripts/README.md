@@ -1,6 +1,6 @@
 # Offline Git updates
 
-> **Current Xereta integration (2026-11-05):** the active source is SilverBullet's Nextcloud-backed `space/` vault on the Mini PC. Nextcloud Desktop on the notebook bridges it to Obsidian; CouchDB/LiveSync connects the Obsidian devices separately. See the [verified synchronization path and indexing repair](../minipc/silverbullet/readme.md) and [Xereta deployment and gates](../apps/xereta/README.md). The AFFiNE sections below describe the preserved earlier pilot.
+> **Current Xereta integration (2026-11-05):** the active source is SilverBullet's Nextcloud-backed `space/` vault on the Mini PC. Nextcloud Desktop on the notebook bridges it to Obsidian; CouchDB/LiveSync connects the Obsidian devices separately. See the [verified synchronization path and indexing repair](../minipc/silverbullet/readme.md) and [Xereta deployment and gates](https://github.com/SchiavonJP/xereta/blob/main/README.md). The AFFiNE sections below describe the preserved earlier pilot.
 
 The [2026-11-08 isolated AFFiNE proof](../LXC_2_hermes_mcp/hindsight/README.md#affine-isolated-ingestion-proof--2026-11-08)
 recaptured three notes, checked citations and duplicate handling, and retained

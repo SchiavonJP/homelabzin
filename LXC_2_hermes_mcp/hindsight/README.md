@@ -1,6 +1,6 @@
 # Hindsight knowledge pilot
 
-> **Xereta integration:** the active source is SilverBullet's Nextcloud-backed `space/` vault on the Mini PC. Nextcloud Desktop on the notebook bridges it to Obsidian; CouchDB/LiveSync connects the Obsidian devices separately. See the [verified synchronization path and indexing repair](../../minipc/silverbullet/readme.md) and [Xereta deployment and gates](../../apps/xereta/README.md). The AFFiNE sections below describe the preserved earlier pilot.
+> **Xereta integration:** the active source is SilverBullet's Nextcloud-backed `space/` vault on the Mini PC. Nextcloud Desktop on the notebook bridges it to Obsidian; CouchDB/LiveSync connects the Obsidian devices separately. See the [verified synchronization path and indexing repair](../../minipc/silverbullet/readme.md) and [Xereta deployment and gates](https://github.com/SchiavonJP/xereta/blob/main/README.md). The AFFiNE sections below describe the preserved earlier pilot.
 
 This stack is an isolated acceptance environment on **sb-hermes / CT 107**.
 It uses a separate `knowledge_pilot` PostgreSQL database on **sb-dados / CT 104**,
@@ -15,7 +15,7 @@ reranking quality is not qualified by these checks.
 
 ## Continuous service policy
 
-The accepted runtime now uses `restart: unless-stopped`, matching its Compose file. This changes restart behavior without upgrading Hindsight. A real restart preserved all 70 production bank documents and returned healthy with the database connected. Stop it explicitly for maintenance; normal Xereta ingestion depends on its availability. AFFiNE regular ingestion is documented in the [Xereta reader runbook](../../apps/xereta/ops/AFFINE.md); the isolated proof below records the earlier qualification boundary.
+The accepted runtime now uses `restart: unless-stopped`, matching its Compose file. This changes restart behavior without upgrading Hindsight. A real restart preserved all 70 production bank documents and returned healthy with the database connected. Stop it explicitly for maintenance; normal Xereta ingestion depends on its availability. AFFiNE regular ingestion is documented in the [Xereta reader runbook](https://github.com/SchiavonJP/xereta/blob/main/ops/AFFINE.md); the isolated proof below records the earlier qualification boundary.
 
 ## AFFiNE isolated ingestion proof — 2026-11-08
 

@@ -22,8 +22,29 @@ sources:
 # Context
 
 * Dokploy runs on [CT234](../infrastructure/dokploy-host.md) (`192.168.0.234`), hand-installed, previously used for the liciteria POC (CTs 230–233, stopped).
-* Xereta currently deploys via Compose on [LXC 2](../lxc/lxc-2-hermes-mcp.md) (`sb_xereta`, `sb_xereta_worker` at `192.168.0.213:3101`).
-* Application repo: `github.com/SchiavonJP/xereta` (split in progress from `apps/xereta/`).
+* Application repo: **`github.com/SchiavonJP/xereta`** (split completed 2026-11-15; single-commit import from `apps/xereta/`).
+* Xereta currently deploys via Compose on [LXC 2](../lxc/lxc-2-hermes-mcp.md) (`sb_xereta`, `sb_xereta_worker` at `192.168.0.213:3101`, `network_mode: host`).
+* Public hostname already points at `http://192.168.0.213:3101` via Cloudflare Tunnel.
+
+> **Strategy A (decided 2026-11-15):** re-provision the CT107-local dependencies on CT234 and move the app there. Alternative (Dokploy remote-managing CT107) was rejected to decouple the app from Hermes' host.
+
+# Re-provisioning on CT234 (Strategy A)
+
+The app's MCP endpoint is an agent gateway with filesystem-backed tool groups — see [xereta/docs/AGENTS.md](https://github.com/SchiavonJP/xereta/blob/main/docs/AGENTS.md):
+
+| Dependency | On CT107 today | On CT234 (to provision) |
+|-----------|----------------|--------------------------|
+| `/skills` (MCP skill tools) | bind mount of `/root/skills` | clone the skills repo (cron pull, same as CT107 pattern) |
+| `/opt/data` (Hermes memory: USER.md, MEMORY.md, synthesis) | read-only mount of Hermes' `root_hermes_data` volume | **mechanism to decide:** read-only rsync/scp cron from CT107, or SSHFS mount from CT107 |
+| Hindsight (loopback endpoint) | Hindsight instance on CT107 | Hindsight instance on CT234 (own bank; migrate or re-seed the `knowledge-vault-pilot` bank — owner decision) |
+| Vault tools (list/read/write notes) | HTTP to vault backends | no change — HTTP-based (SilverBullet on Mini PC, AFFiNE reader on CT106) |
+| Postgres | CT104 `knowledge_curator` | unchanged — `192.168.0.210:5432` reachable from CT234 (verified) |
+
+# MCP migration checklist (before cutover)
+
+1. Patch `backend/app/main.py` transport allowlist: add `192.168.0.234:*` to `allowed_hosts` and `http://192.168.0.234:3101` to `allowed_origins` (keep old entries during transition). Checklist lives in the app repo's `docs/AGENTS.md`.
+2. Update agent-side configs that connect to `http://192.168.0.213:3101/mcp` → `http://192.168.0.234:3101/mcp` (consumers are configured at runtime on the machines, not in either repo).
+3. Cloudflare Tunnel public hostname service field: `http://192.168.0.213:3101` → `http://192.168.0.234:3101`. Hostname/DNS unchanged; cloudflared does not hot-reload — restart the tunnel container.
 
 > **Status `draft`:** written ahead of the migration. Verify steps against the live Dokploy UI and update this concept after the first successful deploy.
 
@@ -31,7 +52,8 @@ sources:
 
 ## 1. Prepare the application repo
 
-* Confirm `xereta` repo contains the Dokploy-ready `compose.yml` + `.env.example`.
+* ~~Confirm `xereta` repo contains the Dokploy-ready `compose.yml`~~ — done: `github.com/SchiavonJP/xereta` (compose.yml at repo root; `XERETA_ENV_FILE` default `/root/xereta/.env` becomes Dokploy-managed env).
+* Complete the MCP allowlist patch + re-provisioning (see above) before the first CT234 deploy.
 * Database stays on [Dados](../services/dados.md) CT104 (`knowledge_curator`, role `xereta`) — no new DB.
 
 ## 2. Create the Dokploy project
@@ -71,7 +93,9 @@ Fill runtime credentials server-side only (never in the repo): `DATABASE_URL` �
 
 # Open items
 
-* ~~Decide final ingress~~ — **decided 2026-11-15**: Cloudflare Tunnel, origin `192.168.0.234:3101` post-cutover (`192.168.0.213:3101` interim). See step 5.
+* ~~Decide final ingress~~ — **decided 2026-11-15**: Cloudflare Tunnel, origin `192.168.0.234:3101` post-cutover (`192.168.0.213:3101` interim — already active). See step 5.
+* ~~Migration strategy~~ — **decided 2026-11-15**: Strategy A (re-provision on CT234). Dependency table above.
+* **Hermes memory mechanism** — read-only rsync cron vs SSHFS from CT107 for `/opt/data` (decide with owner before step 2).
+* **Hindsight bank** — fresh instance re-seeded vs migrating the `knowledge-vault-pilot` bank to CT234.
 * Document liciteria ("pncp") POC teardown/preservation for CTs 230–233.
 * Note: the Xereta AFFiNE reader (`sb_xereta_affine_reader`) runs on CT106 and stays there regardless of where the main app deploys.
-* **CT107 coupling (discovered 2026-11-15 from `compose.yml`):** the app uses `network_mode: host` against Hindsight's loopback endpoint, mounts Hermes' own `root_hermes_data` volume read-only, and binds `/root/skills` from CT107's filesystem. Migration to CT234 requires re-provisioning these (or adopting a Hindsight instance + skills on CT234), **or** using Dokploy's remote-server feature to manage the existing CT107 deployment without moving the app. Decide before step 2.
