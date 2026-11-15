@@ -17,8 +17,8 @@ Clone completo em `/root` (sem sparse-checkout — mesmo padrão usado no PNCP):
 
 ```bash
 cd /root
-git clone https://github.com/SchiavonJP/second-brain-automation.git
-cd second-brain-automation/LXC_12_personal_hub/ryot
+git clone https://github.com/SchiavonJP/homelabzin.git
+cd homelabzin/LXC_12_personal_hub/ryot
 
 cp .env.example .env
 nano .env   # preencher POSTGRES_PASSWORD, SERVER_ADMIN_ACCESS_TOKEN e TMDB_ACCESS_TOKEN
@@ -63,7 +63,7 @@ nunca o banco ativo em si.
 ## Atualização
 
 ```bash
-cd /root/second-brain-automation && git pull
+cd /root/homelabzin && git pull
 cd LXC_12_personal_hub/ryot && docker compose pull && docker compose up -d
 ```
 

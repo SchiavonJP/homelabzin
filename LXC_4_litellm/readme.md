@@ -144,8 +144,8 @@ pct exec <VMID> -- chmod 700 /root/.ssh
 pct exec <VMID> -- chmod 600 /root/.ssh/authorized_keys
 
 # Clone only this folder (run on LXC 4)
-git clone --no-checkout --filter=blob:none https://github.com/SchiavonJP/second-brain-automation.git
-cd second-brain-automation
+git clone --no-checkout --filter=blob:none https://github.com/SchiavonJP/homelabzin.git
+cd homelabzin
 git sparse-checkout init --cone
 git sparse-checkout set LXC_4_litellm
 git checkout main
@@ -173,7 +173,7 @@ curl http://localhost:4000/health
 ### Pull updates
 
 ```bash
-cd ~/second-brain-automation && git pull
+cd ~/homelabzin && git pull
 cd LXC_4_litellm && docker compose up -d
 ```
 
@@ -353,7 +353,7 @@ não estiver. Roda **na LXC 4**, dentro do container `sb_litellm` (via
 ambiente dele, então nenhuma credencial passa pelo script.
 
 ```bash
-cd ~/second-brain-automation/LXC_4_litellm
+cd ~/homelabzin/LXC_4_litellm
 chmod +x ufsc-models.sh                 # só na primeira vez, se o bit se perder
 
 ./ufsc-models.sh --list                 # só lista instalados + carregados

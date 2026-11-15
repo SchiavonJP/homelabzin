@@ -3,7 +3,22 @@
 > Context document for Claude Code.
 > Describes the goal, architecture, decisions made, current state, and next steps.
 
-**Repo:** `https://github.com/SchiavonJP/second-brain-automation.git`
+**Repo:** `https://github.com/SchiavonJP/homelabzin.git`
+
+## OKF Knowledge Bundle (2026-11-14)
+
+Documentation is structured as an [OKF v0.2](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) knowledge bundle at [`docs/ofk/`](docs/ofk/index.md) — markdown + YAML frontmatter, readable in Obsidian, parseable by agents, diffable in git.
+
+- **Concept types:** `Infrastructure`, `LXC Container`, `Service`, `Playbook`
+- **Trust fields:** `generated` (who wrote), `verified` (who confirmed — trust tier), `stale_after` (freshness)
+- **Provenance:** `sources[]` with `author`, `last_modified`; per-claim footnotes keyed by source `id`
+- **Actor convention:** `human:schiva`, `process:<id>`, `<producer>/<version>`
+- **Inventory verified** via `pct list` on 2026-11-14 — repo folder numbers (LXC_1, LXC_3…) no longer match live VMIDs; see `docs/ofk/infrastructure/proxmox-host.md`
+- Per-LXC readmes remain authoritative for deploy steps and are referenced via `resource` — do not delete them
+- Keep a changelog in `docs/ofk/log.md` when bundle content changes
+
+Split decision: Xereta moves to its own repo (`github.com/SchiavonJP/xereta`) with Dokploy deployment on CT234; homelabzin keeps infrastructure configs (`LXC_*`, `minipc/`, `notebook/`, `scripts/`, `migration/`) plus the OKF bundle.
+
 
 ### SSH key setup for LXCs (run from Proxmox host)
 
@@ -17,10 +32,10 @@ pct exec <VMID> -- chmod 600 /root/.ssh/authorized_keys
 ### Deploy any LXC via sparse checkout
 
 ```bash
-git clone --no-checkout --filter=blob:none https://github.com/SchiavonJP/second-brain-automation.git
-cd second-brain-automation
+git clone --no-checkout --filter=blob:none https://github.com/SchiavonJP/homelabzin.git
+cd homelabzin
 git sparse-checkout init --cone
-git sparse-checkout set <LXC_folder>   # e.g. LXC_1_traefik
+git sparse-checkout set <LXC_folder>   # e.g. LXC_2_hermes_mcp
 git checkout main
 ```
 

@@ -60,8 +60,8 @@ pct exec <VMID> -- chmod 700 /root/.ssh
 pct exec <VMID> -- chmod 600 /root/.ssh/authorized_keys
 
 # Clone only this folder (run on LXC 3) — gets .env.example and mcp-servers.json
-git clone --no-checkout --filter=blob:none https://github.com/SchiavonJP/second-brain-automation.git
-cd second-brain-automation
+git clone --no-checkout --filter=blob:none https://github.com/SchiavonJP/homelabzin.git
+cd homelabzin
 git sparse-checkout init --cone
 git sparse-checkout set LXC_3_Odysseus
 git checkout main
@@ -77,7 +77,7 @@ cd /root/repo
 # Configure
 cp .env.example .env
 # Also copy our deployment overrides:
-cp ~/second-brain-automation/LXC_3_Odysseus/.env.example /root/repo/.env
+cp ~/homelabzin/LXC_3_Odysseus/.env.example /root/repo/.env
 nano /root/repo/.env   # set ODYSSEUS_ADMIN_PASSWORD
 
 # Deploy

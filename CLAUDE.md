@@ -1,49 +1,45 @@
-# Homelabzin — Claude Context
+# Homelabzin — Agent Context
 
-## Project Overview
+## Source of truth
 
-Proxmox homelab "second brain" with 7 LXC containers:
+The OKF v0.2 knowledge bundle at **`docs/ofk/`** is the authoritative, agent-parseable documentation. Every concept is markdown with frontmatter (`type`, `status`, `generated`, `verified`, `sources`).
 
-| LXC | Codename | Role | IP | Port |
-|-----|----------|------|----|------|
-| 1 | Traefik | Reverse proxy / TLS | 192.168.0.212 | 80/443 |
-| 2 | Hermes | Agent + MCP server | 192.168.0.213 | 3100 (MCP), 9119 (dashboard) |
-| 3 | Odysseus | Second agent (MCP client) | 192.168.0.214 | 7000 |
-| 4 | LiteLLM | LLM router (OpenRouter free) | 192.168.0.211 | 4000 |
-| 5 | Dados | Postgres 17, Redis 7, FalkorDB | 192.168.0.210 | 5432/6379/6380 |
-| 6 | sb-dev | Dev environment (deferred) | 192.168.0.215 | — |
-| 7 | sb-monitor | Uptime Kuma + Dockhand | 192.168.0.216 | 3001 (Kuma), 3000 (Dockhand) |
-| 8 | Apollo | llama.cpp inference (RTX 3060) | 192.168.0.217 | 8080 |
+Start at `docs/ofk/index.md`. Concept types: `Infrastructure`, `LXC Container`, `Service`, `Playbook`.
 
-## MCP Architecture
+- Before claiming facts about a container/service, read its concept and the `resource` it points to.
+- `verified: human:schiva` = human-reviewed; only `process:`/agent verifiers = machine-confirmed; nothing = unverified — say so.
+- Update `docs/ofk/log.md` when you change bundle content.
 
-- **Server**: `LXC_2_hermes_mcp/server.py` (FastAPI + fastapi_mcp, Python) — Dockerfile runs this
-- **Protocol**: MCP via `fastapi-mcp` (auto-exposes FastAPI routes as MCP tools)
-- **Tools exposed**: vault notes CRUD, full-text search, backlinks, skills, memory/synthesis
-- **Client**: Odysseus (`LXC_3_Odysseus/mcp-servers.json`) connects to `http://192.168.0.213:3100/sse`
-- `mcp-server.js` is an alternative Node.js implementation — not wired to Docker, kept as reference
+## Actor convention (for frontmatter you write)
 
-## Knowledge Graph
+- Human: `human:schiva`
+- Automated process: `process:<id>` (e.g. `process:hindsight-nightly`)
+- Agent/tool: `<producer>/<version>`
 
-A graphify graph exists at `graphify-out/graph.json`. Use it for codebase navigation:
-- Run `/graphify query "<question>"` to traverse the graph
-- Run `/graphify .` to rebuild if files change
-- Key god nodes: `resolve_path()`, `read_md_file()`, `search_in_dir()`
-- Always prefer use the graphify instead of grep
-- Just use grep if you need a lot
+## Inventory (verified 2026-11-14 via `pct list`)
 
-## Key Rules
+> Repo folder `LXC_<n>_*` numbering ≠ Proxmox VMID. Resolve through the table in `docs/ofk/infrastructure/proxmox-host.md`.
 
-- LXC_2 IP: `192.168.0.213` — used in Odysseus mcp-servers.json
-- LXC_4 (LiteLLM) IP: `192.168.0.211` — used in Hermes docker-compose
-- LXC_5 (Dados) IP: `192.168.0.210` — Postgres and Redis
-- LXC_7 (Monitor) IP: `192.168.0.216` — Uptime Kuma + Dockhand
-- LXC_8 (Apollo) IP: `192.168.0.217` — llama-server OpenAI-compatible API
+| VMID | Name | IP | Role |
+|------|------|----|------|
+| 100 | endeavour-vm (VM) | — | Personal desktop, RTX 3060 via VFIO |
+| 104 | sb-dados | 192.168.0.210 | Postgres 17, Redis 7, FalkorDB |
+| 105 | sb-litellm | 192.168.0.211 | LiteLLM router + Langfuse + UFSC VPN |
+| 106 | personal-hub | 192.168.0.221 | AFFiNE, Hawser, Ryot |
+| 107 | sb-hermes | 192.168.0.213 | Hermes agent, MCP server (:3100), Xereta (:3101) |
+| 108 | sb-odysseus | — | **Retired** (stopped) |
+| 109 | sb-monitor | 192.168.0.216 | Uptime Kuma, Dockhand, Homepage |
+| 110 | apollo | 192.168.0.217 | bge-m3 CPU embeddings (:8081), `embed` alias |
+| 111–113 | sb-media / sb-arr / sb-downloads | .218/.219/.220 | Media stack — stopped when unused |
+| 114 | sb-camera | 192.168.0.222 | motionEye dog cam |
+| 230–233 | pncp-* | .230–.233 | Liciteria POC (stopped) |
+| 234 | dokploy | 192.168.0.234 | Dokploy deployment host |
 
-## Docker Service Names
+Reverse proxy (Traefik + Cloudflare Tunnel) runs on the **Mini PC** (`192.168.0.12`, CasaOS) — LXC 1 no longer exists. Mini PC also owns NFS `/storage` export and Obsidian LiveSync (CouchDB — do not touch).
 
-- `sb_litellm` — LiteLLM container
-- `sb_hermes` — Hermes agent
-- `sb_mcp` — MCP server
-- `sb_kuma` — Uptime Kuma (LXC 7)
-- `sb_dockhand` — Dockhand (LXC 7)
+## Key rules
+
+- Xereta is moving to its own repo (`github.com/SchiavonJP/xereta`) and to Dokploy deployment — see `docs/ofk/playbooks/deploy-xereta-dokploy.md`.
+- LiteLLM approved catalog (2026-11-09): `default-agent`, `coder`, `fast`, `reasoning`, `generalist`, `vision`, `frontier`, `ocr`, `embed`. No fallback exists for `embed`.
+- `docs/ofk/` links use relative paths (Obsidian-compatible); keep it that way.
+- Deploy pattern per LXC: sparse checkout of its folder from this repo + `docker compose up -d`.

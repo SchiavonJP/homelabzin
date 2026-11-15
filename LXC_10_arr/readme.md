@@ -73,8 +73,8 @@ curl -fsSL https://get.docker.com | sh
 
 mkdir -p /opt/arr && cd /opt/arr
 
-git clone --no-checkout --filter=blob:none https://github.com/SchiavonJP/second-brain-automation.git
-cd second-brain-automation
+git clone --no-checkout --filter=blob:none https://github.com/SchiavonJP/homelabzin.git
+cd homelabzin
 git sparse-checkout init --cone
 git sparse-checkout set LXC_10_arr
 git checkout main

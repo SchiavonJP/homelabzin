@@ -54,8 +54,8 @@ pct exec <VMID> -- chmod 700 /root/.ssh
 pct exec <VMID> -- chmod 600 /root/.ssh/authorized_keys
 
 # Clone only this folder (run on LXC 5)
-git clone --no-checkout --filter=blob:none https://github.com/SchiavonJP/second-brain-automation.git
-cd second-brain-automation
+git clone --no-checkout --filter=blob:none https://github.com/SchiavonJP/homelabzin.git
+cd homelabzin
 git sparse-checkout init --cone
 git sparse-checkout set LXC_5_dados
 git checkout main
@@ -79,7 +79,7 @@ docker compose ps
 ### Pull updates
 
 ```bash
-cd ~/second-brain-automation && git pull
+cd ~/homelabzin && git pull
 cd LXC_5_dados && docker compose up -d
 ```
 

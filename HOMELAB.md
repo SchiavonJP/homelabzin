@@ -1,6 +1,8 @@
 # Homelab — Overview
 
-> Last updated: 2026-11-05
+> Last updated: 2026-11-14
+>
+> **Knowledge base:** the agent-readable, structured version of this document lives at [`docs/ofk/index.md`](docs/ofk/index.md) (OKF v0.2 bundle). Use the OKF concepts for navigation and current state; this file remains the narrative overview. Agent context: [CLAUDE.md](CLAUDE.md).
 
 ---
 
@@ -56,7 +58,7 @@ Configs: [minipc/nfs/](minipc/nfs/) · [minipc/navidrome/](minipc/navidrome/) ·
 
 ## Proxmox — LXC Stack (192.168.0.200:8006)
 
-All containers run Debian 12 with Docker, deployed via sparse checkout from the [`second-brain-automation`](https://github.com/SchiavonJP/second-brain-automation) repo.
+All containers run Debian 12 with Docker, deployed via sparse checkout from the [`homelabzin`](https://github.com/SchiavonJP/homelabzin) repo.
 
 ### Bootstrap padrão de um novo LXC
 

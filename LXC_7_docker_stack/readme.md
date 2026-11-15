@@ -40,8 +40,8 @@ docker exec -it sb_postgres psql -U secondbrain -c "CREATE DATABASE dockhand;"
 ## Deploy
 
 ```bash
-git clone --no-checkout --filter=blob:none https://github.com/SchiavonJP/second-brain-automation.git
-cd second-brain-automation
+git clone --no-checkout --filter=blob:none https://github.com/SchiavonJP/homelabzin.git
+cd homelabzin
 git sparse-checkout init --cone
 git sparse-checkout set LXC_7_docker_stack
 git checkout main

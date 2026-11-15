@@ -18,7 +18,7 @@ o mesmo, então esse container enxerga todos eles.
 ## Deploy
 
 ```bash
-cd /root/second-brain-automation/LXC_12_personal_hub/hawser
+cd /root/homelabzin/LXC_12_personal_hub/hawser
 
 cp .env.example .env
 nano .env   # preencher HAWSER_TOKEN (gerado no Dockhand)

@@ -72,8 +72,8 @@ mkdir -p /opt/jellyfin
 cd /opt/jellyfin
 
 # Sparse checkout do repo
-git clone --no-checkout --filter=blob:none https://github.com/SchiavonJP/second-brain-automation.git
-cd second-brain-automation
+git clone --no-checkout --filter=blob:none https://github.com/SchiavonJP/homelabzin.git
+cd homelabzin
 git sparse-checkout init --cone
 git sparse-checkout set LXC_9_jellyfin
 git checkout main

@@ -2,6 +2,7 @@
 .env
 *.json.bak
 *.bundle
+.DS_Store
 # Traefik TLS certs
 acme.json
 
