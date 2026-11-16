@@ -24,7 +24,9 @@ MEMORY_PATH = Path(os.environ.get("MEMORY_PATH", "/opt/data"))
 
 # ── MCP server ────────────────────────────────────────────────────────────────
 
-mcp = FastMCP("second-brain")
+# streamable_http_path="/" + mount("/mcp") mirrors the xereta gateway: MCP
+# lives at /mcp exactly, without FastAPI's 307 trailing-slash redirect.
+mcp = FastMCP("second-brain", stateless_http=True, json_response=True, streamable_http_path="/")
 
 # ── FastAPI app — only for /health (Docker health check) ─────────────────────
 
