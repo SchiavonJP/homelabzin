@@ -34,8 +34,8 @@ The app's MCP endpoint is an agent gateway with filesystem-backed tool groups �
 
 | Dependency | On CT107 today | On CT234 (to provision) |
 |-----------|----------------|--------------------------|
-| `/skills` (MCP skill tools) | bind mount of `/root/skills` | clone the skills repo (cron pull, same as CT107 pattern) |
-| `/opt/data` (Hermes memory: USER.md, MEMORY.md, synthesis) | read-only mount of Hermes' `root_hermes_data` volume | **mechanism to decide:** read-only rsync/scp cron from CT107, or SSHFS mount from CT107 |
+| `/skills` (MCP skill tools) | bind mount of `/root/skills` | **not needed anymore** — set `XERETA_SKILLS_BACKEND=hermes-mcp` (2026-11-16); tool reads are proxied to Hermes MCP |
+| `/opt/data` (Hermes memory: USER.md, MEMORY.md, synthesis) | read-only mount of Hermes' `root_hermes_data` volume | **not needed anymore** — set `XERETA_MEMORY_BACKEND=hermes-mcp` (2026-11-16); same Hermes MCP proxy. Hindsight bank migration (Hindsight API files) is separate — still planned as a bank copy in step 1 |
 | Hindsight (loopback endpoint) | Hindsight instance on CT107 | Hindsight instance on CT234 (own bank; migrate or re-seed the `knowledge-vault-pilot` bank — owner decision) |
 | Vault tools (list/read/write notes) | HTTP to vault backends | no change — HTTP-based (SilverBullet on Mini PC, AFFiNE reader on CT106) |
 | Postgres | CT104 `knowledge_curator` | unchanged — `192.168.0.210:5432` reachable from CT234 (verified) |
@@ -67,6 +67,8 @@ The app's MCP endpoint is an agent gateway with filesystem-backed tool groups �
 
 Fill runtime credentials server-side only (never in the repo): `DATABASE_URL` → `postgresql://xereta:<senha>@192.168.0.210:5432/knowledge_curator`, LiteLLM base/key (`generalist`, `embed`), Hindsight bank `knowledge-vault-pilot`, bearer tokens. Copy values from the current `/root/xereta-app` `.env` on CT107.
 
+Backend flags for the CT234 deploy (decided 2026-11-16, no mounts needed): `XERETA_SKILLS_BACKEND=hermes-mcp`, `XERETA_MEMORY_BACKEND=hermes-mcp`, `XERETA_HERMES_MCP_URL=http://192.168.0.213:3100/mcp` (CT234 → CT107 over LAN; CT107's `sb_mcp` transport allowlist already includes `192.168.0.234:*`). `XERETA_HERMES_MCP_TOKEN` only if Hermes gains auth.
+
 ## 4. Deploy and verify
 
 * Deploy; watch build logs in Dokploy.
@@ -95,7 +97,7 @@ Fill runtime credentials server-side only (never in the repo): `DATABASE_URL` �
 
 * ~~Decide final ingress~~ — **decided 2026-11-15**: Cloudflare Tunnel, origin `192.168.0.234:3101` post-cutover (`192.168.0.213:3101` interim — already active). See step 5.
 * ~~Migration strategy~~ — **decided 2026-11-15**: Strategy A (re-provision on CT234). Dependency table above.
-* **Hermes memory mechanism** — read-only rsync cron vs SSHFS from CT107 for `/opt/data` (decide with owner before step 2).
+* ~~Hermes memory mechanism~~ — **decided 2026-11-16**: no copies, no SSHFS. `hermes-mcp` backends proxy skills/memory reads to Hermes MCP over HTTP; `/skills` and `/opt/data` disappear from the CT234 deploy. CT107's `sb_mcp` was rebuilt for streamable-HTTP with `.234` already in its transport allowlist.
 * **Hindsight bank** — fresh instance re-seeded vs migrating the `knowledge-vault-pilot` bank to CT234.
 * Document liciteria ("pncp") POC teardown/preservation for CTs 230–233.
 * Note: the Xereta AFFiNE reader (`sb_xereta_affine_reader`) runs on CT106 and stays there regardless of where the main app deploys.

@@ -38,6 +38,20 @@ Xereta is the review application for the shared Obsidian/SilverBullet vault and 
 | Health | `/health/live`, `/health/ready` (worker heartbeat required) |
 | Public UI | `https://xereta.joaopaulo.me` — Cloudflare Tunnel (decided 2026-11-15); origin `192.168.0.213:3101` today → `192.168.0.234:3101` post-Dokploy; Cloudflare Access recommended |
 
+# MCP tool backends (decided 2026-11-16)
+
+The 6 skills/memory tools (`list_skills`, `get_skill`, `search_skills`, `get_user_model`, `get_memory`, `search_memory`) have pluggable backends, `local` (default) or `hermes-mcp`:
+
+| Item | Value |
+|------|-------|
+| Flags | `XERETA_SKILLS_BACKEND`, `XERETA_MEMORY_BACKEND` (`local` default; flip per group) |
+| Local mode | filesystem mounts `/skills` (`XERETA_SKILLS_PATH`) and `/opt/data` (`XERETA_MEMORY_PATH`) — current CT107 deploy |
+| Hermes mode | proxy to Hermes MCP `http://192.168.0.213:3100/mcp` (`XERETA_HERMES_MCP_URL`), same-named tools — no mounts; target config for CT234 |
+| Auth | optional `XERETA_HERMES_MCP_TOKEN` bearer (Hermes MCP is currently unauthenticated on the LAN) |
+| Errors | `hermes_unavailable` 503 (transport), `hermes_tool_error` 502 (tool failure); Hermes' graceful `{"content": null, "message": ...}` passes through unchanged |
+| Hermes side | [LXC 2 — Hermes](../lxc/lxc-2-hermes-mcp.md) `sb_mcp` rebuilt 2026-11-16 with the FastMCP streamable-HTTP server (old FastApiMCP/SSE build replaced; flat files backed up as `/root/*.bak-20261116`) |
+| Status | **deployed on CT107 (2026-11-16)**: production `:3101` runs in `hermes-mcp` mode end-to-end verified; rollback via `xereta:rollback-20261116` image tag + `.env.bak-20261116` |
+
 # Automation invariants
 
 * Automatic mode off by default after migration; no vault-wide approval ever.
