@@ -83,21 +83,55 @@ Backend flags for the CT234 deploy (decided 2026-11-16, no mounts needed): `XERE
 * Recommend Cloudflare Access in front of the public hostname (owner-review app).
 * cloudflared does not hot-reload — restart the tunnel container after config changes.
 
-## 6. Cutover
+## 6. Cutover (2026-11-16: executed, tunnel step pending Mini PC access)
 
-* Stop `sb_xereta`/`sb_xereta_worker` on CT107 only after the Dokploy deploy is verified.
-* Keep the `xereta_xereta_state` volume data path documented — capture snapshots live there; plan the volume migration before cutover.
-* Rollback: restart Compose on CT107 (`docker compose up -d`), disable the Dokploy project.
+### 6.1 Cloudflare Tunnel origin swap (Mini PC cloudflared)
 
-# Verified prerequisites (2026-11-15)
+The Mini PC (`192.168.0.12`) runs `cloudflared` as a systemd service or Docker container. The tunnel config is managed in the Cloudflare dashboard (Zero Trust → Networks → Tunnels → `xereta.joaopaulo.me`).
+
+1. Open **Cloudflare Zero Trust dashboard** → Networks → Tunnels → select the tunnel serving `xereta.joaopaulo.me`.
+2. In the **Public Hostname** row for `xereta.joaopaulo.me`, change **Service** from `http://192.168.0.213:3101` to `http://192.168.0.234:3101`.
+3. Save. **cloudflared does not hot-reload** — restart the tunnel on the Mini PC:
+   ```bash
+   # if systemd:
+   sudo systemctl restart cloudflared
+   # if docker:
+   docker restart cloudflared
+   ```
+4. Verify: `curl -I https://xereta.joaopaulo.me` should hit the new origin (check `X-Forwarded-For` or app logs on CT234 show the request).
+
+### 6.2 Post-swap verification
+
+* `/health/ready` on `https://xereta.joaopaulo.me` → `200 OK`
+* MCP gateway `https://xereta.joaopaulo.me/mcp/` (bearer token) → `401` (unauth) → valid token → tool list
+* Notebook agents: re-run live smoke against `https://xereta.joaopaulo.me/mcp` (bearer = `XERETA_AGENT_READ_TOKEN`)
+
+### 6.3 Decommission CT107 services
+
+```bash
+# on Proxmox, into CT107:
+docker stop sb_xereta sb_xereta_worker
+docker rm sb_xereta sb_xereta_worker
+# keep the xereta_xereta_state volume and /root/xereta/.env for rollback
+```
+
+Rollback = `docker compose up -d` on CT107 + tunnel service back to `.213:3101`.
+
+## 7. Verified prerequisites (2026-11-16)
 
 * CT234 → CT104:5432 TCP: **open**. `sb_postgres` binds `0.0.0.0:5432`.
+* CT234 → CT107:3100 (Hermes MCP): **open** (LAN).
+* CT234 → CT211:4000 (LiteLLM): **open**.
+* CT234 → Mini PC:3011 (SilverBullet): **open**.
+* CT234 → CT221:3012 (AFFiNE reader): **open**.
+* `sb_mcp` on CT107 rebuilt for streamable-HTTP; transport allowlist includes `192.168.0.234:*`.
+* `xereta_state` volume migrated and verified (133 files, per-file md5 match).
 
-# Open items
+## Open items
 
 * ~~Decide final ingress~~ — **decided 2026-11-15**: Cloudflare Tunnel, origin `192.168.0.234:3101` post-cutover (`192.168.0.213:3101` interim — already active). See step 5.
 * ~~Migration strategy~~ — **decided 2026-11-15**: Strategy A (re-provision on CT234). Dependency table above.
 * ~~Hermes memory mechanism~~ — **decided 2026-11-16**: no copies, no SSHFS. `hermes-mcp` backends proxy skills/memory reads to Hermes MCP over HTTP; `/skills` and `/opt/data` disappear from the CT234 deploy. CT107's `sb_mcp` was rebuilt for streamable-HTTP with `.234` already in its transport allowlist.
-* **Hindsight bank** — fresh instance re-seeded vs migrating the `knowledge-vault-pilot` bank to CT234.
+* ~~Hindsight bank~~ — **decided 2026-11-16**: DB-backed (Postgres on CT104); second instance on CT234 points to same DB — zero migration, zero re-seed.
 * Document liciteria ("pncp") POC teardown/preservation for CTs 230–233.
 * Note: the Xereta AFFiNE reader (`sb_xereta_affine_reader`) runs on CT106 and stays there regardless of where the main app deploys.
