@@ -15,6 +15,7 @@ import frontmatter
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 
 # ── Configuração ──────────────────────────────────────────────────────────────
 
@@ -26,7 +27,12 @@ MEMORY_PATH = Path(os.environ.get("MEMORY_PATH", "/opt/data"))
 
 # streamable_http_path="/" + mount("/mcp") mirrors the xereta gateway: MCP
 # lives at /mcp exactly, without FastAPI's 307 trailing-slash redirect.
-mcp = FastMCP("second-brain", stateless_http=True, json_response=True, streamable_http_path="/")
+mcp = FastMCP("second-brain", stateless_http=True, json_response=True, streamable_http_path="/",
+    transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=True,
+        allowed_hosts=["127.0.0.1:*", "localhost:*", "192.168.0.213:*", "192.168.0.234:*",
+                       "sb_hermes:3100", "sb_mcp:3100"],
+        allowed_origins=["http://127.0.0.1:*", "http://localhost:*", "http://192.168.0.213:3100",
+                         "http://sb_hermes:3100", "http://sb_mcp:3100"]))
 
 # ── FastAPI app — only for /health (Docker health check) ─────────────────────
 
