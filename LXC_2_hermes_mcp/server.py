@@ -12,6 +12,7 @@ from typing import Optional
 
 import aiofiles
 import frontmatter
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from mcp.server.fastmcp import FastMCP
 
@@ -27,7 +28,15 @@ mcp = FastMCP("second-brain")
 
 # ── FastAPI app — only for /health (Docker health check) ─────────────────────
 
-app = FastAPI(title="Second Brain MCP Server", version="2.0.0")
+@asynccontextmanager
+async def lifespan(app):
+    # FastMCP's streamable transport needs its session manager task group,
+    # which a plain app.mount() does not trigger.
+    async with mcp.session_manager.run():
+        yield
+
+
+app = FastAPI(title="Second Brain MCP Server", version="2.0.0", lifespan=lifespan)
 app.mount("/mcp", mcp.streamable_http_app())
 
 
