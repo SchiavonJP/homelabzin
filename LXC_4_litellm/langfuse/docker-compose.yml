@@ -174,7 +174,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1g
+          # 1.5G — acompanha max_server_memory_usage do clickhouse-config.xml;
+          # o cap anterior (900M) derrubava inserts e mutações com o tráfego
+          # real do Langfuse.
+          memory: 1500m
     logging:
       driver: "json-file"
       options:

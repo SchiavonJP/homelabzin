@@ -1,6 +1,8 @@
 <clickhouse>
-    <!-- Limites de memória para homelab — ratio removido, só o limite fixo vale -->
-    <max_server_memory_usage>900000000</max_server_memory_usage>
+    <!-- Limites de memória para homelab — 1.3G: o cap de 900M (2026-11-17)
+         deixava inserts/mutações do Langfuse esbarrando no limite
+         (MEMORY_LIMIT_EXCEEDED no WaitForAsyncInsert, traces descartados). -->
+    <max_server_memory_usage>1300000000</max_server_memory_usage>
 
     <!-- 2026-11-17: disco do CT 105 encheu (95%). Causa raiz:
          system.text_log com level=trace e sem TTL → ~20 GB em 3 meses.
