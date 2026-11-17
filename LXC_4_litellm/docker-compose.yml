@@ -35,6 +35,11 @@ services:
       resources:
         limits:
           memory: 256m
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
 
   litellm:
     image: docker.litellm.ai/berriai/litellm:main-stable
@@ -61,7 +66,9 @@ services:
       UFSC_OLLAMA_API_BASE: ${UFSC_OLLAMA_API_BASE}
       UFSC_OLLAMA_AUTH_HEADER: ${UFSC_OLLAMA_AUTH_HEADER}
       UFSC_CEOS_OLLAMA_API_BASE: ${UFSC_CEOS_OLLAMA_API_BASE}
-    entrypoint: ["litellm", "--config", "/app/config.yaml", "--detailed_debug"]
+    # --detailed_debug removido em 2026-11-17: os logs json do container
+    # chegaram a 3.9 GB com ele ligado e encheram o disco do CT 105.
+    entrypoint: ["litellm", "--config", "/app/config.yaml"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4000/health/liveliness')"]
       interval: 30s
@@ -72,6 +79,11 @@ services:
       resources:
         limits:
           memory: 1g
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
 
   # Agente do Dockhand (LXC 7) — expõe este host pro pool de checagem de
   # atualização de imagem. Modo Standard (token obrigatório, Dockhand
@@ -92,6 +104,11 @@ services:
       resources:
         limits:
           memory: 128m
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
 
 volumes:
   hawser_stacks:

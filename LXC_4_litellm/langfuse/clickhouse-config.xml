@@ -2,6 +2,40 @@
     <!-- Limites de memória para homelab — ratio removido, só o limite fixo vale -->
     <max_server_memory_usage>900000000</max_server_memory_usage>
 
+    <!-- 2026-11-17: disco do CT 105 encheu (95%). Causa raiz:
+         system.text_log com level=trace e sem TTL → ~20 GB em 3 meses.
+         Logger de arquivo em warning + TTL nos logs internos. -->
+    <logger>
+        <level>warning</level>
+    </logger>
+
+    <text_log>
+        <level>warning</level>
+        <ttl>event_date + INTERVAL 3 DAY DELETE</ttl>
+    </text_log>
+
+    <!-- Tabelas de log interno sem <engine> explícito no config base: o <ttl>
+         aqui vale. Para query_log e opentelemetry_span_log (que TÊM <engine>),
+         o TTL foi aplicado via ALTER TABLE SQL — config rejeitaria. -->
+    <trace_log>
+        <ttl>event_date + INTERVAL 3 DAY DELETE</ttl>
+    </trace_log>
+    <processors_profile_log>
+        <ttl>event_date + INTERVAL 3 DAY DELETE</ttl>
+    </processors_profile_log>
+    <metric_log>
+        <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
+    </metric_log>
+    <asynchronous_metric_log>
+        <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
+    </asynchronous_metric_log>
+    <query_metric_log>
+        <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
+    </query_metric_log>
+    <part_log>
+        <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
+    </part_log>
+
     <!-- LXC sem IPv6 — escuta apenas em IPv4 -->
     <listen_host>0.0.0.0</listen_host>
 
