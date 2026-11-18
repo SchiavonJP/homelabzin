@@ -436,3 +436,79 @@ curl http://192.168.0.211:4000/health      # confirmar que nada quebrou
 Agente Hawser (`sb_hawser`, porta 2376) registrado no Dockhand (LXC 7) —
 detecta atualização de imagem disponível (badge, não aplica sozinho). Ver
 `HAWSER_TOKEN` no `.env.example`.
+
+## Incidentes conhecidos do stack de observabilidade
+
+### Disco enchendo (2026-11) — resolvido
+
+A causa **não** era volume de traces. Era log sem rotação:
+
+| Fonte | Tamanho | Correção |
+|---|---|---|
+| `system.text_log` (level `trace`, sem TTL) | 20.4 GB | `level=warning` + TTL 3d |
+| `sb_litellm` json logs (`--detailed_debug`) | 3.9 GB | flag removida + rotação |
+| `clickhouse-server` file logs | 1.4 GB | nível `warning` |
+
+Estado durável (commitado): TTL 7d em `traces`/`observations`/`scores`,
+TTL 3d/7d nas tabelas `system.*_log`, rotação `json-file 10m×5` em todos os
+serviços dos dois composes. Se o disco voltar a encher, meça primeiro com
+`du -sh /var/lib/docker/containers/*` e `system.parts` antes de expandir.
+
+### ClickHouse morto → Langfuse em crash-loop
+
+Sintoma: `sb_langfuse` reiniciando com `lookup sb_clickhouse on 127.0.0.11:53:
+no such host`, `sb_clickhouse` parado. Cadeia real:
+
+1. ClickHouse morre por `MEMORY_LIMIT_EXCEEDED` em merges de background
+   (o cap é `max_server_memory_usage` em `langfuse/clickhouse-config.xml`,
+   1.3 GiB; o container tem 1.5 GiB).
+2. Se o container estava parado no shutdown do CT, `unless-stopped` não o
+   ressuscita — por isso está `restart: always`.
+
+Diagnóstico rápido:
+
+```bash
+docker exec sb_clickhouse clickhouse-client --query \
+  "SELECT toStartOfMinute(event_time), count() FROM system.text_log
+   WHERE level='Error' AND event_time > now() - INTERVAL 10 MINUTE
+   GROUP BY 1 ORDER BY 1 DESC"
+docker exec sb_clickhouse clickhouse-client --query \
+  "SELECT table, num_parts, progress FROM system.merges"
+```
+
+### Merges travados em tabelas `system.*_N` órfãs
+
+Quando o `config.xml`/`clickhouse-config.xml` muda, o ClickHouse renomeia as
+tabelas de log do sistema cuja estrutura divergiu (`metric_log_0`,
+`text_log_1`, `query_log_0`, ...) e cria uma nova. As órfãs não recebem mais
+inserts, mas **continuam tentando merge** — e com muitos parts minúsculos o
+merge estoura o cap de memória, falha, loga o erro em `text_log` (que cresce)
+e tenta de novo: loop que consome 100% da RAM do ClickHouse e derruba o stack.
+Em 2026-11-18 isso deu ~1.900 erros/min e RSS em 1.17 GiB.
+
+Correção (as órfãs são lixo de diagnóstico, podem ser dropadas):
+
+```bash
+docker exec sb_clickhouse clickhouse-client --query \
+  "SELECT name FROM system.tables WHERE database='system' AND name LIKE '%\\_%' ESCAPE '\\'"
+docker exec sb_clickhouse clickhouse-client --query "DROP TABLE system.metric_log_0"
+#  ... repetir para cada órfã que tenha parts
+docker exec sb_clickhouse clickhouse-client --query "TRUNCATE TABLE system.metric_log"
+docker exec sb_clickhouse clickhouse-client --query "TRUNCATE TABLE system.text_log"
+```
+
+Só os nomes com sufixo `_0/_1/_2` são órfãs — `metric_log`, `text_log` e
+`trace_log` sem sufixo são as tabelas vivas.
+
+### `network_mode: container:sb_ufsc_vpn`
+
+`sb_litellm` compartilha o netns do `sb_ufsc_vpn` (e não o filesystem).
+Consequências ao mexer no VPN:
+
+- se `sb_ufsc_vpn` for recriado/reiniciado, `sb_litellm` fica no netns morto —
+  o healthcheck continua passando e as requisições externas falham. **Sempre
+  `docker restart sb_litellm` depois.**
+- cada container tem seu próprio `/etc/resolv.conf`; o VPN pode esvaziá-lo
+  (`nameserver` sumido) e o `sb_litellm` também. Reparo:
+  `printf "nameserver 127.0.0.11\noptions ndots:0\n" > /etc/resolv.conf`
+  dentro do container.
