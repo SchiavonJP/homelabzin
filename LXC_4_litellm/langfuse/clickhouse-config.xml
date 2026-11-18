@@ -19,9 +19,13 @@
     <!-- 2026-11-18: background merges (TTL do text_log incluído) estouravam
          o cap de memória com o default de 16 threads × ratio 2 = 32 merges
          simultâneos, cada um alocando buffers de 16 MB+. O processo morria e
-         levava o Langfuse junto. 4 threads é adequado para 2 vCPUs. -->
-    <background_pool_size>4</background_pool_size>
+         levava o Langfuse junto. 8 threads é adequado para 2 vCPUs;
+         free_entries acompanha o pool (exigência do ClickHouse 24.10). -->
+    <background_pool_size>8</background_pool_size>
     <background_merges_mutations_concurrency_ratio>1</background_merges_mutations_concurrency_ratio>
+    <merge_tree>
+        <number_of_free_entries_in_pool_to_execute_mutation>2</number_of_free_entries_in_pool_to_execute_mutation>
+    </merge_tree>
 
     <!-- Tabelas de log interno sem <engine> explícito no config base: o <ttl>
          aqui vale. Para query_log e opentelemetry_span_log (que TÊM <engine>),
