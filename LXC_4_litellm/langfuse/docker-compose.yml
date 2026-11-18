@@ -149,7 +149,10 @@ services:
   clickhouse:
     image: clickhouse/clickhouse-server:24-alpine
     container_name: sb_clickhouse
-    restart: unless-stopped
+    # always (não unless-stopped): em 2026-11-18 o ClickHouse morreu antes do
+    # reboot do CT e, por estar em estado "stopped", não voltou sozinho —
+    # derrubou o Langfuse junto. Sendo a dependência do stack, sempre volta.
+    restart: always
     environment:
       CLICKHOUSE_DB: default
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}

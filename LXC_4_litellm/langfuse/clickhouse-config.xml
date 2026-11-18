@@ -16,6 +16,13 @@
         <ttl>event_date + INTERVAL 3 DAY DELETE</ttl>
     </text_log>
 
+    <!-- 2026-11-18: background merges (TTL do text_log incluído) estouravam
+         o cap de memória com o default de 16 threads × ratio 2 = 32 merges
+         simultâneos, cada um alocando buffers de 16 MB+. O processo morria e
+         levava o Langfuse junto. 4 threads é adequado para 2 vCPUs. -->
+    <background_pool_size>4</background_pool_size>
+    <background_merges_mutations_concurrency_ratio>1</background_merges_mutations_concurrency_ratio>
+
     <!-- Tabelas de log interno sem <engine> explícito no config base: o <ttl>
          aqui vale. Para query_log e opentelemetry_span_log (que TÊM <engine>),
          o TTL foi aplicado via ALTER TABLE SQL — config rejeitaria. -->
