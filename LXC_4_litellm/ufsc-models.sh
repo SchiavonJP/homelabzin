@@ -8,7 +8,7 @@
 #
 # Uso:
 #   ./ufsc-models.sh                      # vlab: lista + carrega qwen3.8:27b se faltar
-#   ./ufsc-models.sh --list               # só lista, não carrega nada
+#   ./ufsc-models.sh --list               # só lista (carregados + todos os instalados), não carrega nada
 #   ./ufsc-models.sh --cluster ceos       # fallback CEOS
 #   ./ufsc-models.sh --cluster all        # os dois
 #   ./ufsc-models.sh --model llama3.3:70b --keep-alive 2h
@@ -72,8 +72,10 @@ for name in (["vlab", "ceos"] if args.cluster == "all" else [args.cluster]):
     print(f"== {name} ==")
     try:
         available = [m["name"] for m in call(name, "/api/tags").get("models", [])]
-        print(f"  {len(available)} modelos instalados")
         loaded = show_loaded(name)
+        print(f"  {len(available)} modelos instalados (* = carregado):")
+        for a in sorted(available):
+            print(f"    {'*' if a in loaded else ' '} {a}")
     except (urllib.error.URLError, OSError, ValueError) as e:
         print(f"  ERRO ao consultar: {e}")
         rc = 1
