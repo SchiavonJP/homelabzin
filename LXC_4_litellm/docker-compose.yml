@@ -6,7 +6,9 @@ services:
   ufsc-vpn:
     build: ./vpn
     container_name: sb_ufsc_vpn
-    restart: unless-stopped
+    # always (não unless-stopped): após reboot do CT o sidecar precisa voltar
+    # sozinho, senão o litellm (netns compartilhado) fica sem túnel.
+    restart: always
     ports:
       - "4000:4000"
     cap_add:
@@ -19,7 +21,7 @@ services:
       # (que agora envolve compilar o strongSwan do zero, ~30min).
       - ./vpn/ipsec.conf.template:/etc/ipsec.conf.template:ro
       - ./vpn/ipsec.secrets.template:/etc/ipsec.secrets.template:ro
-      - ./vpn/charon-resolve.conf:/usr/local/etc/strongswan.d/charon/resolve.conf:ro
+      - ./vpn/charon-resolve.conf:/etc/strongswan.d/charon/resolve.conf:ro
     environment:
       UFSC_USERNAME: ${UFSC_VPN_USERNAME}
       UFSC_PASSWORD: ${UFSC_VPN_PASSWORD}
